@@ -1,0 +1,29 @@
+name: flutter_blocx_example
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  faker: ^2.2.0
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^9.1.1
+  freezed_annotation: ^3.1.0
+  flutter_blocx:
+    path: ../
+  blocx:
+    path: ../../blocx
+  uuid: ^4.5.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  freezed: ^3.2.0
+  build_runner: ^2.7.0
+
+flutter:
+  uses-material-design: true
