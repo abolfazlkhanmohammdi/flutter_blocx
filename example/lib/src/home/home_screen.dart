@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_blocx_example/src/list/users/ui/users_screen.dart';
 
-class ScreenHome extends StatefulWidget {
-  const ScreenHome({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<ScreenHome> createState() => _ScreenHomeState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _ScreenHomeState extends State<ScreenHome> {
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,7 +18,7 @@ class _ScreenHomeState extends State<ScreenHome> {
 
   Widget listItem(BuildContext context, String title) {
     return InkWell(
-      onTap: () => Navigator.of(context).pushNamed(title),
+      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => UsersScreen())),
       child: SizedBox(
         height: 160,
         child: Card(

@@ -6,44 +6,28 @@ import 'package:implicitly_animated_list/implicitly_animated_list.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class AnimatedInfiniteList<Entity extends ListEntity<Entity>> extends StatefulWidget {
+  final AnimatedInfiniteListOptions options;
   final Widget Function(BuildContext context, Entity item) itemBuilder;
   final Widget Function(BuildContext context, int index)? separatorBuilder;
-  final bool reverse;
-  final bool animateAtStart;
-  final EdgeInsets? padding;
-  final List<Entity> items;
-  final Duration? animationDuration;
   final AnimatedChildBuilder? deleteAnimation;
   final AnimatedChildBuilder? insertAnimation;
-  final bool Function(Entity first, Entity second)? itemEquality;
-  final int topLoadingTriggerItemDistance;
-  final int bottomLoadingTriggerItemDistance;
   final InfiniteListBloc bloc;
   final void Function()? loadBottomData;
   final void Function()? loadTopData;
   final void Function()? refreshOnSwipe;
-  final ScrollPhysics? scrollPhysics;
-  final bool shrinkWrap;
+  final List<Entity> items;
   const AnimatedInfiniteList({
     super.key,
-    required this.itemBuilder,
+    required this.options,
     required this.items,
+    required this.itemBuilder,
     required this.bloc,
-    this.scrollPhysics,
-    this.reverse = false,
     this.separatorBuilder,
-    this.padding,
-    this.itemEquality,
     this.deleteAnimation,
-    this.animationDuration,
     this.insertAnimation,
     this.refreshOnSwipe,
     this.loadBottomData,
     this.loadTopData,
-    this.shrinkWrap = false,
-    this.topLoadingTriggerItemDistance = 3,
-    this.bottomLoadingTriggerItemDistance = 5,
-    this.animateAtStart = true,
   });
 
   @override
@@ -53,16 +37,16 @@ class AnimatedInfiniteList<Entity extends ListEntity<Entity>> extends StatefulWi
 class AnimatedInfiniteListState<Entity extends ListEntity<Entity>>
     extends State<AnimatedInfiniteList<Entity>> {
   InfiniteListBloc get bloc => widget.bloc;
-
+  AnimatedInfiniteListOptions get options => widget.options;
   @override
   Widget build(BuildContext context) {
     return BlocProvider<InfiniteListBloc>.value(
       value: widget.bloc,
-      child: BlocConsumer<InfiniteListBloc, InfiniteListBlocState>(
+      child: BlocConsumer<InfiniteListBloc, InfiniteListState>(
         listener: blocListener,
         bloc: widget.bloc,
         buildWhen: (_, c) => c.shouldRebuild,
-        builder: (BuildContext context, InfiniteListBlocState state) {
+        builder: (BuildContext context, InfiniteListState state) {
           debugPrint("height is: ${state.swipeRefreshHeight}");
           return Column(
             children: [
@@ -72,26 +56,25 @@ class AnimatedInfiniteListState<Entity extends ListEntity<Entity>>
                   onNotification: onScroll,
                   child: Listener(
                     onPointerDown: maySwipe
-                        ? (d) => bloc.add(InfiniteListBlocEventVerticalDragStarted(globalY: d.position.dy))
+                        ? (d) => bloc.add(InfiniteListEventVerticalDragStarted(globalY: d.position.dy))
                         : null,
-                    onPointerUp: maySwipe ? (d) => bloc.add(InfiniteListBlocEventVerticalDragEnded()) : null,
+                    onPointerUp: maySwipe ? (d) => bloc.add(InfiniteListEventVerticalDragEnded()) : null,
                     onPointerMove: maySwipe
-                        ? (d) => bloc.add(InfiniteListBlocEventVerticalDragUpdated(globalY: d.position.dy))
+                        ? (d) => bloc.add(InfiniteListEventVerticalDragUpdated(globalY: d.position.dy))
                         : null,
                     onPointerCancel: maySwipe
-                        ? (_) => bloc.add(InfiniteListBlocEventVerticalDragUpdated(globalY: null))
+                        ? (_) => bloc.add(InfiniteListEventVerticalDragUpdated(globalY: null))
                         : null,
                     child: ImplicitlyAnimatedList<Entity>(
-                      initialAnimation: widget.animateAtStart,
-                      physics: widget.scrollPhysics,
+                      initialAnimation: options.animateAtStart,
+                      physics: options.scrollPhysics,
                       itemData: widget.items,
-                      shrinkWrap: widget.shrinkWrap,
-                      padding: widget.padding,
+                      shrinkWrap: options.shrinkWrap,
+                      padding: options.padding,
                       insertAnimation: widget.insertAnimation ?? _defaultAnimation,
                       deleteAnimation: widget.deleteAnimation ?? _defaultAnimation,
                       itemBuilder: (c, i) => _itemBuilder(c, i, state),
-                      itemEquality:
-                          widget.itemEquality ?? (ListEntity f, ListEntity s) => f.identifier == s.identifier,
+                      itemEquality: (ListEntity f, ListEntity s) => f.identifier == s.identifier,
                     ),
                   ),
                 ),
@@ -124,29 +107,26 @@ class AnimatedInfiniteListState<Entity extends ListEntity<Entity>>
       !bloc.state.isRefreshing &&
       widget.refreshOnSwipe != null);
 
-  Widget _itemBuilder(BuildContext context, Entity data, InfiniteListBlocState state) {
+  Widget _itemBuilder(BuildContext context, Entity data, InfiniteListState state) {
     int index = widget.items.indexOf(data);
     bool isBottomLoadingTrigger =
-        index == (widget.items.length - widget.bottomLoadingTriggerItemDistance) && !state.hasReachedEnd;
-    bool isTopLoadingTrigger = widget.topLoadingTriggerItemDistance == index;
+        index == (widget.items.length - options.bottomLoadingTriggerItemDistance) && !state.hasReachedEnd;
+    bool isTopLoadingTrigger = options.topLoadingTriggerItemDistance == index;
     var itemWidget = widget.itemBuilder(context, data);
     if (isTopLoadingTrigger || isBottomLoadingTrigger) {
       var keyEnum = isTopLoadingTrigger
           ? EnumInfiniteListKey.topLoadingTrigger
           : EnumInfiniteListKey.bottomLoadingTrigger;
-      return Card(
-        color: Colors.red,
-        child: VisibilityDetector(
-          key: Key(keyEnum.name),
-          onVisibilityChanged: (c) => onVisibilityChanged(keyEnum, c, state),
-          child: itemWidget,
-        ),
+      return VisibilityDetector(
+        key: Key(keyEnum.name),
+        onVisibilityChanged: (c) => onVisibilityChanged(keyEnum, c, state),
+        child: itemWidget,
       );
     }
     return itemWidget;
   }
 
-  void onVisibilityChanged(EnumInfiniteListKey key, VisibilityInfo c, InfiniteListBlocState state) {
+  void onVisibilityChanged(EnumInfiniteListKey key, VisibilityInfo c, InfiniteListState state) {
     if (c.visibleFraction < 1) return;
     switch (key) {
       case EnumInfiniteListKey.topLoadingTrigger:
@@ -162,7 +142,7 @@ class AnimatedInfiniteListState<Entity extends ListEntity<Entity>>
     widget.loadTopData!();
   }
 
-  void manageBottomLoading(InfiniteListBlocState state) {
+  void manageBottomLoading(InfiniteListState state) {
     if (state.isLoadingBottom || widget.loadBottomData == null || state.isScrollingUp) return;
     bloc.setLoadingBottomStatus(true);
     widget.loadBottomData!();
@@ -170,12 +150,11 @@ class AnimatedInfiniteListState<Entity extends ListEntity<Entity>>
 
   bool onScroll(UserScrollNotification notification) {
     bool isIdle = notification.direction == ScrollDirection.idle;
-    var pixels = notification.metrics.pixels;
     bool isScrollingUp = !isIdle && notification.direction == ScrollDirection.forward;
     bool isAtTop = notification.metrics.pixels == 0;
     bool isAtBottom = notification.metrics.pixels == notification.metrics.maxScrollExtent;
     bloc.add(
-      InfiniteListBlocEventOnScroll(
+      InfiniteListEventOnScroll(
         isAtTop: isAtTop,
         isScrollingUp: isScrollingUp,
         isAtBottom: isAtBottom,
@@ -185,7 +164,7 @@ class AnimatedInfiniteListState<Entity extends ListEntity<Entity>>
     return false;
   }
 
-  Widget loadBottomWidget(BuildContext context, InfiniteListBlocState state) {
+  Widget loadBottomWidget(BuildContext context, InfiniteListState state) {
     var primaryColor = Theme.of(context).colorScheme.primary;
     return AnimatedSize(
       duration: Duration(milliseconds: 300),
@@ -205,7 +184,7 @@ class AnimatedInfiniteListState<Entity extends ListEntity<Entity>>
     );
   }
 
-  Widget swipeRefreshWidget(BuildContext context, InfiniteListBlocState state) {
+  Widget swipeRefreshWidget(BuildContext context, InfiniteListState state) {
     var primaryColor = Theme.of(context).colorScheme.primary;
     return Container(
       color: primaryColor,
@@ -214,11 +193,69 @@ class AnimatedInfiniteListState<Entity extends ListEntity<Entity>>
     );
   }
 
-  void blocListener(BuildContext context, InfiniteListBlocState state) {
-    if (state is InfiniteListBlocStateRefresh) {
+  void blocListener(BuildContext context, InfiniteListState state) {
+    if (state is InfiniteListStateRefresh) {
       widget.refreshOnSwipe!();
     }
   }
 }
 
 enum EnumInfiniteListKey { topLoadingTrigger, bottomLoadingTrigger }
+
+class AnimatedInfiniteListOptions {
+  final bool reverse;
+  final bool animateAtStart;
+  final EdgeInsets? padding;
+  final Duration? animationDuration;
+  final AnimatedChildBuilder? deleteAnimation;
+  final AnimatedChildBuilder? insertAnimation;
+  final int topLoadingTriggerItemDistance;
+  final int bottomLoadingTriggerItemDistance;
+  final ScrollPhysics? scrollPhysics;
+  final bool shrinkWrap;
+
+  const AnimatedInfiniteListOptions({
+    this.reverse = false,
+    this.animateAtStart = true,
+    this.padding,
+    this.animationDuration,
+    this.deleteAnimation,
+    this.insertAnimation,
+    this.topLoadingTriggerItemDistance = 2,
+    this.bottomLoadingTriggerItemDistance = 2,
+    this.scrollPhysics,
+    this.shrinkWrap = false,
+  });
+
+  /// default options
+  factory AnimatedInfiniteListOptions.defaultOptions() => const AnimatedInfiniteListOptions();
+
+  /// copyWith to selectively override fields
+  AnimatedInfiniteListOptions copyWith({
+    bool? reverse,
+    bool? animateAtStart,
+    EdgeInsets? padding,
+    Duration? animationDuration,
+    AnimatedChildBuilder? deleteAnimation,
+    AnimatedChildBuilder? insertAnimation,
+    bool Function(Object first, Object second)? itemEquality,
+    int? topLoadingTriggerItemDistance,
+    int? bottomLoadingTriggerItemDistance,
+    ScrollPhysics? scrollPhysics,
+    bool? shrinkWrap,
+  }) {
+    return AnimatedInfiniteListOptions(
+      reverse: reverse ?? this.reverse,
+      animateAtStart: animateAtStart ?? this.animateAtStart,
+      padding: padding ?? this.padding,
+      animationDuration: animationDuration ?? this.animationDuration,
+      deleteAnimation: deleteAnimation ?? this.deleteAnimation,
+      insertAnimation: insertAnimation ?? this.insertAnimation,
+      topLoadingTriggerItemDistance: topLoadingTriggerItemDistance ?? this.topLoadingTriggerItemDistance,
+      bottomLoadingTriggerItemDistance:
+          bottomLoadingTriggerItemDistance ?? this.bottomLoadingTriggerItemDistance,
+      scrollPhysics: scrollPhysics ?? this.scrollPhysics,
+      shrinkWrap: shrinkWrap ?? this.shrinkWrap,
+    );
+  }
+}

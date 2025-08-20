@@ -38,18 +38,15 @@ class UsersBloc extends ListBloc<User, dynamic>
   }
 
   @override
-  Future loadInitialPage(
-    ListBlocEventLoadInitialPage<User, dynamic> event,
-    Emitter<ListBlocState<User>> emit,
-  ) async {
-    emit(ListBlocStateLoading());
+  Future loadInitialPage(ListEventLoadInitialPage<User, dynamic> event, Emitter<ListState<User>> emit) async {
+    emit(ListStateLoading());
     var users = await repository.getUsers(loadCount, 0);
     await insertToList(users, users.length < loadCount, DataInsertSource.init);
     emitState(emit);
   }
 
   @override
-  Future loadNextPage(ListBlocEventLoadNextPage<User> event, Emitter<ListBlocState<User>> emit) async {
+  Future loadNextPage(ListEventLoadNextPage<User> event, Emitter<ListState<User>> emit) async {
     isLoadingNextPage = true;
     emitState(emit);
     var users = await repository.getUsers(loadCount, offset);
@@ -59,7 +56,7 @@ class UsersBloc extends ListBloc<User, dynamic>
   }
 
   @override
-  Future refreshPage(ListBlocEventRefreshData<User> event, Emitter<ListBlocState<User>> emit) async {
+  Future refreshPage(ListEventRefreshData<User> event, Emitter<ListState<User>> emit) async {
     isRefreshing = true;
     emitState(emit);
     var users = await repository.getUsers(list.length, 0);

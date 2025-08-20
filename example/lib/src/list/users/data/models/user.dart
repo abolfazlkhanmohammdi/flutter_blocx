@@ -22,7 +22,7 @@ class User extends ListEntity<User> {
   });
 
   @override
-  User copyWith({
+  User copyWithListFlags({
     /// [isSelected]
     /// [isBeingSelected]
     /// [isBeingRemoved]
