@@ -15,6 +15,7 @@ dependencies:
   flutter_bloc: ^9.1.1
   implicitly_animated_list: ^2.3.0
   visibility_detector: ^0.4.0+2
+  logger: ^2.6.1
 
 dev_dependencies:
   flutter_test:

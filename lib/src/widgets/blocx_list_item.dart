@@ -11,7 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// Provides convenience methods to dispatch common list events (remove / select / deselect /
 /// highlight / clear highlight). Each method checks that the bloc supports the required
 /// capability mixin before dispatching; otherwise it throws a descriptive error.
-abstract class BlocxListItem<T extends ListEntity<T>, P> extends StatelessWidget {
+abstract class BlocxListItem<T extends BaseEntity, P> extends StatelessWidget {
   final T item;
 
   const BlocxListItem({super.key, required this.item});
@@ -95,10 +95,14 @@ abstract class BlocxListItem<T extends ListEntity<T>, P> extends StatelessWidget
   // Convenience flags
   // ---------------------------------------------------------------------------
 
-  bool get isSelected => item.isSelected;
-  bool get isHighlighted => item.isHighlighted;
-  bool get isBeingRemoved => item.isBeingRemoved;
-  bool get isBeingSelected => item.isBeingSelected;
+  bool isSelected(BuildContext context) =>
+      (bloc(context) as SelectableListBlocMixin<T, P>).isSelected(item.identifier);
+  bool isHighlighted(BuildContext context) =>
+      (bloc(context) as HighlightableListBlocMixin<T, P>).isHighlighted(item.identifier);
+  bool isBeingRemoved(BuildContext context) =>
+      (bloc(context) as DeletableListBlocMixin<T, P>).isBeingRemoved(item.identifier);
+  bool isBeingSelected(BuildContext context) =>
+      (bloc(context) as SelectableListBlocMixin<T, P>).isBeingSelected(item.identifier);
 
   // ---------------------------------------------------------------------------
   // Dispatch helpers (validated)

@@ -14,10 +14,10 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Product {
 
- bool get isSelected; bool get isBeingSelected; bool get isBeingRemoved; bool get isHighlighted; String get uuid; String get name; String get description; double get price; int get stock; String get imageUrl; String get category; String get username;
+ String get uuid; String get name; String get description; double get price; int get stock; String get imageUrl; String get category; String get username;
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
- @JsonKey(includeFromJson: false, includeToJson: false)
+@JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 $ProductCopyWith<Product> get copyWith => _$ProductCopyWithImpl<Product>(this as Product, _$identity);
 
@@ -25,16 +25,16 @@ $ProductCopyWith<Product> get copyWith => _$ProductCopyWithImpl<Product>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Product&&super == other&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.isBeingSelected, isBeingSelected) || other.isBeingSelected == isBeingSelected)&&(identical(other.isBeingRemoved, isBeingRemoved) || other.isBeingRemoved == isBeingRemoved)&&(identical(other.isHighlighted, isHighlighted) || other.isHighlighted == isHighlighted)&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.price, price) || other.price == price)&&(identical(other.stock, stock) || other.stock == stock)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.category, category) || other.category == category)&&(identical(other.username, username) || other.username == username));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Product&&super == other&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.price, price) || other.price == price)&&(identical(other.stock, stock) || other.stock == stock)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.category, category) || other.category == category)&&(identical(other.username, username) || other.username == username));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,super.hashCode,isSelected,isBeingSelected,isBeingRemoved,isHighlighted,uuid,name,description,price,stock,imageUrl,category,username);
+int get hashCode => Object.hash(runtimeType,super.hashCode,uuid,name,description,price,stock,imageUrl,category,username);
 
 @override
 String toString() {
-  return 'Product(isSelected: $isSelected, isBeingSelected: $isBeingSelected, isBeingRemoved: $isBeingRemoved, isHighlighted: $isHighlighted, uuid: $uuid, name: $name, description: $description, price: $price, stock: $stock, imageUrl: $imageUrl, category: $category, username: $username)';
+  return 'Product(uuid: $uuid, name: $name, description: $description, price: $price, stock: $stock, imageUrl: $imageUrl, category: $category, username: $username)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ProductCopyWith<$Res>  {
   factory $ProductCopyWith(Product value, $Res Function(Product) _then) = _$ProductCopyWithImpl;
 @useResult
 $Res call({
- bool isSelected, bool isBeingSelected, bool isBeingRemoved, bool isHighlighted, String uuid, String name, String description, double price, int stock, String imageUrl, String category, String username
+ String uuid, String name, String description, double price, int stock, String imageUrl, String category, String username
 });
 
 
@@ -62,13 +62,9 @@ class _$ProductCopyWithImpl<$Res>
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? isSelected = null,Object? isBeingSelected = null,Object? isBeingRemoved = null,Object? isHighlighted = null,Object? uuid = null,Object? name = null,Object? description = null,Object? price = null,Object? stock = null,Object? imageUrl = null,Object? category = null,Object? username = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? uuid = null,Object? name = null,Object? description = null,Object? price = null,Object? stock = null,Object? imageUrl = null,Object? category = null,Object? username = null,}) {
   return _then(_self.copyWith(
-isSelected: null == isSelected ? _self.isSelected : isSelected // ignore: cast_nullable_to_non_nullable
-as bool,isBeingSelected: null == isBeingSelected ? _self.isBeingSelected : isBeingSelected // ignore: cast_nullable_to_non_nullable
-as bool,isBeingRemoved: null == isBeingRemoved ? _self.isBeingRemoved : isBeingRemoved // ignore: cast_nullable_to_non_nullable
-as bool,isHighlighted: null == isHighlighted ? _self.isHighlighted : isHighlighted // ignore: cast_nullable_to_non_nullable
-as bool,uuid: null == uuid ? _self.uuid : uuid // ignore: cast_nullable_to_non_nullable
+uuid: null == uuid ? _self.uuid : uuid // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
@@ -158,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isSelected,  bool isBeingSelected,  bool isBeingRemoved,  bool isHighlighted,  String uuid,  String name,  String description,  double price,  int stock,  String imageUrl,  String category,  String username)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uuid,  String name,  String description,  double price,  int stock,  String imageUrl,  String category,  String username)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
-return $default(_that.isSelected,_that.isBeingSelected,_that.isBeingRemoved,_that.isHighlighted,_that.uuid,_that.name,_that.description,_that.price,_that.stock,_that.imageUrl,_that.category,_that.username);case _:
+return $default(_that.uuid,_that.name,_that.description,_that.price,_that.stock,_that.imageUrl,_that.category,_that.username);case _:
   return orElse();
 
 }
@@ -179,10 +175,10 @@ return $default(_that.isSelected,_that.isBeingSelected,_that.isBeingRemoved,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isSelected,  bool isBeingSelected,  bool isBeingRemoved,  bool isHighlighted,  String uuid,  String name,  String description,  double price,  int stock,  String imageUrl,  String category,  String username)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uuid,  String name,  String description,  double price,  int stock,  String imageUrl,  String category,  String username)  $default,) {final _that = this;
 switch (_that) {
 case _Product():
-return $default(_that.isSelected,_that.isBeingSelected,_that.isBeingRemoved,_that.isHighlighted,_that.uuid,_that.name,_that.description,_that.price,_that.stock,_that.imageUrl,_that.category,_that.username);}
+return $default(_that.uuid,_that.name,_that.description,_that.price,_that.stock,_that.imageUrl,_that.category,_that.username);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -196,10 +192,10 @@ return $default(_that.isSelected,_that.isBeingSelected,_that.isBeingRemoved,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isSelected,  bool isBeingSelected,  bool isBeingRemoved,  bool isHighlighted,  String uuid,  String name,  String description,  double price,  int stock,  String imageUrl,  String category,  String username)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uuid,  String name,  String description,  double price,  int stock,  String imageUrl,  String category,  String username)?  $default,) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
-return $default(_that.isSelected,_that.isBeingSelected,_that.isBeingRemoved,_that.isHighlighted,_that.uuid,_that.name,_that.description,_that.price,_that.stock,_that.imageUrl,_that.category,_that.username);case _:
+return $default(_that.uuid,_that.name,_that.description,_that.price,_that.stock,_that.imageUrl,_that.category,_that.username);case _:
   return null;
 
 }
@@ -211,13 +207,9 @@ return $default(_that.isSelected,_that.isBeingSelected,_that.isBeingRemoved,_tha
 
 
 class _Product extends Product {
-  const _Product({this.isSelected = false, this.isBeingSelected = false, this.isBeingRemoved = false, this.isHighlighted = false, required this.uuid, required this.name, required this.description, required this.price, required this.stock, required this.imageUrl, required this.category, required this.username}): super._();
+  const _Product({required this.uuid, required this.name, required this.description, required this.price, required this.stock, required this.imageUrl, required this.category, required this.username}): super._();
   
 
-@override@JsonKey() final  bool isSelected;
-@override@JsonKey() final  bool isBeingSelected;
-@override@JsonKey() final  bool isBeingRemoved;
-@override@JsonKey() final  bool isHighlighted;
 @override final  String uuid;
 @override final  String name;
 @override final  String description;
@@ -237,16 +229,16 @@ _$ProductCopyWith<_Product> get copyWith => __$ProductCopyWithImpl<_Product>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Product&&super == other&&(identical(other.isSelected, isSelected) || other.isSelected == isSelected)&&(identical(other.isBeingSelected, isBeingSelected) || other.isBeingSelected == isBeingSelected)&&(identical(other.isBeingRemoved, isBeingRemoved) || other.isBeingRemoved == isBeingRemoved)&&(identical(other.isHighlighted, isHighlighted) || other.isHighlighted == isHighlighted)&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.price, price) || other.price == price)&&(identical(other.stock, stock) || other.stock == stock)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.category, category) || other.category == category)&&(identical(other.username, username) || other.username == username));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Product&&super == other&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.price, price) || other.price == price)&&(identical(other.stock, stock) || other.stock == stock)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.category, category) || other.category == category)&&(identical(other.username, username) || other.username == username));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,super.hashCode,isSelected,isBeingSelected,isBeingRemoved,isHighlighted,uuid,name,description,price,stock,imageUrl,category,username);
+int get hashCode => Object.hash(runtimeType,super.hashCode,uuid,name,description,price,stock,imageUrl,category,username);
 
 @override
 String toString() {
-  return 'Product(isSelected: $isSelected, isBeingSelected: $isBeingSelected, isBeingRemoved: $isBeingRemoved, isHighlighted: $isHighlighted, uuid: $uuid, name: $name, description: $description, price: $price, stock: $stock, imageUrl: $imageUrl, category: $category, username: $username)';
+  return 'Product(uuid: $uuid, name: $name, description: $description, price: $price, stock: $stock, imageUrl: $imageUrl, category: $category, username: $username)';
 }
 
 
@@ -257,7 +249,7 @@ abstract mixin class _$ProductCopyWith<$Res> implements $ProductCopyWith<$Res> {
   factory _$ProductCopyWith(_Product value, $Res Function(_Product) _then) = __$ProductCopyWithImpl;
 @override @useResult
 $Res call({
- bool isSelected, bool isBeingSelected, bool isBeingRemoved, bool isHighlighted, String uuid, String name, String description, double price, int stock, String imageUrl, String category, String username
+ String uuid, String name, String description, double price, int stock, String imageUrl, String category, String username
 });
 
 
@@ -274,13 +266,9 @@ class __$ProductCopyWithImpl<$Res>
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? isSelected = null,Object? isBeingSelected = null,Object? isBeingRemoved = null,Object? isHighlighted = null,Object? uuid = null,Object? name = null,Object? description = null,Object? price = null,Object? stock = null,Object? imageUrl = null,Object? category = null,Object? username = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? uuid = null,Object? name = null,Object? description = null,Object? price = null,Object? stock = null,Object? imageUrl = null,Object? category = null,Object? username = null,}) {
   return _then(_Product(
-isSelected: null == isSelected ? _self.isSelected : isSelected // ignore: cast_nullable_to_non_nullable
-as bool,isBeingSelected: null == isBeingSelected ? _self.isBeingSelected : isBeingSelected // ignore: cast_nullable_to_non_nullable
-as bool,isBeingRemoved: null == isBeingRemoved ? _self.isBeingRemoved : isBeingRemoved // ignore: cast_nullable_to_non_nullable
-as bool,isHighlighted: null == isHighlighted ? _self.isHighlighted : isHighlighted // ignore: cast_nullable_to_non_nullable
-as bool,uuid: null == uuid ? _self.uuid : uuid // ignore: cast_nullable_to_non_nullable
+uuid: null == uuid ? _self.uuid : uuid // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable

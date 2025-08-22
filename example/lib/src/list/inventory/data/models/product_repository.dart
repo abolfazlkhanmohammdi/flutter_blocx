@@ -6,7 +6,8 @@ class ProductRepository extends FakeRepository {
 
   Future<List<Product>> getProducts(int loadCount, int offset, String username) async {
     await randomWaitFuture;
-    var products = List.generate(loadCount, (i) => generateProduct(username));
+    var userProductCount = _allProducts.where((e) => e.username == username).length;
+    var products = List.generate(userProductCount >= 10 ? 5 : loadCount, (i) => generateProduct(username));
     return products;
   }
 

@@ -10,13 +10,13 @@ class ProductCard extends BlocxListItem<Product, User> {
   Widget buildContent(BuildContext context, Product item) {
     final theme = Theme.of(context);
 
-    final disabled = item.isBeingRemoved;
+    final disabled = isBeingRemoved(context);
     final bg = disabled
-        ? theme.colorScheme.error.withOpacity(0.10)
-        : item.isHighlighted
+        ? theme.colorScheme.error.withValues(alpha: 0.10)
+        : isHighlighted(context)
         ? theme.colorScheme.primaryContainer
         : theme.cardColor;
-    final BorderSide? borderSide = item.isSelected
+    final BorderSide? borderSide = isSelected(context)
         ? BorderSide(color: theme.colorScheme.primary, width: 2)
         : null;
     return Card(
@@ -36,21 +36,21 @@ class ProductCard extends BlocxListItem<Product, User> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Image
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  item.imageUrl,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    width: 80,
-                    height: 80,
-                    color: Colors.grey.shade200,
-                    child: const Icon(Icons.image_not_supported),
-                  ),
-                ),
-              ),
+              // ClipRRect(
+              //   borderRadius: BorderRadius.circular(8),
+              //   child: Image.network(
+              //     item.imageUrl,
+              //     width: 80,
+              //     height: 80,
+              //     fit: BoxFit.cover,
+              //     errorBuilder: (_, __, ___) => Container(
+              //       width: 80,
+              //       height: 80,
+              //       color: Colors.grey.shade200,
+              //       child: const Icon(Icons.image_not_supported),
+              //     ),
+              //   ),
+              // ),
               const SizedBox(width: 12),
 
               // Texts
@@ -77,21 +77,23 @@ class ProductCard extends BlocxListItem<Product, User> {
                           children: [
                             // Highlight toggle
                             IconButton(
-                              tooltip: item.isHighlighted ? 'Unhighlight' : 'Highlight',
+                              tooltip: isHighlighted(context) ? 'Unhighlight' : 'Highlight',
                               onPressed: disabled
                                   ? null
-                                  : () => item.isHighlighted
+                                  : () => isHighlighted(context)
                                         ? clearHighlightedItem(context)
                                         : highlightItem(context),
-                              icon: Icon(item.isHighlighted ? Icons.star : Icons.star_border),
+                              icon: Icon(isHighlighted(context) ? Icons.star : Icons.star_border),
                             ),
                             // Select toggle
                             IconButton(
-                              tooltip: item.isSelected ? 'Deselect' : 'Select',
+                              tooltip: isSelected(context) ? 'Deselect' : 'Select',
                               onPressed: disabled
                                   ? null
-                                  : () => item.isSelected ? deselectItem(context) : selectItem(context),
-                              icon: Icon(item.isSelected ? Icons.check_box : Icons.check_box_outline_blank),
+                                  : () => isSelected(context) ? deselectItem(context) : selectItem(context),
+                              icon: Icon(
+                                isSelected(context) ? Icons.check_box : Icons.check_box_outline_blank,
+                              ),
                             ),
                             // Delete
                             IconButton(

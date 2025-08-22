@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:implicitly_animated_list/implicitly_animated_list.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-class AnimatedInfiniteList<Entity extends ListEntity<Entity>> extends StatefulWidget {
+class AnimatedInfiniteList<Entity extends BaseEntity> extends StatefulWidget {
   final AnimatedInfiniteListOptions options;
   final Widget Function(BuildContext context, Entity item) itemBuilder;
   final Widget Function(BuildContext context, int index)? separatorBuilder;
@@ -34,8 +34,7 @@ class AnimatedInfiniteList<Entity extends ListEntity<Entity>> extends StatefulWi
   AnimatedInfiniteListState createState() => AnimatedInfiniteListState<Entity>();
 }
 
-class AnimatedInfiniteListState<Entity extends ListEntity<Entity>>
-    extends State<AnimatedInfiniteList<Entity>> {
+class AnimatedInfiniteListState<Entity extends BaseEntity> extends State<AnimatedInfiniteList<Entity>> {
   InfiniteListBloc get bloc => widget.bloc;
   AnimatedInfiniteListOptions get options => widget.options;
   @override
@@ -47,17 +46,16 @@ class AnimatedInfiniteListState<Entity extends ListEntity<Entity>>
         bloc: widget.bloc,
         buildWhen: (_, c) => c.shouldRebuild,
         builder: (BuildContext context, InfiniteListState state) {
-          debugPrint("height is: ${state.swipeRefreshHeight}");
           return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               swipeRefreshWidget(context, state),
               Expanded(
                 child: NotificationListener<UserScrollNotification>(
                   onNotification: onScroll,
                   child: Listener(
-                    onPointerDown: maySwipe
-                        ? (d) => bloc.add(InfiniteListEventVerticalDragStarted(globalY: d.position.dy))
-                        : null,
+                    onPointerDown: (d) =>
+                        bloc.add(InfiniteListEventVerticalDragStarted(globalY: d.position.dy)),
                     onPointerUp: maySwipe ? (d) => bloc.add(InfiniteListEventVerticalDragEnded()) : null,
                     onPointerMove: maySwipe
                         ? (d) => bloc.add(InfiniteListEventVerticalDragUpdated(globalY: d.position.dy))
@@ -74,7 +72,7 @@ class AnimatedInfiniteListState<Entity extends ListEntity<Entity>>
                       insertAnimation: widget.insertAnimation ?? _defaultAnimation,
                       deleteAnimation: widget.deleteAnimation ?? _defaultAnimation,
                       itemBuilder: (c, i) => _itemBuilder(c, i, state),
-                      itemEquality: (ListEntity f, ListEntity s) => f.identifier == s.identifier,
+                      itemEquality: (BaseEntity f, BaseEntity s) => f.identifier == s.identifier,
                     ),
                   ),
                 ),
@@ -101,11 +99,14 @@ class AnimatedInfiniteListState<Entity extends ListEntity<Entity>>
     ).drive(Tween<double>(begin: 0, end: 1));
   }
 
-  bool get maySwipe =>
-      (bloc.state.isAtTop &&
-      bloc.state.isScrollingUp &&
-      !bloc.state.isRefreshing &&
-      widget.refreshOnSwipe != null);
+  bool get maySwipe {
+    final cond1 = bloc.state.isAtTop;
+    final cond2 = bloc.state.isScrollingUp;
+    final cond3 = !bloc.state.isRefreshing;
+    final cond4 = widget.refreshOnSwipe != null;
+    final result = cond1 && cond2 && cond3 && cond4;
+    return result;
+  }
 
   Widget _itemBuilder(BuildContext context, Entity data, InfiniteListState state) {
     int index = widget.items.indexOf(data);
@@ -113,7 +114,7 @@ class AnimatedInfiniteListState<Entity extends ListEntity<Entity>>
         index == (widget.items.length - options.bottomLoadingTriggerItemDistance) && !state.hasReachedEnd;
     bool isTopLoadingTrigger = options.topLoadingTriggerItemDistance == index;
     var itemWidget = widget.itemBuilder(context, data);
-    if (isTopLoadingTrigger || isBottomLoadingTrigger) {
+    if (isTopLoadingTrigger || isBottomLoadingTrigger && !state.hasReachedEnd) {
       var keyEnum = isTopLoadingTrigger
           ? EnumInfiniteListKey.topLoadingTrigger
           : EnumInfiniteListKey.bottomLoadingTrigger;
@@ -127,7 +128,7 @@ class AnimatedInfiniteListState<Entity extends ListEntity<Entity>>
   }
 
   void onVisibilityChanged(EnumInfiniteListKey key, VisibilityInfo c, InfiniteListState state) {
-    if (c.visibleFraction < 1) return;
+    if (c.visibleFraction < 0.5) return;
     switch (key) {
       case EnumInfiniteListKey.topLoadingTrigger:
         manageTopLoading();
@@ -151,7 +152,7 @@ class AnimatedInfiniteListState<Entity extends ListEntity<Entity>>
   bool onScroll(UserScrollNotification notification) {
     bool isIdle = notification.direction == ScrollDirection.idle;
     bool isScrollingUp = !isIdle && notification.direction == ScrollDirection.forward;
-    bool isAtTop = notification.metrics.pixels == 0;
+    bool isAtTop = notification.metrics.pixels < 40;
     bool isAtBottom = notification.metrics.pixels == notification.metrics.maxScrollExtent;
     bloc.add(
       InfiniteListEventOnScroll(
@@ -165,18 +166,19 @@ class AnimatedInfiniteListState<Entity extends ListEntity<Entity>>
   }
 
   Widget loadBottomWidget(BuildContext context, InfiniteListState state) {
+    var colorsScheme = Theme.of(context).colorScheme;
     var primaryColor = Theme.of(context).colorScheme.primary;
     return AnimatedSize(
       duration: Duration(milliseconds: 300),
       child: state.isLoadingBottom
           ? Container(
+              padding: EdgeInsets.all(16),
               color: primaryColor,
               child: Center(
-                child: Container(
-                  height: 40,
-                  width: 40,
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  child: CircularProgressIndicator(color: primaryColor),
+                child: SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(color: colorsScheme.onPrimary),
                 ),
               ),
             )
@@ -189,7 +191,9 @@ class AnimatedInfiniteListState<Entity extends ListEntity<Entity>>
     return Container(
       color: primaryColor,
       height: state.swipeRefreshHeight,
-      child: SizedBox.square(dimension: 24, child: CircularProgressIndicator(color: Colors.white)),
+      child: Center(
+        child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white)),
+      ),
     );
   }
 

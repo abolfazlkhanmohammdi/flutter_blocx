@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 ///
 /// - Typing triggers [ListEventSearch].
 /// - Clearing input triggers [ListEventClearSearch].
-class BlocxSearchField<T extends ListEntity<T>, P> extends StatelessWidget {
+class BlocxSearchField<T extends BaseEntity, P> extends StatelessWidget {
   final TextEditingController controller;
   final BlocxSearchFieldOptions options;
 

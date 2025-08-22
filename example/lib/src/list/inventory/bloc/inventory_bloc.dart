@@ -1,9 +1,6 @@
-import 'dart:async';
-
-import 'package:bloc/src/bloc.dart';
 import 'package:blocx/blocx.dart';
-import 'package:flutter_blocx_example/src/list/inventory/bloc/use_cases/use_case_refresh_user_inventory.dart';
 import 'package:flutter_blocx_example/src/list/inventory/bloc/use_cases/use_case_get_user_inventory.dart';
+import 'package:flutter_blocx_example/src/list/inventory/bloc/use_cases/use_case_refresh_user_inventory.dart';
 import 'package:flutter_blocx_example/src/list/inventory/bloc/use_cases/use_case_remove_product.dart';
 import 'package:flutter_blocx_example/src/list/inventory/bloc/use_cases/use_case_search_products.dart';
 import 'package:flutter_blocx_example/src/list/inventory/data/models/product.dart';
@@ -47,17 +44,19 @@ class InventoryBloc extends ListBloc<Product, User>
   }
 
   @override
-  SearchUseCase<Product, User>? searchUseCase(String searchText, {int offset = 0}) {
+  SearchUseCase<Product, User>? searchUseCase(String searchText, {int? loadCount, int? offset}) {
     return UseCaseSearchUserProducts(
       searchQuery: SearchQuery(
         searchText: searchText,
         payload: payload,
-        loadCount: loadCount,
-        offset: offset,
+        loadCount: loadCount ?? this.loadCount,
+        offset: offset ?? this.offset,
       ),
     );
   }
 
   @override
   bool get isSingleSelect => false;
+  @override
+  int get loadCount => 10;
 }

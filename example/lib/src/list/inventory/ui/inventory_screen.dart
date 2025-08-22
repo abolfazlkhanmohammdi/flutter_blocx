@@ -35,4 +35,7 @@ class _InventoryScreenState extends AnimatedListWidgetState<InventoryScreen, Pro
       body: body,
     );
   }
+
+  @override
+  AnimatedInfiniteListOptions get listOptions => super.listOptions.copyWith(reverse: true);
 }

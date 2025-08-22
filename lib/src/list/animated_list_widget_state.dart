@@ -6,7 +6,7 @@ import 'package:flutter_blocx/src/screen_manager/screen_manager_state.dart';
 import 'package:flutter_blocx/src/widgets/animated_infinite_list.dart';
 import 'package:implicitly_animated_list/implicitly_animated_list.dart';
 
-abstract class AnimatedListWidgetState<W extends ListWidget<P>, T extends ListEntity<T>, P>
+abstract class AnimatedListWidgetState<W extends ListWidget<P>, T extends BaseEntity, P>
     extends ScreenManagerState<W> {
   final ListBloc<T, P> bloc;
   AnimatedListWidgetState({required this.bloc}) : super(managerCubit: bloc.screenManagerCubit);
@@ -31,8 +31,13 @@ abstract class AnimatedListWidgetState<W extends ListWidget<P>, T extends ListEn
   }
 
   Widget listBuilder(BuildContext context, ListState<T> state) {
-    final listOrLoading = isLoading
+    final top = topWidget(context, state);
+    final bottom = bottomWidget(context, state);
+    bool hasTopOrBottomWidget = top != null || bottom != null;
+    final listOrLoading = isLoading || isSearching
         ? loadingWidget(context, state)
+        : state.list.isEmpty
+        ? emptyWidget(context, state)
         : AnimatedInfiniteList<T>(
             refreshOnSwipe: bloc.isRefreshable ? refreshData : null,
             loadBottomData: bloc.isInfinite ? loadNextPage : null,
@@ -42,17 +47,14 @@ abstract class AnimatedListWidgetState<W extends ListWidget<P>, T extends ListEn
             deleteAnimation: deleteAnimation,
             insertAnimation: insertAnimation,
             separatorBuilder: separatorBuilder,
-            options: listOptions,
+            options: hasTopOrBottomWidget ? listOptions : listOptions.copyWith(padding: padding),
           );
 
-    final top = topWidget(context, state);
-    final bottom = bottomWidget(context, state);
-
     // if neither top nor bottom exists, return list directly
-    if (top == null && bottom == null) return listOrLoading;
+    if (!hasTopOrBottomWidget) return listOrLoading;
 
-    return Container(
-      color: Colors.red,
+    return Padding(
+      padding: padding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: topBottomAndListSpacing,
@@ -80,7 +82,7 @@ abstract class AnimatedListWidgetState<W extends ListWidget<P>, T extends ListEn
   void _listListener(BuildContext context, ListState<T> state) {}
 
   bool get isLoading => bloc.state is ListStateLoading;
-
+  bool get isSearching => bloc.state.isSearching;
   void search(String text) {
     bloc.add(ListEventSearch<T>(searchText: text));
   }
@@ -98,7 +100,7 @@ abstract class AnimatedListWidgetState<W extends ListWidget<P>, T extends ListEn
       children: [
         CircularProgressIndicator(),
         Text(
-          loadingText.isNotEmpty ? loadingText : "loading data please wait",
+          state.isSearching ? searchingText : loadingText,
           style: textTheme(context).bodyLarge?.copyWith(color: theme(context).colorScheme.primary),
         ),
         Row(),
@@ -109,7 +111,7 @@ abstract class AnimatedListWidgetState<W extends ListWidget<P>, T extends ListEn
   ThemeData theme(BuildContext context) => Theme.of(context);
   TextTheme textTheme(BuildContext context) => theme(context).textTheme;
 
-  String get loadingText => "";
+  String get loadingText => "loading data please wait";
 
   void refreshData() {
     bloc.add(ListEventRefreshData<T>());
@@ -130,4 +132,21 @@ abstract class AnimatedListWidgetState<W extends ListWidget<P>, T extends ListEn
   }
 
   P? get payload => widget.payload;
+  EdgeInsets get padding => EdgeInsets.all(8);
+
+  String get emptyListText => "No data";
+
+  String get searchingText => "Searching data, please wait";
+
+  Widget emptyWidget(BuildContext context, ListState<T> state) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Icon(Icons.data_object_rounded, size: 80, color: theme(context).colorScheme.primary),
+        SizedBox(height: 8),
+        Text(emptyListText, style: textTheme(context).titleMedium, textAlign: TextAlign.center),
+      ],
+    );
+  }
 }

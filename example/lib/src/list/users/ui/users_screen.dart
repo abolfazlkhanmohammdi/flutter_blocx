@@ -1,3 +1,4 @@
+import 'package:blocx/blocx.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blocx/list_widget.dart';
 import 'package:flutter_blocx_example/src/list/inventory/ui/inventory_screen.dart';
@@ -12,7 +13,20 @@ class UsersScreen extends ListWidget {
 }
 
 class _UsersScreenState extends AnimatedListWidgetState<UsersScreen, User, dynamic> {
+  late final TextEditingController searchController;
+
   _UsersScreenState() : super(bloc: UsersBloc());
+
+  @override
+  void initState() {
+    super.initState();
+    searchController = TextEditingController();
+  }
+
+  @override
+  Widget? topWidget(BuildContext context, ListState<User> state) {
+    return Column(children: [BlocxSearchField<User, dynamic>(controller: searchController)]);
+  }
 
   @override
   Widget itemBuilder(BuildContext context, User item) {
@@ -27,20 +41,20 @@ class _UsersScreenState extends AnimatedListWidgetState<UsersScreen, User, dynam
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
-              Container(
-                clipBehavior: Clip.hardEdge,
-                decoration: ShapeDecoration(
-                  shape: RoundedSuperellipseBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                width: 200,
-                height: 120,
-                child: FadeInImage(
-                  image: NetworkImage(item.image),
-                  key: Key("image_${item.identifier}"),
-                  fit: BoxFit.cover,
-                  placeholder: NetworkImage("https://placehold.co/600x400/png"),
-                ),
-              ),
+              // Container(
+              //   clipBehavior: Clip.hardEdge,
+              //   decoration: ShapeDecoration(
+              //     shape: RoundedSuperellipseBorder(borderRadius: BorderRadius.circular(8)),
+              //   ),
+              //   width: 200,
+              //   height: 120,
+              //   child: FadeInImage(
+              //     image: NetworkImage(item.image),
+              //     key: Key("image_${item.identifier}"),
+              //     fit: BoxFit.cover,
+              //     placeholder: NetworkImage("https://placehold.co/600x400/png"),
+              //   ),
+              // ),
               SizedBox(width: 24),
               Expanded(
                 child: Column(
@@ -54,7 +68,7 @@ class _UsersScreenState extends AnimatedListWidgetState<UsersScreen, User, dynam
                         style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
-                    Text(item.name, style: textTheme.labelMedium),
+                    Text(item.username, style: textTheme.labelMedium),
                   ],
                 ),
               ),

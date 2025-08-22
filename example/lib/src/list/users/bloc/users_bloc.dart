@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:blocx/blocx.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx_example/src/list/users/data/models/user.dart';
 import 'package:flutter_blocx_example/src/list/users/data/user_repository.dart';
+import 'package:flutter_blocx_example/src/list/users/use_case/use_case_search_users.dart';
 
 /// This page does not require a payload, so we pass `dynamic` for `P`.
 ///
@@ -28,7 +31,10 @@ import 'package:flutter_blocx_example/src/list/users/data/user_repository.dart';
 /// This bloc follows **Option A** (manual control).
 
 class UsersBloc extends ListBloc<User, dynamic>
-    with RefreshableListBlocMixin<User, dynamic>, InfiniteListBlocMixin<User, dynamic> {
+    with
+        RefreshableListBlocMixin<User, dynamic>,
+        InfiniteListBlocMixin<User, dynamic>,
+        SearchableListBlocMixin<User, dynamic> {
   UserRepository repository = UserRepository();
   UsersBloc() : super(ScreenManagerCubit(), InfiniteListBloc());
 
@@ -57,10 +63,57 @@ class UsersBloc extends ListBloc<User, dynamic>
 
   @override
   Future refreshPage(ListEventRefreshData<User> event, Emitter<ListState<User>> emit) async {
+    if (searchText.isNotEmpty) {
+      add(ListEventSearchRefresh());
+      return;
+    }
     isRefreshing = true;
     emitState(emit);
-    var users = await repository.getUsers(list.length, 0);
+    var users = await repository.refreshUsers(list.length, 0);
+    clearList();
     await insertToList(users, users.length < list.length, DataInsertSource.refresh);
     emitState(emit);
   }
+
+  @override
+  Future<void> search(ListEventSearch<User> event, Emitter<ListState<User>> emit) async {
+    if (event.searchText.isEmpty) {
+      add(ListEventLoadInitialPage(payload: payload));
+      return;
+    }
+    isSearching = true;
+    emitState(emit);
+    var result = await UseCaseSearchUsers(
+      searchQuery: SearchQuery(
+        searchText: searchText,
+        payload: payload,
+        loadCount: loadCount,
+        offset: offset,
+      ),
+    ).execute();
+    isSearching = false;
+    emitState(emit);
+    clearList();
+    insertToList(result.data!.items, result.data!.items.length < loadCount, DataInsertSource.search);
+    emitState(emit);
+  }
+
+  @override
+  Future<void> searchRefresh(ListEventSearchRefresh<User> event, Emitter<ListState<User>> emit) async {
+    var result = await UseCaseSearchUsers(
+      searchQuery: SearchQuery(searchText: searchText, payload: payload, loadCount: list.length, offset: 0),
+    ).execute();
+    isSearching = false;
+    emitState(emit);
+    clearList();
+    insertToList(result.data!.items, result.data!.items.length < loadCount, DataInsertSource.search);
+    infiniteListBloc.add(InfiniteListEventCloseRefresh());
+    emitState(emit);
+  }
+
+  @override
+  int get loadCount => 20;
+
+  @override
+  Duration get searchDebounceDuration => Duration(milliseconds: 24);
 }

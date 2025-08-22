@@ -1,7 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blocx_example/src/home/home_screen.dart';
-import 'package:flutter_blocx_example/src/list/users/ui/users_screen.dart';
 
 void main() {
   runApp(const MainApp());
