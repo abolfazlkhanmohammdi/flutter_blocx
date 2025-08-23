@@ -4,6 +4,9 @@ import 'package:flutter_blocx/list_widget.dart';
 import 'package:flutter_blocx_example/src/list/inventory/ui/inventory_screen.dart';
 import 'package:flutter_blocx_example/src/list/users/bloc/users_bloc.dart';
 import 'package:flutter_blocx_example/src/list/users/data/models/user.dart';
+import 'package:flutter_blocx_example/src/list/users/ui/scroll_controller_bar.dart';
+import 'package:flutter_blocx_example/src/list/users/ui/user_card.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class UsersScreen extends ListWidget {
   const UsersScreen({super.key});
@@ -12,7 +15,7 @@ class UsersScreen extends ListWidget {
   State<UsersScreen> createState() => _UsersScreenState();
 }
 
-class _UsersScreenState extends AnimatedListWidgetState<UsersScreen, User, dynamic> {
+class _UsersScreenState extends ListWidgetState<UsersScreen, User, dynamic> {
   late final TextEditingController searchController;
 
   _UsersScreenState() : super(bloc: UsersBloc());
@@ -24,60 +27,28 @@ class _UsersScreenState extends AnimatedListWidgetState<UsersScreen, User, dynam
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    searchController.dispose();
+  }
+
+  @override
   Widget? topWidget(BuildContext context, ListState<User> state) {
-    return Column(children: [BlocxSearchField<User, dynamic>(controller: searchController)]);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        spacing: 16,
+        children: [
+          BlocxSearchField<User, dynamic>(controller: searchController),
+          if (!isLoading) ...[ScrollControllerBar(currentIndex: state.additionalInfo ?? 1)],
+        ],
+      ),
+    );
   }
 
   @override
   Widget itemBuilder(BuildContext context, User item) {
-    var textTheme = Theme.of(context).textTheme;
-    return InkWell(
-      onTap: () =>
-          Navigator.of(context).push(MaterialPageRoute(builder: (_) => InventoryScreen(payload: item))),
-      child: Card(
-        key: Key(item.identifier),
-        shape: RoundedSuperellipseBorder(borderRadius: BorderRadius.circular(8)),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              // Container(
-              //   clipBehavior: Clip.hardEdge,
-              //   decoration: ShapeDecoration(
-              //     shape: RoundedSuperellipseBorder(borderRadius: BorderRadius.circular(8)),
-              //   ),
-              //   width: 200,
-              //   height: 120,
-              //   child: FadeInImage(
-              //     image: NetworkImage(item.image),
-              //     key: Key("image_${item.identifier}"),
-              //     fit: BoxFit.cover,
-              //     placeholder: NetworkImage("https://placehold.co/600x400/png"),
-              //   ),
-              // ),
-              SizedBox(width: 24),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 8,
-                  children: [
-                    Hero(
-                      tag: item.username,
-                      child: Text(
-                        item.name,
-                        style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    Text(item.username, style: textTheme.labelMedium),
-                  ],
-                ),
-              ),
-              Text(item.index.toString(), style: textTheme.headlineLarge),
-            ],
-          ),
-        ),
-      ),
-    );
+    return UserCard(item: item);
   }
 
   @override
@@ -92,5 +63,51 @@ class _UsersScreenState extends AnimatedListWidgetState<UsersScreen, User, dynam
   }
 
   @override
-  AnimatedInfiniteListOptions get listOptions => super.listOptions.copyWith();
+  InfiniteListOptions get listOptions => super.listOptions.copyWith(useAnimatedList: false, reverse: false);
+
+  @override
+  Widget? refreshWidgetBuilder(BuildContext context, double swipeRefreshHeight) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(color: theme.colorScheme.primary, borderRadius: BorderRadius.circular(8)),
+      // always apply swipeRefreshHeight
+      width: MediaQuery.sizeOf(context).width,
+      height: swipeRefreshHeight,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SpinKitDoubleBounce(color: theme.colorScheme.onPrimary, size: swipeRefreshHeight / 2),
+          Text(
+            "refreshing the screen, please wait",
+            style: TextStyle(fontSize: swipeRefreshHeight / 4, color: theme.colorScheme.onPrimary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget? loadMoreWidgetBuilder(BuildContext context, bool isLoadingMore) {
+    return AnimatedSize(
+      duration: Duration(milliseconds: 100),
+      child: isLoadingMore
+          ? Container(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              margin: EdgeInsets.all(16),
+              decoration: BoxDecoration(color: colorScheme.primary, borderRadius: BorderRadius.circular(16)),
+              width: MediaQuery.sizeOf(context).width,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SpinKitDoubleBounce(color: theme.colorScheme.onPrimary, size: 32),
+                  Text(
+                    "Loading more items, please wait",
+                    style: TextStyle(fontSize: 16, color: theme.colorScheme.onPrimary),
+                  ),
+                ],
+              ),
+            )
+          : SizedBox(),
+    );
+  }
 }

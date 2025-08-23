@@ -1,19 +1,23 @@
 import 'package:blocx/blocx.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_blocx/src/list/list_widget.dart';
+import 'package:flutter_blocx/list_widget.dart';
 import 'package:flutter_blocx/src/screen_manager/screen_manager_state.dart';
-import 'package:flutter_blocx/src/widgets/animated_infinite_list.dart';
+import 'package:flutter_blocx/src/widgets/infinite_list.dart';
 import 'package:implicitly_animated_list/implicitly_animated_list.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
-abstract class AnimatedListWidgetState<W extends ListWidget<P>, T extends BaseEntity, P>
+abstract class ListWidgetState<W extends ListWidget<P>, T extends BaseEntity, P>
     extends ScreenManagerState<W> {
-  final ListBloc<T, P> bloc;
-  AnimatedListWidgetState({required this.bloc}) : super(managerCubit: bloc.screenManagerCubit);
+  late final ListBloc<T, P> bloc;
+  ScrollController? scrollController;
+  ListWidgetState({required this.bloc}) : super(managerCubit: bloc.screenManagerCubit);
 
   @override
   void initState() {
+    setScrollController();
     bloc.add(ListEventLoadInitialPage<T, P>(payload: widget.payload));
+
     super.initState();
   }
 
@@ -38,7 +42,8 @@ abstract class AnimatedListWidgetState<W extends ListWidget<P>, T extends BaseEn
         ? loadingWidget(context, state)
         : state.list.isEmpty
         ? emptyWidget(context, state)
-        : AnimatedInfiniteList<T>(
+        : InfiniteList<T>(
+            scrollController: scrollController,
             refreshOnSwipe: bloc.isRefreshable ? refreshData : null,
             loadBottomData: bloc.isInfinite ? loadNextPage : null,
             itemBuilder: itemBuilder,
@@ -47,23 +52,22 @@ abstract class AnimatedListWidgetState<W extends ListWidget<P>, T extends BaseEn
             deleteAnimation: deleteAnimation,
             insertAnimation: insertAnimation,
             separatorBuilder: separatorBuilder,
-            options: hasTopOrBottomWidget ? listOptions : listOptions.copyWith(padding: padding),
+            options: listOptions.copyWith(padding: padding),
+            refreshWidgetBuilder: refreshWidgetBuilder,
+            loadMoreWidgetBuilder: loadMoreWidgetBuilder,
           );
 
     // if neither top nor bottom exists, return list directly
     if (!hasTopOrBottomWidget) return listOrLoading;
 
-    return Padding(
-      padding: padding,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: topBottomAndListSpacing,
-        children: [
-          ?top,
-          Expanded(child: listOrLoading),
-          ?bottom,
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: topBottomAndListSpacing,
+      children: [
+        ?top,
+        Expanded(child: listOrLoading),
+        ?bottom,
+      ],
     );
   }
 
@@ -79,7 +83,12 @@ abstract class AnimatedListWidgetState<W extends ListWidget<P>, T extends BaseEn
   /// Renders a single list item.
   Widget itemBuilder(BuildContext context, T item);
 
-  void _listListener(BuildContext context, ListState<T> state) {}
+  void _listListener(BuildContext context, ListState<T> state) {
+    if (state is ListStateScrollToItem<T>) {
+      var sc = scrollController as AutoScrollController;
+      sc.scrollToIndex(state.index, preferPosition: AutoScrollPosition.middle);
+    }
+  }
 
   bool get isLoading => bloc.state is ListStateLoading;
   bool get isSearching => bloc.state.isSearching;
@@ -101,16 +110,16 @@ abstract class AnimatedListWidgetState<W extends ListWidget<P>, T extends BaseEn
         CircularProgressIndicator(),
         Text(
           state.isSearching ? searchingText : loadingText,
-          style: textTheme(context).bodyLarge?.copyWith(color: theme(context).colorScheme.primary),
+          style: textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary),
         ),
         Row(),
       ],
     );
   }
 
-  ThemeData theme(BuildContext context) => Theme.of(context);
-  TextTheme textTheme(BuildContext context) => theme(context).textTheme;
-
+  ThemeData get theme => Theme.of(context);
+  TextTheme get textTheme => theme.textTheme;
+  ColorScheme get colorScheme => theme.colorScheme;
   String get loadingText => "loading data please wait";
 
   void refreshData() {
@@ -121,12 +130,13 @@ abstract class AnimatedListWidgetState<W extends ListWidget<P>, T extends BaseEn
     bloc.add(ListEventLoadNextPage<T>());
   }
 
-  AnimatedInfiniteListOptions get listOptions => AnimatedInfiniteListOptions.defaultOptions();
+  InfiniteListOptions get listOptions => InfiniteListOptions.defaultOptions();
 
   AnimatedChildBuilder? get deleteAnimation => null;
 
   AnimatedChildBuilder? get insertAnimation => null;
 
+  // does not work with animated list variant
   Widget separatorBuilder(BuildContext context, int index) {
     return SizedBox.shrink();
   }
@@ -143,10 +153,49 @@ abstract class AnimatedListWidgetState<W extends ListWidget<P>, T extends BaseEn
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Icon(Icons.data_object_rounded, size: 80, color: theme(context).colorScheme.primary),
+        Icon(Icons.data_object_rounded, size: 80, color: theme.colorScheme.primary),
         SizedBox(height: 8),
-        Text(emptyListText, style: textTheme(context).titleMedium, textAlign: TextAlign.center),
+        Text(emptyListText, style: textTheme.titleMedium, textAlign: TextAlign.center),
       ],
     );
+  }
+
+  void scrollToItem(T item, {bool highlightItem = false}) {
+    // Ensure the bloc has the scrollable mixin
+    if (!this.bloc.isScrollable) {
+      throw StateError(
+        'scrollToIndex can only be used on a bloc that mixes in '
+        'ScrollableListBlocMixin<$T, $P>.',
+      );
+    }
+    final bloc = this.bloc as ScrollableListBlocMixin<T, P>;
+    bloc.add(ListEventScrollToItem<T>(item: item, highlightItem: highlightItem));
+  }
+
+  void setScrollController() {
+    scrollController = bloc.isScrollable ? AutoScrollController() : ScrollController();
+    if (scrollController is AutoScrollController) {
+      (scrollController as AutoScrollController).addListener(_onScroll);
+    }
+  }
+
+  Widget? refreshWidgetBuilder(BuildContext context, double swipeRefreshHeight) {
+    return null;
+  }
+
+  bool _hasAutoScrolled = false;
+  void _onScroll() {
+    var sc = scrollController as AutoScrollController;
+    if (sc.isAutoScrolling) {
+      _hasAutoScrolled = true;
+    }
+    if (_hasAutoScrolled && !sc.isAutoScrolling) {
+      _hasAutoScrolled = false;
+      bloc.add(ListEventHighlightScrolledToItems());
+    }
+  }
+
+  Widget? loadMoreWidgetBuilder(BuildContext context, bool isLoadingMore) {
+    return null;
   }
 }

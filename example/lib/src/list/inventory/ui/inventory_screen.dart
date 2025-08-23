@@ -13,7 +13,7 @@ class InventoryScreen extends ListWidget<User> {
   State<InventoryScreen> createState() => _InventoryScreenState();
 }
 
-class _InventoryScreenState extends AnimatedListWidgetState<InventoryScreen, Product, User> {
+class _InventoryScreenState extends ListWidgetState<InventoryScreen, Product, User> {
   _InventoryScreenState() : super(bloc: InventoryBloc());
 
   @override
@@ -37,5 +37,5 @@ class _InventoryScreenState extends AnimatedListWidgetState<InventoryScreen, Pro
   }
 
   @override
-  AnimatedInfiniteListOptions get listOptions => super.listOptions.copyWith(reverse: true);
+  InfiniteListOptions get listOptions => super.listOptions.copyWith(reverse: true);
 }
