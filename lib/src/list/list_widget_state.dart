@@ -198,4 +198,8 @@ abstract class ListWidgetState<W extends ListWidget<P>, T extends BaseEntity, P>
   Widget? loadMoreWidgetBuilder(BuildContext context, bool isLoadingMore) {
     return null;
   }
+
+  deleteMultipleItems(List<T> items) {
+    bloc.add(ListEventRemoveMultipleItems(items: items));
+  }
 }

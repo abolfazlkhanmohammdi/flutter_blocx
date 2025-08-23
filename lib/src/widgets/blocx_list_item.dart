@@ -92,17 +92,23 @@ abstract class BlocxListItem<T extends BaseEntity, P> extends StatelessWidget {
   }
 
   // ---------------------------------------------------------------------------
-  // Convenience flags
+  // Convenience flags (reactive via bloc.state)
   // ---------------------------------------------------------------------------
 
-  bool isSelected(BuildContext context) =>
-      (bloc(context) as SelectableListBlocMixin<T, P>).isSelected(item.identifier);
-  bool isHighlighted(BuildContext context) =>
-      (bloc(context) as HighlightableListBlocMixin<T, P>).isHighlighted(item.identifier);
-  bool isBeingRemoved(BuildContext context) =>
-      (bloc(context) as DeletableListBlocMixin<T, P>).isBeingRemoved(item.identifier);
-  bool isBeingSelected(BuildContext context) =>
-      (bloc(context) as SelectableListBlocMixin<T, P>).isBeingSelected(item.identifier);
+  /// True when this item's id is present in `state.selectedItemIds`.
+  bool isSelected(BuildContext context) => bloc(context).state.isSelected(item);
+
+  /// True when this item's id is present in `state.highlightedItemIds`.
+  bool isHighlighted(BuildContext context) => bloc(context).state.isHighlighted(item);
+
+  /// True when this item's id is present in `state.beingRemovedItemIds`.
+  bool isBeingRemoved(BuildContext context) => bloc(context).state.isBeingRemoved(item);
+
+  /// True when this item's id is present in `state.beingSelectedItemIds`.
+  bool isBeingSelected(BuildContext context) => bloc(context).state.isBeingSelected(item);
+
+  /// True when this item's id is present in `state.expandedItemIds`.
+  bool isExpanded(BuildContext context) => bloc(context).state.isExpanded(item);
 
   // ---------------------------------------------------------------------------
   // Dispatch helpers (validated)

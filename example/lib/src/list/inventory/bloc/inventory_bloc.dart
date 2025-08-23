@@ -59,4 +59,8 @@ class InventoryBloc extends ListBloc<Product, User>
   bool get isSingleSelect => false;
   @override
   int get loadCount => 10;
+
+  @override
+  // TODO: implement syncWithServerOnSelection
+  bool get syncWithServerOnSelection => super.syncWithServerOnSelection;
 }

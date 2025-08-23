@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blocx/list_widget.dart';
+import 'package:flutter_blocx_example/src/list/inventory/ui/inventory_screen.dart';
 import 'package:flutter_blocx_example/src/list/users/data/models/user.dart';
 
 class UserCard extends BlocxListItem<User, dynamic> {
@@ -15,6 +16,8 @@ class UserCard extends BlocxListItem<User, dynamic> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: InkWell(
+        onTap: () =>
+            Navigator.of(context).push(MaterialPageRoute(builder: (c) => InventoryScreen(payload: user))),
         onLongPress: () {
           // Toggle highlight (will throw a clear error if highlight isn’t enabled)
           highlighted ? clearHighlightedItem(context) : highlightItem(context);
