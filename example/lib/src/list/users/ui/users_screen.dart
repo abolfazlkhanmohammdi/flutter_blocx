@@ -1,7 +1,6 @@
 import 'package:blocx/blocx.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blocx/list_widget.dart';
-import 'package:flutter_blocx_example/src/list/inventory/ui/inventory_screen.dart';
 import 'package:flutter_blocx_example/src/list/users/bloc/users_bloc.dart';
 import 'package:flutter_blocx_example/src/list/users/data/models/user.dart';
 import 'package:flutter_blocx_example/src/list/users/ui/scroll_controller_bar.dart';

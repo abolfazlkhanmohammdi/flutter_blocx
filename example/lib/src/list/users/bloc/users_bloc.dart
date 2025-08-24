@@ -4,7 +4,10 @@ import 'package:blocx/blocx.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx_example/src/list/users/data/models/user.dart';
 import 'package:flutter_blocx_example/src/list/users/data/user_repository.dart';
-import 'package:flutter_blocx_example/src/list/users/use_case/use_case_search_users.dart';
+import 'package:flutter_blocx_example/src/list/users/use_cases/use_case_get_users.dart';
+import 'package:flutter_blocx_example/src/list/users/use_cases/use_case_refresh_users.dart';
+import 'package:flutter_blocx_example/src/list/users/use_cases/use_case_search_users.dart';
+
 part 'users_bloc_event.dart';
 part 'users_bloc_state.dart';
 
@@ -50,14 +53,27 @@ class UsersBloc extends ListBloc<User, dynamic>
     return ("error", "an ErrorOccurred");
   }
 
+  /// You can either override the UseCase like this
+  /// keep in mind since this is the first load you have to pass 0 to offset
   @override
-  Future loadInitialPage(ListEventLoadInitialPage<User, dynamic> event, Emitter<ListState<User>> emit) async {
-    emit(ListStateLoading());
-    var users = await repository.getUsers(loadCount, 0);
-    await insertToList(users, users.length < loadCount, DataInsertSource.init);
-    emitState(emit);
-  }
+  PaginationUseCase<User, dynamic>? get loadInitialPageUseCase => UseCaseGetUsers(
+    queryInput: PaginationQuery(payload: payload, loadCount: loadCount, offset: 0),
+  );
 
+  /// Or override loadInitialPage yourself like below but keep in mind then you're responsible
+  /// for all the flags which the ui requires like [isSearching], [isRefreshing] etc.
+  // @override
+  // Future loadInitialPage(ListEventLoadInitialPage<User, dynamic> event, Emitter<ListState<User>> emit) async {
+  //   emit(ListStateLoading());
+  //   var users = await repository.getUsers(loadCount, 0);
+  //   await insertToList(users, users.length < loadCount, DataInsertSource.init);
+  //   emitState(emit);
+  // }
+
+  @override
+  PaginationUseCase<User, dynamic>? get loadNextPageUseCase => UseCaseGetUsers(
+    queryInput: PaginationQuery(payload: payload, loadCount: loadCount, offset: offset),
+  );
   @override
   Future loadNextPage(ListEventLoadNextPage<User> event, Emitter<ListState<User>> emit) async {
     isLoadingNextPage = true;
@@ -69,18 +85,22 @@ class UsersBloc extends ListBloc<User, dynamic>
   }
 
   @override
-  Future refreshPage(ListEventRefreshData<User> event, Emitter<ListState<User>> emit) async {
-    if (searchText.isNotEmpty) {
-      add(ListEventSearchRefresh());
-      return;
-    }
-    isRefreshing = true;
-    emitState(emit);
-    var users = await repository.refreshUsers(list.length, 0);
-    clearList();
-    await insertToList(users, users.length < list.length, DataInsertSource.refresh);
-    emitState(emit);
-  }
+  PaginationUseCase<User, dynamic>? get refreshPageUseCase => UseCaseRefreshUsers(
+    queryInput: PaginationQuery(payload: payload, loadCount: list.length, offset: 0),
+  );
+  // @override
+  // Future refreshPage(ListEventRefreshData<User> event, Emitter<ListState<User>> emit) async {
+  //   if (searchText.isNotEmpty) {
+  //     add(ListEventSearchRefresh());
+  //     return;
+  //   }
+  //   isRefreshing = true;
+  //   emitState(emit);
+  //   var users = await repository.refreshUsers(list.length, 0);
+  //   clearList();
+  //   await insertToList(users, users.length < list.length, DataInsertSource.refresh);
+  //   emitState(emit);
+  // }
 
   @override
   SearchUseCase<User, dynamic>? searchUseCase(String searchText, {int? loadCount, int? offset}) {
@@ -118,6 +138,11 @@ class UsersBloc extends ListBloc<User, dynamic>
         isLoadingNextPage: isLoadingNextPage,
         isRefreshing: isRefreshing,
         isSearching: isSearching,
+        selectedItemIds: selectedItemIds,
+        highlightedItemIds: highlightedItemIds,
+        expandedItemIds: expandedItemIds,
+        beingRemovedItemIds: beingRemovedItemIds,
+        beingSelectedItemIds: beingSelectedItemIds,
       ),
     );
   }
