@@ -1,10 +1,10 @@
-import 'package:blocx/blocx.dart';
-import 'package:flutter_blocx_example/src/list/inventory/bloc/use_cases/use_case_get_user_inventory.dart';
-import 'package:flutter_blocx_example/src/list/inventory/bloc/use_cases/use_case_refresh_user_inventory.dart';
-import 'package:flutter_blocx_example/src/list/inventory/bloc/use_cases/use_case_remove_product.dart';
-import 'package:flutter_blocx_example/src/list/inventory/bloc/use_cases/use_case_search_products.dart';
-import 'package:flutter_blocx_example/src/list/inventory/data/models/product.dart';
-import 'package:flutter_blocx_example/src/list/users/data/models/user.dart';
+import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_flutter_example/src/list/inventory/bloc/use_cases/use_case_get_user_inventory.dart';
+import 'package:blocx_flutter_example/src/list/inventory/bloc/use_cases/use_case_refresh_user_inventory.dart';
+import 'package:blocx_flutter_example/src/list/inventory/bloc/use_cases/use_case_remove_product.dart';
+import 'package:blocx_flutter_example/src/list/inventory/bloc/use_cases/use_case_search_products.dart';
+import 'package:blocx_flutter_example/src/list/inventory/data/models/product.dart';
+import 'package:blocx_flutter_example/src/list/users/data/models/user.dart';
 
 // in this bloc we'll provide use cases instead of direct load
 class InventoryBloc extends ListBloc<Product, User>

@@ -1,4 +1,4 @@
-import 'package:blocx/blocx.dart';
+import 'package:blocx_core/blocx_core.dart';
 import 'package:flutter/material.dart';
 
 class BlocxSnackBar extends StatelessWidget {

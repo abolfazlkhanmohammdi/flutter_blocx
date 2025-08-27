@@ -1,7 +1,7 @@
-import 'package:blocx/blocx.dart';
-import 'package:flutter_blocx_example/src/list/inventory/data/models/product.dart';
-import 'package:flutter_blocx_example/src/list/inventory/data/models/product_Repository.dart';
-import 'package:flutter_blocx_example/src/list/users/data/models/user.dart';
+import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_flutter_example/src/list/inventory/data/models/product.dart';
+import 'package:blocx_flutter_example/src/list/inventory/data/models/product_Repository.dart';
+import 'package:blocx_flutter_example/src/list/users/data/models/user.dart';
 
 class UseCaseSearchUserProducts extends SearchUseCase<Product, User> {
   ProductRepository repository = ProductRepository();

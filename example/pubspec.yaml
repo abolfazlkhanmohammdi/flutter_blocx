@@ -1,4 +1,4 @@
-name: flutter_blocx_example
+name: blocx_flutter_example
 description: "A new Flutter project."
 publish_to: 'none'
 version: 0.1.0
@@ -12,10 +12,10 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^9.1.1
   freezed_annotation: ^3.1.0
-  flutter_blocx:
+  blocx_flutter:
     path: ../
-  blocx:
-    path: ../../blocx
+  blocx_core:
+    path: ../../blocx_core
   uuid: ^4.5.1
   equatable: ^2.0.7
   logger: ^2.6.1

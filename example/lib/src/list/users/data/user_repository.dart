@@ -1,5 +1,5 @@
-import 'package:flutter_blocx_example/src/core/fake_repository.dart';
-import 'package:flutter_blocx_example/src/list/users/data/models/user.dart';
+import 'package:blocx_flutter_example/src/core/fake_repository.dart';
+import 'package:blocx_flutter_example/src/list/users/data/models/user.dart';
 
 class UserRepository extends FakeRepository {
   int index = 0;

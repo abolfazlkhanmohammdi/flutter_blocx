@@ -1,4 +1,4 @@
-import 'package:blocx/blocx.dart';
+import 'package:blocx_core/blocx_core.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'product.freezed.dart';

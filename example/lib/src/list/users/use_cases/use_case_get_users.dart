@@ -1,6 +1,6 @@
-import 'package:blocx/blocx.dart';
-import 'package:flutter_blocx_example/src/list/users/data/models/user.dart';
-import 'package:flutter_blocx_example/src/list/users/data/user_repository.dart';
+import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_flutter_example/src/list/users/data/models/user.dart';
+import 'package:blocx_flutter_example/src/list/users/data/user_repository.dart';
 
 class UseCaseGetUsers extends PaginationUseCase<User, dynamic> {
   UserRepository repository = UserRepository();

@@ -1,5 +1,5 @@
-import 'package:flutter_blocx_example/src/core/fake_repository.dart';
-import 'package:flutter_blocx_example/src/list/inventory/data/models/product.dart';
+import 'package:blocx_flutter_example/src/core/fake_repository.dart';
+import 'package:blocx_flutter_example/src/list/inventory/data/models/product.dart';
 
 class ProductRepository extends FakeRepository {
   static final List<Product> _allProducts = [];

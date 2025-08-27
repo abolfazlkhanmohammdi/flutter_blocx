@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_blocx_example/src/list/users/ui/users_screen.dart';
+import 'package:blocx_flutter_example/src/list/users/ui/users_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

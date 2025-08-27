@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:blocx/blocx.dart';
+import 'package:blocx_core/blocx_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_blocx_example/src/list/users/data/models/user.dart';
-import 'package:flutter_blocx_example/src/list/users/data/user_repository.dart';
-import 'package:flutter_blocx_example/src/list/users/use_cases/use_case_get_users.dart';
-import 'package:flutter_blocx_example/src/list/users/use_cases/use_case_refresh_users.dart';
-import 'package:flutter_blocx_example/src/list/users/use_cases/use_case_search_users.dart';
+import 'package:blocx_flutter_example/src/list/users/data/models/user.dart';
+import 'package:blocx_flutter_example/src/list/users/data/user_repository.dart';
+import 'package:blocx_flutter_example/src/list/users/use_cases/use_case_get_users.dart';
+import 'package:blocx_flutter_example/src/list/users/use_cases/use_case_refresh_users.dart';
+import 'package:blocx_flutter_example/src/list/users/use_cases/use_case_search_users.dart';
 
 part 'users_bloc_event.dart';
 part 'users_bloc_state.dart';

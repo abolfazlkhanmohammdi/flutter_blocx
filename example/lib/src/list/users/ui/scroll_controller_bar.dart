@@ -1,8 +1,8 @@
-import 'package:blocx/blocx.dart';
+import 'package:blocx_core/blocx_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_blocx_example/src/list/users/bloc/users_bloc.dart';
-import 'package:flutter_blocx_example/src/list/users/data/models/user.dart';
+import 'package:blocx_flutter_example/src/list/users/bloc/users_bloc.dart';
+import 'package:blocx_flutter_example/src/list/users/data/models/user.dart';
 
 class ScrollControllerBar extends StatefulWidget {
   final int currentIndex;

@@ -49,13 +49,20 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.0"
-  blocx:
+  blocx_core:
     dependency: "direct main"
     description:
-      path: "../../blocx"
+      path: "../../blocx_core"
       relative: true
     source: path
     version: "1.0.0"
+  blocx_flutter:
+    dependency: "direct main"
+    description:
+      path: ".."
+      relative: true
+    source: path
+    version: "0.0.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -245,13 +252,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "9.1.1"
-  flutter_blocx:
-    dependency: "direct main"
-    description:
-      path: ".."
-      relative: true
-    source: path
-    version: "0.0.1"
   flutter_lints:
     dependency: "direct dev"
     description:

@@ -1,9 +1,9 @@
-import 'package:blocx/blocx.dart';
+import 'package:blocx_core/blocx_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_blocx/list_widget.dart';
-import 'package:flutter_blocx/src/screen_manager/screen_manager_state.dart';
-import 'package:flutter_blocx/src/widgets/infinite_list.dart';
+import 'package:blocx_flutter/list_widget.dart';
+import 'package:blocx_flutter/src/screen_manager/screen_manager_state.dart';
+import 'package:blocx_flutter/src/widgets/infinite_list.dart';
 import 'package:implicitly_animated_list/implicitly_animated_list.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 

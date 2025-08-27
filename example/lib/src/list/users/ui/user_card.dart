@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_blocx/list_widget.dart';
-import 'package:flutter_blocx_example/src/list/inventory/ui/inventory_screen.dart';
-import 'package:flutter_blocx_example/src/list/users/data/models/user.dart';
+import 'package:blocx_flutter/list_widget.dart';
+import 'package:blocx_flutter_example/src/list/inventory/ui/inventory_screen.dart';
+import 'package:blocx_flutter_example/src/list/users/data/models/user.dart';
 
 class UserCard extends BlocxListItem<User, dynamic> {
   const UserCard({super.key, required super.item});

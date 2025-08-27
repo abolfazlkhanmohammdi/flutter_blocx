@@ -1,4 +1,4 @@
-import 'package:blocx/blocx.dart';
+import 'package:blocx_core/blocx_core.dart';
 
 class User extends BaseEntity {
   final String image;
