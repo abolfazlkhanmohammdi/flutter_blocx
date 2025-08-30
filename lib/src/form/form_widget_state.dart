@@ -18,7 +18,7 @@ abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> ex
     return BlocProvider(
       create: (context) => bloc,
       child: BlocConsumer<FormBloc<F, P, E>, FormBlocState<F, E>>(
-        builder: blocBuilder,
+        builder: _blocBuilder,
         buildWhen: (_, c) => c.shouldRebuild,
         listener: blocListener,
         listenWhen: (_, c) => c.shouldListen,
@@ -26,64 +26,24 @@ abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> ex
     );
   }
 
-  bool get wrapInList => false;
-
-  String get registerText;
-
-  String get submittingText;
-
-  String get cancelButtonText => "cancel";
-
   void blocListener(BuildContext context, FormBlocState<F, E> state) {}
 
-  Widget blocBuilder(BuildContext context, FormBlocState<F, E> state) {
-    return Form(key: formKey, child: wrapInList ? listedForm(context, state) : columnForm(context, state));
-  }
-
-  Widget listedForm(BuildContext context, FormBlocState<F, E> state) {
-    return Column(
-      spacing: formVerticalSpacing,
-      children: [
-        ?topWidget(context, state),
-        Expanded(child: ListView(children: formMembers(context, state))),
-        bottomWidget(context, state),
-      ],
-    );
-  }
-
-  Widget columnForm(BuildContext context, FormBlocState<F, E> state) {
-    return Column(
-      spacing: formVerticalSpacing,
-
-      children: [?topWidget(context, state), ...formMembers(context, state), bottomWidget(context, state)],
-    );
-  }
-
-  Widget? topWidget(BuildContext context, FormBlocState<F, E> state) {
-    return null;
-  }
-
-  List<Widget> formMembers(BuildContext context, FormBlocState<F, E> state);
-
-  Widget bottomWidget(BuildContext context, FormBlocState<F, E> state) {
-    return FormButtonRow(
-      formState: state,
-      registerText: registerText,
-      registerSubmittingText: submittingText,
-      popButtonText: cancelButtonText,
-    );
+  Widget _blocBuilder(BuildContext context, FormBlocState<F, E> state) {
+    return Form(key: formKey, child: formWidget(context, state));
   }
 
   BlocXFormTextField<F, P, E> textField(
     E key, {
     BlocXTextFieldOptions? options,
     FormFieldValidator? validator,
+    TextFieldType? type,
   }) {
     return BlocXFormTextField<F, P, E>(
       formKey: key,
       textFieldOptions: options ?? BlocXTextFieldOptions(),
       controller: getTextEditingController(key),
       validator: validator,
+      textFieldType: type ?? TextFieldType.filled,
     );
   }
 
@@ -117,4 +77,14 @@ abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> ex
   }
 
   double get formVerticalSpacing => 16;
+
+  bool additionalValidityChecks(FormBlocState<F, E> state) {
+    return true;
+  }
+
+  isFormValid(FormBlocState<F, E> state) {
+    return (formKey.currentState?.validate() ?? true) && additionalValidityChecks(state);
+  }
+
+  formWidget(BuildContext context, FormBlocState<F, E> state);
 }

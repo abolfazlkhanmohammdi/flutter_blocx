@@ -17,6 +17,7 @@ import 'form_register_button.dart';
 class FormButtonRow extends BlocxStatelessWidget {
   /// Current form state used by [FormRegisterButton].
   final FormBlocState formState;
+  final bool isFormValid;
 
   /// Text shown on the register button when idle.
   final String registerText;
@@ -29,19 +30,17 @@ class FormButtonRow extends BlocxStatelessWidget {
 
   /// Called when the register button is pressed (disabled while submitting).
   final VoidCallback? onRegisterPressed;
+  final VoidCallback? onSecondButtonPressed;
 
   /// Label for the pop (secondary) button.
-  final String popButtonText;
+  final String secondButtonText;
 
   /// Optional style for the pop (secondary) button.
-  final ButtonStyle? popButtonStyle;
+  final ButtonStyle? secondButtonStyle;
+  final ButtonStyle? submitButtonStyle;
 
   /// If true, disables the pop button while the form is submitting.
   final bool disablePopWhileSubmitting;
-
-  /// Called right before attempting to pop. Return value is ignored; if set,
-  /// it runs and then a pop is attempted via [Navigator.maybePop].
-  final VoidCallback? onBeforePop;
 
   /// Horizontal gap between the two buttons.
   final double spacing;
@@ -51,15 +50,17 @@ class FormButtonRow extends BlocxStatelessWidget {
 
   const FormButtonRow({
     super.key,
+    this.onSecondButtonPressed,
+    required this.isFormValid,
     required this.formState,
     required this.registerText,
     required this.registerSubmittingText,
     this.registerType = RegisterButtonType.filled,
     this.onRegisterPressed,
-    this.popButtonText = 'Cancel',
-    this.popButtonStyle,
+    this.submitButtonStyle,
+    this.secondButtonText = 'Cancel',
+    this.secondButtonStyle,
     this.disablePopWhileSubmitting = false,
-    this.onBeforePop,
     this.spacing = 12.0,
     this.expandEqually = true,
   });
@@ -70,35 +71,39 @@ class FormButtonRow extends BlocxStatelessWidget {
   Widget build(BuildContext context) {
     final left = _buildRegisterButton(context);
     final right = _buildPopButton(context);
-
+    Row widget;
     if (expandEqually) {
-      return Row(
+      widget = Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(child: left),
           SizedBox(width: spacing),
           Expanded(child: right),
         ],
       );
+    } else {
+      widget = Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          left,
+          SizedBox(width: spacing),
+          right,
+        ],
+      );
     }
-
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        left,
-        SizedBox(width: spacing),
-        right,
-      ],
-    );
+    return SizedBox(height: 40, child: widget);
   }
 
   /// Builds the left-side [FormRegisterButton].
   Widget _buildRegisterButton(BuildContext context) {
     return FormRegisterButton(
+      style: submitButtonStyle,
       state: formState,
       buttonText: registerText,
       submitText: registerSubmittingText,
       type: registerType,
-      onPressed: onRegisterPressed,
+      isFormValid: isFormValid,
     );
   }
 
@@ -110,15 +115,15 @@ class FormButtonRow extends BlocxStatelessWidget {
     final disabled = disablePopWhileSubmitting && _isSubmitting;
 
     return OutlinedButton(
-      style: popButtonStyle,
+      style: secondButtonStyle,
       onPressed: disabled
           ? null
-          : () async {
-              onBeforePop?.call();
-              // Try to pop if possible (no-op if we're at the root).
-              await Navigator.of(context).maybePop();
-            },
-      child: Text(popButtonText),
+          : onSecondButtonPressed ??
+                () async {
+                  // Try to pop if possible (no-op if we're at the root).
+                  await Navigator.of(context).maybePop();
+                },
+      child: Text(secondButtonText),
     );
   }
 }

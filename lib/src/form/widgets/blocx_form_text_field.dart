@@ -2,24 +2,12 @@ import 'package:blocx_core/blocx_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// A form-connected [TextFormField] that reports its value to a [FormBloc].
-///
-/// Generics:
-/// - **F**: form data type held by the bloc
-/// - **P**: payload type emitted by events/effects
-/// - **E**: enum used as the *key* for form inputs (one enum value per field)
-///
-/// Behavior:
-/// - On every text change, dispatches `FormEventUpdateData(data: <text>, key: <E>)`.
-/// - If you pass a [controller], this widget **won’t** dispose it. If not,
-///   an internal one is created and disposed automatically.
-/// - Styling & behavior are controlled via [textFieldOptions].
 class BlocXFormTextField<F, P, E extends Enum> extends StatefulWidget {
   /// The enum key that identifies this field in your form.
   final E formKey;
 
-  /// Visual & behavioral options for the text field.
-  final BlocXTextFieldOptions textFieldOptions;
+  /// Type of the text field (filled, outlined, underlined).
+  final TextFieldType textFieldType;
 
   /// Optional controller. If omitted, one is created internally.
   final TextEditingController? controller;
@@ -27,10 +15,14 @@ class BlocXFormTextField<F, P, E extends Enum> extends StatefulWidget {
   /// Standard validator for [TextFormField].
   final FormFieldValidator<String>? validator;
 
+  /// Visual & behavioral options for the text field.
+  final BlocXTextFieldOptions textFieldOptions;
+
   const BlocXFormTextField({
     super.key,
     required this.formKey,
     this.textFieldOptions = const BlocXTextFieldOptions(),
+    required this.textFieldType, // Directly taking TextFieldType here
     this.controller,
     this.validator,
   });
@@ -71,13 +63,14 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends State<BlocXFormTextF
       autofocus: o.autofocus,
       style: o.style,
       keyboardType: o.keyboardType,
+      textDirection: isRtl(_controller.text) ? TextDirection.rtl : TextDirection.ltr,
       textCapitalization: o.textCapitalization,
       textInputAction: o.textInputAction,
       textAlign: o.textAlign,
       maxLines: o.maxLines,
       minLines: o.minLines,
       obscureText: o.obscureText,
-      decoration: _buildDecoration(context, o),
+      decoration: _buildDecoration(context),
       onChanged: (text) {
         // Notify the bloc about this field’s new value.
         bloc.add(FormEventUpdateData(data: text, key: widget.formKey));
@@ -87,14 +80,21 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends State<BlocXFormTextF
     );
   }
 
+  bool isRtl(String text) {
+    // Regular expression to check for RTL characters (e.g., Arabic, Hebrew)
+    final rtlPattern = RegExp(r'[\u0590-\u08FF\u200F\u202B\u202E\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]');
+    // If any character in the string matches the RTL pattern, return true
+    return rtlPattern.hasMatch(text);
+  }
+
   /// Access the nearest [FormBloc] in the tree.
   FormBloc<F, P, E> get bloc => BlocProvider.of<FormBloc<F, P, E>>(context);
 
-  /// Build the resolved [InputDecoration] using [BlocXTextFieldOptions].
-  /// Defaults: **filled** and **no underline/border**.
-  InputDecoration _buildDecoration(BuildContext context, BlocXTextFieldOptions o) {
-    final bool canShowClear = o.showClearButton && _controller.text.isNotEmpty && !o.obscureText;
+  /// Build the resolved [InputDecoration] based on the [TextFieldType].
+  InputDecoration _buildDecoration(BuildContext context) {
+    final o = widget.textFieldOptions;
 
+    final bool canShowClear = o.showClearButton && _controller.text.isNotEmpty && !o.obscureText;
     final Widget? suffix = canShowClear
         ? IconButton(
             visualDensity: VisualDensity.compact,
@@ -108,56 +108,90 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends State<BlocXFormTextF
           )
         : null;
 
-    if (o.decoration != null) {
-      // Respect user-provided decoration; only merge common bits.
-      return o.decoration!.copyWith(
-        labelText: o.labelText ?? o.decoration!.labelText,
-        labelStyle: o.labelStyle ?? o.decoration!.labelStyle,
-        hintText: o.hintText ?? o.decoration!.hintText,
-        hintStyle: o.hintStyle ?? o.decoration!.hintStyle,
-        helperText: o.helperText ?? o.decoration!.helperText,
-        helperStyle: o.helperStyle ?? o.decoration!.helperStyle,
-        errorText: o.errorText ?? o.decoration!.errorText,
-        errorStyle: o.errorStyle ?? o.decoration!.errorStyle,
-        prefixIcon: o.prefixIcon ?? o.decoration!.prefixIcon,
-        suffixIcon: suffix ?? o.decoration!.suffixIcon,
-      );
+    // Hint style with lower opacity of primary color
+    final hintStyle = o.hintStyle ?? TextStyle(color: Theme.of(context).colorScheme.primary.withAlpha(60));
+
+    final BorderRadius radius = o.borderRadius ?? const BorderRadius.all(Radius.circular(8));
+
+    switch (widget.textFieldType) {
+      case TextFieldType.outlined:
+        return InputDecoration(
+          labelText: o.labelText,
+          labelStyle: o.labelStyle,
+          hintText: o.hintText,
+          hintStyle: hintStyle,
+          helperText: o.helperText,
+          helperStyle: o.helperStyle,
+          errorText: o.errorText,
+          errorStyle: o.errorStyle,
+          prefixIcon: o.prefixIcon,
+          suffixIcon: suffix,
+          filled: o.filled,
+          fillColor: o.fillColor ?? Theme.of(context).colorScheme.surfaceContainerHighest,
+          border: OutlineInputBorder(
+            borderRadius: radius,
+            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: radius,
+            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: radius,
+            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1),
+          ),
+          isDense: true,
+          contentPadding: o.contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        );
+
+      case TextFieldType.underlined:
+        return InputDecoration(
+          labelText: o.labelText,
+          labelStyle: o.labelStyle,
+          hintText: o.hintText,
+          hintStyle: hintStyle,
+          helperText: o.helperText,
+          helperStyle: o.helperStyle,
+          errorText: o.errorText,
+          errorStyle: o.errorStyle,
+          prefixIcon: o.prefixIcon,
+          suffixIcon: suffix,
+          filled: o.filled,
+          fillColor: o.fillColor ?? Theme.of(context).colorScheme.surfaceContainerHighest,
+          border: UnderlineInputBorder(borderSide: BorderSide(color: Theme.of(context).colorScheme.primary)),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+          ),
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1),
+          ),
+          isDense: true,
+          contentPadding: o.contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        );
+
+      case TextFieldType.filled:
+        return InputDecoration(
+          labelText: o.labelText,
+          labelStyle: o.labelStyle,
+          hintText: o.hintText,
+          hintStyle: hintStyle,
+          helperText: o.helperText,
+          helperStyle: o.helperStyle,
+          errorText: o.errorText,
+          errorStyle: o.errorStyle,
+          prefixIcon: o.prefixIcon,
+          suffixIcon: suffix,
+          filled: o.filled,
+          fillColor: o.fillColor ?? Theme.of(context).colorScheme.surfaceContainerHighest,
+          border: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none),
+          enabledBorder: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none),
+          focusedBorder: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none),
+          errorBorder: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none),
+          disabledBorder: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none),
+          isDense: true,
+          contentPadding: o.contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        );
     }
-
-    // ---- Default look: filled, no underline, rounded ----
-    final BorderRadius radius = o.borderRadius ?? const BorderRadius.all(Radius.circular(12));
-
-    final OutlineInputBorder noLine = OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none);
-
-    return InputDecoration(
-      // label / hint / helper / error
-      labelText: o.labelText,
-      labelStyle: o.labelStyle,
-      hintText: o.hintText,
-      hintStyle: o.hintStyle,
-      helperText: o.helperText,
-      helperStyle: o.helperStyle,
-      errorText: o.errorText,
-      errorStyle: o.errorStyle,
-
-      // icons
-      prefixIcon: o.prefixIcon,
-      suffixIcon: suffix,
-
-      // filled, no underline
-      filled: o.filled, // default true
-      fillColor: o.fillColor ?? Theme.of(context).colorScheme.surfaceVariant,
-
-      // remove underlines (all states)
-      border: noLine,
-      enabledBorder: noLine,
-      focusedBorder: noLine,
-      errorBorder: noLine,
-      disabledBorder: noLine,
-
-      isDense: true,
-      contentPadding: o.contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    );
   }
 
   @override
@@ -168,6 +202,8 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends State<BlocXFormTextF
     super.dispose();
   }
 }
+
+enum TextFieldType { outlined, underlined, filled }
 
 /// Wraps common [TextField]/[TextFormField] parameters.
 /// Defaults are a **filled** field with **no underline** and rounded corners.

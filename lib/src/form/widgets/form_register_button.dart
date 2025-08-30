@@ -1,6 +1,7 @@
 import 'package:blocx_core/blocx_core.dart';
 import 'package:blocx_flutter/src/core/widgets/blocx_stateless_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// A reusable submit/register button that reacts to a form [state].
 ///
@@ -13,9 +14,10 @@ import 'package:flutter/material.dart';
 /// - Customize per-type styles using the provided `*Style` parameters.
 /// - Override `buildOtherButton` in a subclass to provide a custom button.
 ///   The base `other` implementation returns a [SizedBox.shrink] by design.
-class FormRegisterButton extends BlocxStatelessWidget {
+class FormRegisterButton<F, P, E extends Enum> extends BlocxStatelessWidget {
   /// Current form state (used to detect submitting).
   final FormBlocState state;
+  final bool isFormValid;
 
   /// Which visual variant to render.
   final RegisterButtonType type;
@@ -25,9 +27,6 @@ class FormRegisterButton extends BlocxStatelessWidget {
 
   /// Label shown while submitting.
   final String submitText;
-
-  /// Callback when pressed (disabled while submitting).
-  final VoidCallback? onPressed;
 
   // -------- Styling hooks (Material) --------
   /// Optional style for [RegisterButtonType.elevated].
@@ -52,14 +51,15 @@ class FormRegisterButton extends BlocxStatelessWidget {
 
   /// Spacing between spinner and text.
   final double spacing;
+  final ButtonStyle? style;
 
   const FormRegisterButton({
     super.key,
+    required this.isFormValid,
     required this.state,
     required this.buttonText,
     required this.submitText,
     this.type = RegisterButtonType.filled,
-    this.onPressed,
     this.elevatedStyle,
     this.filledStyle,
     this.textStyle,
@@ -68,6 +68,7 @@ class FormRegisterButton extends BlocxStatelessWidget {
     this.labelTextStyle,
     this.loadingIndicatorBuilder,
     this.spacing = 8.0,
+    this.style,
   });
 
   /// True while the form is in submitting state.
@@ -75,7 +76,7 @@ class FormRegisterButton extends BlocxStatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final disabled = isSubmittingForm;
+    final disabled = isSubmittingForm || !isFormValid;
     final label = disabled ? submitText : buttonText;
 
     switch (type) {
@@ -101,8 +102,8 @@ class FormRegisterButton extends BlocxStatelessWidget {
   @protected
   Widget buildElevatedButton(BuildContext context, {required String label, required bool disabled}) {
     return ElevatedButton(
-      style: elevatedStyle,
-      onPressed: disabled ? null : onPressed,
+      style: style ?? elevatedStyle,
+      onPressed: disabled ? null : () => onPressed(context),
       child: _buildContent(context, label: label, disabled: disabled),
     );
   }
@@ -111,8 +112,8 @@ class FormRegisterButton extends BlocxStatelessWidget {
   @protected
   Widget buildFilledButton(BuildContext context, {required String label, required bool disabled}) {
     return FilledButton(
-      style: filledStyle,
-      onPressed: disabled ? null : onPressed,
+      style: style ?? filledStyle,
+      onPressed: disabled ? null : () => onPressed(context),
       child: _buildContent(context, label: label, disabled: disabled),
     );
   }
@@ -121,8 +122,8 @@ class FormRegisterButton extends BlocxStatelessWidget {
   @protected
   Widget buildTextButton(BuildContext context, {required String label, required bool disabled}) {
     return TextButton(
-      style: textStyle,
-      onPressed: disabled ? null : onPressed,
+      style: style ?? textStyle,
+      onPressed: disabled ? null : () => onPressed(context),
       child: _buildContent(context, label: label, disabled: disabled),
     );
   }
@@ -131,10 +132,18 @@ class FormRegisterButton extends BlocxStatelessWidget {
   @protected
   Widget buildOutlinedButton(BuildContext context, {required String label, required bool disabled}) {
     return OutlinedButton(
-      style: outlinedStyle,
-      onPressed: disabled ? null : onPressed,
+      style: style ?? outlinedStyle,
+      onPressed: disabled ? null : () => onPressed(context),
       child: _buildContent(context, label: label, disabled: disabled),
     );
+  }
+
+  void onPressed(BuildContext context) {
+    bloc(context).add(FormEventSubmit());
+  }
+
+  FormBloc<F, P, E> bloc(BuildContext context) {
+    return BlocProvider.of<FormBloc<F, P, E>>(context);
   }
 
   /// Default implementation for custom/other style.
