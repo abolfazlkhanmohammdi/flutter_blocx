@@ -1,21 +1,21 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:blocx_flutter_example/src/home/home_screen.dart';
 
-void main() {
-  runApp(const MainApp());
+import 'src/screens/splash/presentation/splash_screen.dart';
+
+Future<void> main() async {
+  runApp(const MyApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      scrollBehavior: MaterialScrollBehavior().copyWith(
-        dragDevices: {PointerDeviceKind.touch, PointerDeviceKind.mouse, PointerDeviceKind.trackpad},
-      ),
-      home: HomeScreen(),
+      title: 'Flutter Demo',
+      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+      home: SplashScreen(),
     );
   }
 }

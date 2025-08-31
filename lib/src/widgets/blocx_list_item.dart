@@ -11,10 +11,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// Provides convenience methods to dispatch common list events (remove / select / deselect /
 /// highlight / clear highlight). Each method checks that the bloc supports the required
 /// capability mixin before dispatching; otherwise it throws a descriptive error.
-abstract class BlocxListItem<T extends BaseEntity, P> extends StatelessWidget {
+abstract class BlocxCollectionWidget<T extends BaseEntity, P> extends StatelessWidget {
   final T item;
 
-  const BlocxListItem({super.key, required this.item});
+  const BlocxCollectionWidget({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
