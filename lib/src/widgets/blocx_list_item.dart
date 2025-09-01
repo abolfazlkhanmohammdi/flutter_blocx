@@ -1,4 +1,5 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_flutter/src/widgets/confirm_action_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -117,7 +118,11 @@ abstract class BlocxCollectionWidget<T extends BaseEntity, P> extends StatelessW
   @protected
   void removeItem(BuildContext context) {
     _requireDeletable(context);
-    bloc(context).add(ListEventRemoveItem<T>(item: item));
+    if (confirmBeforeDelete) {
+      confirmThenDelete(context);
+    } else {
+      bloc(context).add(ListEventRemoveItem<T>(item: item));
+    }
   }
 
   @protected
@@ -144,4 +149,20 @@ abstract class BlocxCollectionWidget<T extends BaseEntity, P> extends StatelessW
     _requireHighlightable(context);
     bloc(context).add(ListEventClearHighlightedItem<T>(item: item));
   }
+
+  bool get confirmBeforeDelete => true;
+  String? get itemName => null;
+
+  Future<void> confirmThenDelete(BuildContext context) async {
+    var result = await showModalBottomSheet(
+      context: context,
+      builder: (_) {
+        return ConfirmActionWidget(options: confirmDeleteOptions);
+      },
+    );
+    if (result == null || !result) return;
+    bloc(context).add(ListEventRemoveItem(item: item));
+  }
+
+  ConfirmActionOptions get confirmDeleteOptions => ConfirmActionOptions();
 }

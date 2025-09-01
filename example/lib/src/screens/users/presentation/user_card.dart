@@ -1,50 +1,67 @@
+import 'package:blocx_flutter/flutter_blocx.dart';
 import 'package:blocx_flutter/list_widget.dart';
+import 'package:example/src/screens/note_tags/presentation/note_tags_screen.dart';
 import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:flutter/material.dart';
 
-/// Grid-ready user tile.
-/// - Nice in 2–4 column grids
-/// - Optional selection badge
 class UserCard extends BlocxCollectionWidget<User, dynamic> {
-  const UserCard({super.key, required super.item});
+  const UserCard({super.key, required super.item, this.onEdit});
+
+  final VoidCallback? onEdit;
 
   @override
   Widget buildContent(BuildContext context, User item) {
     final t = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
+    final canDelete = bloc(context).isDeletable;
+    final canHighlight = bloc(context).isHighlightable;
 
     return Card(
-      color: isSelected(context) ? cs.primaryContainer : Theme.of(context).cardColor,
+      color: isHighlighted(context)
+          ? Colors.green.shade100
+          : isBeingRemoved(context)
+          ? Colors.red.shade100
+          : isSelected(context)
+          ? cs.primaryContainer
+          : Theme.of(context).cardColor,
       shape: RoundedSuperellipseBorder(borderRadius: BorderRadius.circular(12)),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
+        onTap: () =>
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => NoteTagsScreen(payload: item))),
+        onLongPress: () => isSelected(context) ? deselectItem(context) : selectItem(context),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: LayoutBuilder(
             builder: (context, box) {
               final side = box.biggest.shortestSide;
-              final radius = (side * 0.22).clamp(20.0, 36.0);
+              final radius = (side * 0.22).clamp(20.0, 36.0).toDouble();
 
               return Column(
+                spacing: 4,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Stack(
                     children: [
                       Center(
-                        child: _Avatar(
-                          url: item.avatarUrl,
-                          name: item.displayName,
-                          radius: radius.toDouble(),
+                        child: Hero(
+                          tag: "user-${item.id}",
+                          child: _Avatar(url: item.avatarUrl, name: item.displayName, radius: radius),
                         ),
                       ),
                       if (isSelected(context))
                         Positioned(
                           right: 0,
                           top: 0,
-                          child: Icon(Icons.check_circle, size: 18, color: cs.primary),
+                          left: 0,
+                          bottom: 0,
+
+                          child: CircleAvatar(
+                            backgroundColor: cs.secondary.withAlpha(160),
+                            child: Icon(Icons.check_circle, size: 24, color: cs.primary),
+                          ),
                         ),
                     ],
                   ),
@@ -70,7 +87,45 @@ class UserCard extends BlocxCollectionWidget<User, dynamic> {
                     ),
                   ],
                   const SizedBox(height: 8),
-                  _StatusPill(active: item.isActive),
+                  Center(child: _StatusPill(active: item.isActive)),
+                  const SizedBox(height: 10),
+                  if (onEdit != null)
+                    FilledButton.tonalIcon(
+                      icon: const Icon(Icons.edit),
+                      label: const Text('Edit'),
+                      onPressed: () {
+                        highlightItem(context);
+                        onEdit!.call();
+                      },
+                    ),
+                  if (onEdit != null && canDelete) const SizedBox(width: 8),
+                  if (canDelete)
+                    FilledButton.icon(
+                      icon: isBeingRemoved(context)
+                          ? SizedBox.square(
+                              dimension: 16,
+                              child: CircularProgressIndicator(color: Colors.red),
+                            )
+                          : const Icon(Icons.delete),
+                      label: Text(
+                        isBeingRemoved(context) ? "Deleting" : 'Delete',
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: isBeingRemoved(context) ? Colors.red : Colors.white,
+                        ),
+                      ),
+                      style: FilledButton.styleFrom(backgroundColor: cs.error, foregroundColor: cs.onError),
+                      onPressed: isBeingRemoved(context) ? null : () => removeItem(context),
+                    ),
+                  if (canHighlight)
+                    FilledButton.icon(
+                      icon: const Icon(Icons.highlight),
+                      label: const Text('highlight'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: cs.primary,
+                        foregroundColor: cs.onPrimary,
+                      ),
+                      onPressed: () => highlightItem(context),
+                    ),
                 ],
               );
             },
@@ -80,9 +135,12 @@ class UserCard extends BlocxCollectionWidget<User, dynamic> {
     );
   }
 
-  void onLongPress() {}
-
-  void onTap() {}
+  @override
+  ConfirmActionOptions get confirmDeleteOptions => ConfirmActionOptions(
+    title: "Delete ${item.displayName}",
+    question: "Are you sure you want to delete the user ${item.displayName}?",
+    imageUrl: item.avatarUrl,
+  );
 }
 
 class _Avatar extends StatelessWidget {
@@ -108,7 +166,7 @@ class _Avatar extends StatelessWidget {
   }
 
   String _initials(String s) {
-    final parts = s.trim().split(RegExp(r'\\s+'));
+    final parts = s.trim().split(RegExp(r'\s+'));
     if (parts.isEmpty) return '?';
     if (parts.length == 1) {
       final t = parts.first;

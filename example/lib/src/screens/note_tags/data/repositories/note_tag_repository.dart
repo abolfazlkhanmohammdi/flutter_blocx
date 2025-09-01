@@ -48,12 +48,7 @@ class NoteTagJsonRepository extends FakeRepository implements BaseEntity {
     DateTime? updatedAt,
   }) {
     final now = DateTime.now();
-    final uniqueName = (nameOverride == null || _names.contains(nameOverride))
-        ? _newUniqueName(nameOverride)
-        : (() {
-            _reserveName(nameOverride);
-            return nameOverride;
-          })();
+    final uniqueName = faker.conference.name();
 
     return {
       'id': idOverride ?? id,
@@ -133,6 +128,11 @@ class NoteTagJsonRepository extends FakeRepository implements BaseEntity {
     final slice = sorted.sublist(start, end);
 
     return ResponseWrapper(ok: true, data: slice);
+  }
+
+  Future<ResponseWrapper<Json>> getAll() async {
+    await randomWaitFuture;
+    return ResponseWrapper(ok: true, data: _tags);
   }
 
   Future<ResponseWrapper<Json>> getById(int tagId) async {

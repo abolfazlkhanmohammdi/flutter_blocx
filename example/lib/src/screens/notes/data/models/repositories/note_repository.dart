@@ -12,7 +12,6 @@ class NotesJsonRepository extends FakeRepository {
 
   Json _newNoteJson({
     required int tagId,
-    int? idOverride,
     String? title,
     String? content,
     bool? isPinned,
@@ -22,7 +21,7 @@ class NotesJsonRepository extends FakeRepository {
   }) {
     final now = DateTime.now();
     return {
-      'id': idOverride ?? id,
+      'uuid': uuid,
       'tagId': tagId,
       'title': title ?? faker.lorem.sentence(),
       'content': content ?? faker.lorem.sentences(faker.randomGenerator.integer(4, min: 1)).join(' '),
@@ -40,15 +39,15 @@ class NotesJsonRepository extends FakeRepository {
   }
 
   Future<ResponseWrapper<int>> seedForTags(List<int> tagIds, {int perTag = 10}) async {
-    final ids = <int>[];
+    final ids = <String>[];
     for (final tid in tagIds) {
       for (int i = 0; i < perTag; i++) {
         final n = _newNoteJson(tagId: tid);
         _notes.add(n);
-        ids.add(n['id'] as int);
+        ids.add(n['uuid'] as String);
       }
     }
-    return ResponseWrapper(ok: true, data: ids);
+    return ResponseWrapper(ok: true, data: []);
   }
 
   Future<ResponseWrapper<Json>> clear() async {
@@ -112,6 +111,11 @@ class NotesJsonRepository extends FakeRepository {
     final slice = sorted.sublist(start, end);
 
     return ResponseWrapper(ok: true, data: slice);
+  }
+
+  Future<ResponseWrapper<Json>> getAll() async {
+    await randomWaitFuture;
+    return ResponseWrapper(ok: true, data: _notes);
   }
 
   Future<ResponseWrapper<Json>> getById(int noteId) async {

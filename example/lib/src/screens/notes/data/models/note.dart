@@ -1,34 +1,36 @@
-// lib/models/note.dart
 import 'dart:convert';
 
 import 'package:blocx_core/blocx_core.dart';
+import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
+import 'package:example/src/screens/users/data/models/user.dart';
 
 class Note extends BaseEntity {
-  final int? id;
-
-  /// Short title used in lists & search.
+  final String uuid;
+  final int tagId;
   final String title;
-
-  /// Optional body text.
   final String? content;
-
-  /// Creation timestamp.
+  final bool isPinned;
+  final bool isArchived;
   final DateTime createdAt;
-
-  /// Last modification timestamp.
   final DateTime updatedAt;
+  User? user;
+  NoteTag? noteTag;
+  Note({
+    required this.uuid,
+    required this.tagId,
+    required this.title,
+    this.user,
+    this.noteTag,
+    this.content,
+    this.isPinned = false,
+    this.isArchived = false,
+    required this.createdAt,
+    required this.updatedAt,
+  });
 
-  Note({this.id, required this.title, this.content, required this.createdAt, required this.updatedAt});
-
-  /// Convenience factory for a brand-new note (unpersisted).
-  factory Note.newNote({required String title, String? content, bool isPinned = false}) {
-    final now = DateTime.now();
-    return Note(id: null, title: title, content: content, createdAt: now, updatedAt: now);
-  }
-
-  /// Returns a copy with selected fields changed.
   Note copyWith({
-    int? id,
+    String? uuid,
+    int? tagId,
     String? title,
     String? content,
     bool? isPinned,
@@ -37,30 +39,35 @@ class Note extends BaseEntity {
     DateTime? updatedAt,
   }) {
     return Note(
-      id: id ?? this.id,
+      uuid: uuid ?? this.uuid,
+      tagId: tagId ?? this.tagId,
       title: title ?? this.title,
       content: content ?? this.content,
+      isPinned: isPinned ?? this.isPinned,
+      isArchived: isArchived ?? this.isArchived,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
-  bool get isNew => id == null;
-
-  // ---------- Serialization (no 3P deps) ----------
-
   Map<String, dynamic> toMap() => {
-    'id': id,
+    'uuid': uuid,
+    'tagId': tagId,
     'title': title,
     'content': content,
+    'isPinned': isPinned,
+    'isArchived': isArchived,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
   };
 
   factory Note.fromMap(Map<String, dynamic> map) => Note(
-    id: (map['id'] as num?)?.toInt(),
+    uuid: (map['uuid'] as String?) ?? "",
+    tagId: (map['tagId'] as num?)?.toInt() ?? -1,
     title: map['title'] as String? ?? '',
     content: map['content'] as String?,
+    isPinned: map['isPinned'] as bool? ?? false,
+    isArchived: map['isArchived'] as bool? ?? false,
     createdAt: DateTime.tryParse(map['createdAt'] as String? ?? '') ?? DateTime.now(),
     updatedAt: DateTime.tryParse(map['updatedAt'] as String? ?? '') ?? DateTime.now(),
   );
@@ -68,19 +75,18 @@ class Note extends BaseEntity {
   String toJson() => jsonEncode(toMap());
   factory Note.fromJson(String source) => Note.fromMap(jsonDecode(source) as Map<String, dynamic>);
 
-  // ---------- Equality & debugging ----------
+  @override
+  String toString() => 'Note(uuid:$uuid, tagId:$tagId, title:"$title")';
 
   @override
-  String toString() => 'Note(id:$id, title:"$title"';
+  bool operator ==(Object other) => other is Note && other.uuid == uuid;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Note && runtimeType == other.runtimeType && id != null && other.id != null && id == other.id;
+  int get hashCode => uuid.hashCode;
+
+  static int byUpdatedDesc(Note a, Note b) => b.updatedAt.compareTo(a.updatedAt);
+  static int byTitle(Note a, Note b) => a.title.toLowerCase().compareTo(b.title.toLowerCase());
 
   @override
-  int get hashCode => id.hashCode;
-
-  @override
-  String get identifier => id!.toString();
+  String get identifier => uuid.toString();
 }

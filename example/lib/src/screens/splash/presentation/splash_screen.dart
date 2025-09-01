@@ -57,7 +57,7 @@ class _SplashScreenState extends BlocXWidgetState<SplashScreen> {
 
   void blocListener(BuildContext context, SplashState state) {
     if (state is SplashStateDataLoaded) {
-      Navigator.of(context).push(MaterialPageRoute(builder: (_) => UsersScreen()));
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => UsersScreen()));
     }
   }
 }
