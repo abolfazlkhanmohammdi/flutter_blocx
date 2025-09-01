@@ -101,7 +101,6 @@ class UserJsonRepository extends FakeRepository implements BaseEntity {
   }
 
   Future<ResponseWrapper<Json>> getById(int userId) async {
-    await randomWaitFuture;
     final i = _users.indexWhere((e) => e['id'] == userId);
     if (i == -1) return const ResponseWrapper(ok: false, data: <Json>[]);
     return ResponseWrapper(ok: true, data: <Json>[_users[i]]);

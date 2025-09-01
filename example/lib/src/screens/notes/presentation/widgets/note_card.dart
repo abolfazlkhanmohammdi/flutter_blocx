@@ -165,7 +165,9 @@ class _TagChip extends StatelessWidget {
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
           const SizedBox(width: 6),
-          Text(name, style: Theme.of(context).textTheme.labelSmall),
+          Expanded(
+            child: Text(name, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.labelSmall),
+          ),
         ],
       ),
     );

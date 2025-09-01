@@ -136,7 +136,6 @@ class NoteTagJsonRepository extends FakeRepository implements BaseEntity {
   }
 
   Future<ResponseWrapper<Json>> getById(int tagId) async {
-    await randomWaitFuture;
     final idx = _tags.indexWhere((e) => e['id'] == tagId);
     if (idx == -1) return const ResponseWrapper(ok: false, data: <Json>[]);
     return ResponseWrapper(ok: true, data: <Json>[_tags[idx]]);
