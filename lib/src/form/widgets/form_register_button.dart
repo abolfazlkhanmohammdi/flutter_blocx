@@ -73,11 +73,12 @@ class FormRegisterButton<F, P, E extends Enum> extends BlocxStatelessWidget {
 
   /// True while the form is in submitting state.
   bool get isSubmittingForm => state is FormStateSubmittingForm;
-
+  bool get isCheckingFields => state is FormStateCheckingUniqueFormField;
   @override
   Widget build(BuildContext context) {
-    final disabled = isSubmittingForm || !isFormValid;
-    final label = disabled ? submitText : buttonText;
+    final disabled =
+        isSubmittingForm || !isFormValid || isCheckingFields || bloc(context).state.errors.isNotEmpty;
+    final label = isSubmittingForm ? submitText : buttonText;
 
     switch (type) {
       case RegisterButtonType.elevated:
@@ -171,9 +172,9 @@ class FormRegisterButton<F, P, E extends Enum> extends BlocxStatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(width: 16, height: 16, child: Center(child: indicator)),
-        SizedBox(width: spacing),
-        text,
+        if (isSubmittingForm || isCheckingFields)
+          SizedBox(width: 16, height: 16, child: Center(child: indicator)),
+        if (!isCheckingFields) ...[SizedBox(width: spacing), text],
       ],
     );
   }

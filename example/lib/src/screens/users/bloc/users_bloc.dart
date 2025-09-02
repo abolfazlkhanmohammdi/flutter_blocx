@@ -19,14 +19,12 @@ class UsersBloc extends ListBloc<User, dynamic>
   }
 
   @override
-  PaginationUseCase<User, dynamic>? get loadInitialPageUseCase => UseCaseGetUsers(
-    queryInput: PaginationQuery(payload: "", loadCount: loadCount, offset: 0),
-  );
+  PaginationUseCase<User, dynamic>? get loadInitialPageUseCase =>
+      UseCaseGetUsers(loadCount: loadCount, offset: 0);
 
   @override
-  PaginationUseCase<User, dynamic>? get loadNextPageUseCase => UseCaseGetUsers(
-    queryInput: PaginationQuery(payload: "", loadCount: loadCount, offset: offset),
-  );
+  PaginationUseCase<User, dynamic>? get loadNextPageUseCase =>
+      UseCaseGetUsers(loadCount: loadCount, offset: offset);
 
   @override
   BaseUseCase<bool>? deleteItemUseCase(User item) {
@@ -34,14 +32,11 @@ class UsersBloc extends ListBloc<User, dynamic>
   }
 
   @override
-  SearchUseCase<User, dynamic>? searchUseCase(String searchText, {int? loadCount, int? offset}) {
+  SearchUseCase<User>? searchUseCase(String searchText, {int? loadCount, int? offset}) {
     return UseCaseSearchUsers(
-      searchQuery: SearchQuery(
-        searchText: searchText,
-        payload: payload,
-        loadCount: loadCount ?? this.loadCount,
-        offset: offset ?? 0,
-      ),
+      searchText: searchText,
+      loadCount: loadCount ?? this.loadCount,
+      offset: offset ?? 0,
     );
   }
 

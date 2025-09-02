@@ -14,6 +14,12 @@ abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> ex
   FormWidgetState({required this.bloc});
 
   @override
+  void initState() {
+    super.initState();
+    bloc.add(FormEventInit(payload: widget.payload));
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => bloc,
@@ -26,7 +32,13 @@ abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> ex
     );
   }
 
-  void blocListener(BuildContext context, FormBlocState<F, E> state) {}
+  void blocListener(BuildContext context, FormBlocState<F, E> state) {
+    if (state is FormStateApplyInitialDataToForm) {
+      applyInitialDataToForm(state.formData);
+    } else if (state is FormStateFormSubmitted<F, E>) {
+      onFormSubmitted(state);
+    }
+  }
 
   Widget _blocBuilder(BuildContext context, FormBlocState<F, E> state) {
     return Form(key: formKey, child: formWidget(context, state));
@@ -87,4 +99,12 @@ abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> ex
   }
 
   formWidget(BuildContext context, FormBlocState<F, E> state);
+
+  bool get isUpdate => widget.payload != null;
+
+  void applyInitialDataToForm(F formData);
+
+  void onFormSubmitted(FormStateFormSubmitted<F, E> state);
+
+  P? get payload => widget.payload;
 }

@@ -21,7 +21,7 @@ class NotesJsonRepository extends FakeRepository {
   }) {
     final now = DateTime.now();
     return {
-      'uuid': uuid,
+      'id': id, // use incremental int id from FakeRepository
       'tagId': tagId,
       'title': title ?? faker.lorem.sentence(),
       'content': content ?? faker.lorem.sentences(faker.randomGenerator.integer(4, min: 1)).join(' '),
@@ -39,15 +39,15 @@ class NotesJsonRepository extends FakeRepository {
   }
 
   Future<ResponseWrapper<int>> seedForTags(List<int> tagIds, {int perTag = 10}) async {
-    final ids = <String>[];
+    final ids = <int>[];
     for (final tid in tagIds) {
       for (int i = 0; i < perTag; i++) {
         final n = _newNoteJson(tagId: tid);
         _notes.add(n);
-        ids.add(n['uuid'] as String);
+        ids.add(n['id'] as int);
       }
     }
-    return ResponseWrapper(ok: true, data: []);
+    return ResponseWrapper(ok: true, data: ids);
   }
 
   Future<ResponseWrapper<Json>> clear() async {
@@ -55,6 +55,7 @@ class NotesJsonRepository extends FakeRepository {
     return const ResponseWrapper(ok: true, data: <Json>[]);
   }
 
+  /// NOTE: keeps **insertion order** (no sorting).
   Future<ResponseWrapper<Json>> getPaginated({
     required int offset,
     int limit = 20,
@@ -63,16 +64,21 @@ class NotesJsonRepository extends FakeRepository {
     String? query,
     bool? isPinned,
     bool? isArchived,
-    String sortBy = 'updatedAt',
-    bool descending = true,
-    bool generateOnDemand = true,
+    bool generateOnDemand = false,
   }) async {
     await randomWaitFuture;
 
     Iterable<Json> results = _notes;
 
-    if (generateOnDemand && tagId != null) {
-      _ensureAtLeastForTag(tagId, offset + limit);
+    // Generate on demand for requested tag(s)
+    if (generateOnDemand) {
+      if (tagId != null) {
+        _ensureAtLeastForTag(tagId, offset + limit);
+      } else if (tagIds != null && tagIds.isNotEmpty) {
+        for (final tid in tagIds) {
+          _ensureAtLeastForTag(tid, offset + limit);
+        }
+      }
     }
 
     if (tagId != null) {
@@ -94,21 +100,11 @@ class NotesJsonRepository extends FakeRepository {
     if (isPinned != null) results = results.where((n) => n['isPinned'] == isPinned);
     if (isArchived != null) results = results.where((n) => n['isArchived'] == isArchived);
 
-    int cmp(Json a, Json b) {
-      if (sortBy == 'title') {
-        return (a['title'] as String).toLowerCase().compareTo((b['title'] as String).toLowerCase());
-      }
-      final ad = DateTime.tryParse(a['updatedAt'] as String) ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final bd = DateTime.tryParse(b['updatedAt'] as String) ?? DateTime.fromMillisecondsSinceEpoch(0);
-      return ad.compareTo(bd);
-    }
-
-    var sorted = results.toList()..sort(cmp);
-    if (descending) sorted = sorted.reversed.toList();
-
-    final end = (offset + limit).clamp(0, sorted.length);
+    // Slice without sorting (preserve insertion order)
+    final list = results.toList();
+    final end = (offset + limit).clamp(0, list.length);
     final start = offset.clamp(0, end);
-    final slice = sorted.sublist(start, end);
+    final slice = list.sublist(start, end);
 
     return ResponseWrapper(ok: true, data: slice);
   }

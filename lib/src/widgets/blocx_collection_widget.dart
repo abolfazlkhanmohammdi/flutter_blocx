@@ -1,4 +1,5 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_flutter/flutter_blocx.dart';
 import 'package:blocx_flutter/src/widgets/confirm_action_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,10 +13,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// Provides convenience methods to dispatch common list events (remove / select / deselect /
 /// highlight / clear highlight). Each method checks that the bloc supports the required
 /// capability mixin before dispatching; otherwise it throws a descriptive error.
-abstract class BlocxCollectionWidget<T extends BaseEntity, P> extends StatelessWidget {
+abstract class BlocxCollectionWidget<T extends BaseEntity, P> extends BlocxStatelessWidget {
   final T item;
 
-  const BlocxCollectionWidget({super.key, required this.item});
+  const BlocxCollectionWidget({required this.item, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -162,6 +163,14 @@ abstract class BlocxCollectionWidget<T extends BaseEntity, P> extends StatelessW
     );
     if (result == null || !result) return;
     bloc(context).add(ListEventRemoveItem(item: item));
+  }
+
+  void updateItem(BuildContext context, T item) {
+    bloc(context).add(ListEventUpdateItem(item: item));
+  }
+
+  void insertItem(BuildContext context, T item, {int index = 0}) {
+    bloc(context).add(ListEventAddItem(item: item, index: index));
   }
 
   ConfirmActionOptions get confirmDeleteOptions => ConfirmActionOptions();

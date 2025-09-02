@@ -2,9 +2,9 @@ import 'package:blocx_core/blocx_core.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
 import 'package:example/src/screens/note_tags/data/repositories/note_tag_repository.dart';
 
-class UseCaseDeleteNoteTag extends BaseUseCase<bool> {
+class DeleteNoteTagUseCase extends BaseUseCase<bool> {
   final NoteTag noteTag;
-  UseCaseDeleteNoteTag({required this.noteTag});
+  DeleteNoteTagUseCase({required this.noteTag});
   @override
   Future<UseCaseResult<bool>> perform() async {
     var result = await NoteTagJsonRepository().delete(noteTag.id);

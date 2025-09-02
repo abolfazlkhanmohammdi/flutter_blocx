@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:blocx_core/blocx_core.dart';
 
 class NoteTag extends BaseEntity {
@@ -70,12 +69,14 @@ class NoteTag extends BaseEntity {
   @override
   String toString() => 'NoteTag(id:$id, userId:$userId, name:$name, archived:$isArchived)';
 
-  @override
-  bool operator ==(Object other) => other is NoteTag && other.id == id;
-
-  @override
-  int get hashCode => id.hashCode;
-
   static int byName(NoteTag a, NoteTag b) => a.name.toLowerCase().compareTo(b.name.toLowerCase());
   static int byUpdatedDesc(NoteTag a, NoteTag b) => b.updatedAt.compareTo(a.updatedAt);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is NoteTag && other.runtimeType == runtimeType && other.id == id && other.name == name);
+
+  @override
+  int get hashCode => Object.hash(runtimeType, id, name);
 }

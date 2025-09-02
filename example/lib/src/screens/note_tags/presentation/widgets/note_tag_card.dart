@@ -1,14 +1,14 @@
 import 'package:blocx_flutter/list_widget.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
+import 'package:example/src/screens/note_tags/data/models/note_tag_form_payload.dart';
+import 'package:example/src/screens/note_tags/presentation/form/note_tag_form.dart';
 import 'package:example/src/screens/notes/presentation/notes_screen.dart';
 import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:flutter/material.dart';
 
 class NoteTagCard extends BlocxCollectionWidget<NoteTag, User> {
   final User user;
-  const NoteTagCard({super.key, required this.user, required super.item, this.onEdit});
-
-  final VoidCallback? onEdit;
+  const NoteTagCard({super.key, required this.user, required super.item});
 
   @override
   Widget buildContent(BuildContext context, NoteTag item) {
@@ -18,54 +18,91 @@ class NoteTagCard extends BlocxCollectionWidget<NoteTag, User> {
     final color = Color(item.colorArgb ?? cs.primary.value);
 
     return Card(
-      color: isSelected(context) ? cs.primaryContainer : Theme.of(context).cardColor,
+      color: isHighlighted(context) || isSelected(context)
+          ? cs.primaryContainer
+          : Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (context) => NotesScreen(payload: (item, user)))),
+        onTap: isBeingRemoved(context)
+            ? null
+            : () => Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (context) => NotesScreen(payload: (item, user)))),
         onLongPress: () => isHighlighted(context) ? clearHighlightedItem(context) : highlightItem(context),
         borderRadius: BorderRadius.circular(12),
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          leading: _Swatch(color: color),
-          title: Text(item.name, style: t.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
-          subtitle: Text(
-            'Updated ${item.updatedAt.toLocal()}',
-            style: t.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          trailing: Row(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (onEdit != null)
-                IconButton(
-                  tooltip: 'Edit',
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    highlightItem(context);
-                    onEdit!.call();
-                  },
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: _Swatch(color: color),
+                title: Text(item.name, style: t.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+                subtitle: Text(
+                  'Updated ${item.updatedAt.toLocal()}',
+                  style: t.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              if (canDelete)
-                IconButton(
-                  tooltip: 'Delete',
-                  icon: const Icon(Icons.delete),
-                  color: cs.error,
-                  onPressed: () => removeItem(context),
-                ),
-              if (isSelected(context))
-                Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: Icon(Icons.check_circle, color: cs.primary),
-                ),
+                trailing: isSelected(context) ? Icon(Icons.check_circle, color: cs.primary) : null,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.tonalIcon(
+                      icon: const Icon(Icons.edit),
+                      label: const Text('Edit'),
+                      onPressed: () {
+                        launchEditFlow(context);
+                      },
+                    ),
+                  ),
+                  if (canDelete) const SizedBox(width: 8),
+                  if (canDelete)
+                    Expanded(
+                      child: FilledButton.icon(
+                        icon: isBeingRemoved(context)
+                            ? SizedBox.square(
+                                dimension: 16,
+                                child: CircularProgressIndicator(color: Colors.red),
+                              )
+                            : const Icon(Icons.delete, size: 16),
+                        label: Text(
+                          isBeingRemoved(context) ? "Deleting..." : 'Delete',
+                          style: textTheme(
+                            context,
+                          ).titleSmall?.copyWith(color: isBeingRemoved(context) ? Colors.red : Colors.white),
+                        ),
+                        style: FilledButton.styleFrom(backgroundColor: cs.error, foregroundColor: cs.onError),
+                        onPressed: isBeingRemoved(context) ? null : () => removeItem(context),
+                      ),
+                    ),
+                ],
+              ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  @override
+  bool get confirmBeforeDelete => false;
+
+  Future<void> launchEditFlow(BuildContext context) async {
+    var result = await showModalBottomSheet<NoteTag>(
+      backgroundColor: Colors.white,
+      isScrollControlled: true,
+      context: context,
+      builder: (_) => NoteTagForm(
+        payload: NoteTagFormPayload(userId: user.id, toBeEdited: item),
+      ),
+    );
+    if (result == null) return;
+    updateItem(context, result);
   }
 }
 

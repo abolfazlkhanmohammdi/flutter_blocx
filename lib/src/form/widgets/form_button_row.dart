@@ -14,7 +14,7 @@ import 'form_register_button.dart';
 /// - The secondary button can be styled; by default it's an [OutlinedButton].
 /// - Optionally disable the pop button while the form is submitting.
 /// - Optional pre-pop callback (e.g., for analytics or side-effects).
-class FormButtonRow extends BlocxStatelessWidget {
+class FormButtonRow<F, P, E extends Enum> extends BlocxStatelessWidget {
   /// Current form state used by [FormRegisterButton].
   final FormBlocState formState;
   final bool isFormValid;
@@ -97,7 +97,7 @@ class FormButtonRow extends BlocxStatelessWidget {
 
   /// Builds the left-side [FormRegisterButton].
   Widget _buildRegisterButton(BuildContext context) {
-    return FormRegisterButton(
+    return FormRegisterButton<F, P, E>(
       style: submitButtonStyle,
       state: formState,
       buttonText: registerText,

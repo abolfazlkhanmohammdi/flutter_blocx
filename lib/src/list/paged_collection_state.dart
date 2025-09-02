@@ -18,7 +18,6 @@ abstract class CollectionWidgetState<W extends ListWidget<P>, T extends BaseEnti
   void initState() {
     setScrollController();
     bloc.add(ListEventLoadInitialPage<T, P>(payload: widget.payload));
-
     super.initState();
   }
 
@@ -214,13 +213,14 @@ abstract class CollectionWidgetState<W extends ListWidget<P>, T extends BaseEnti
       itemBuilder: itemBuilder,
       items: state.list,
       bloc: bloc.infiniteListBloc,
-      // deleteAnimation: deleteAnimation,
-      // insertAnimation: insertAnimation,
-      // separatorBuilder: separatorBuilder,
       options: gridOptions.copyWith(padding: padding),
       refreshWidgetBuilder: refreshWidgetBuilder,
       loadMoreWidgetBuilder: loadMoreWidgetBuilder,
     );
+  }
+
+  addToList(T item, {int index = 0}) {
+    bloc.add(ListEventAddItem(item: item, index: index));
   }
 }
 

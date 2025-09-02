@@ -1,6 +1,7 @@
 import 'package:blocx_core/blocx_core.dart';
 import 'package:example/src/core/data/fake_repository.dart';
 import 'package:example/src/core/data/response_wrapper.dart';
+import 'package:example/src/screens/note_tags/data/models/note_tag_form_data.dart';
 
 typedef Json = Map<String, dynamic>;
 
@@ -50,15 +51,16 @@ class NoteTagJsonRepository extends FakeRepository implements BaseEntity {
     final now = DateTime.now();
     final uniqueName = faker.conference.name();
 
-    return {
+    var result = {
       'id': idOverride ?? id,
       'userId': userId,
-      'name': uniqueName,
+      'name': nameOverride ?? uniqueName,
       'colorArgb': colorArgb ?? _randColorArgb(),
       'isArchived': isArchived ?? faker.randomGenerator.boolean(),
       'createdAt': (createdAt ?? now).toIso8601String(),
       'updatedAt': (updatedAt ?? createdAt ?? now).toIso8601String(),
     };
+    return result;
   }
 
   void _ensureAtLeastForUser(int userId, int count) {
@@ -85,14 +87,12 @@ class NoteTagJsonRepository extends FakeRepository implements BaseEntity {
     return const ResponseWrapper(ok: true, data: <Json>[]);
   }
 
+  /// Keeps insertion order (no sorting).
   Future<ResponseWrapper<Json>> getPaginated({
     required int offset,
     int limit = 20,
     int? userId,
     String? query,
-    bool? isArchived,
-    String sortBy = 'updatedAt',
-    bool descending = true,
   }) async {
     await randomWaitFuture;
 
@@ -107,25 +107,11 @@ class NoteTagJsonRepository extends FakeRepository implements BaseEntity {
       final q = query.toLowerCase();
       results = results.where((t) => (t['name'] as String).toLowerCase().contains(q));
     }
-    if (isArchived != null) {
-      results = results.where((t) => t['isArchived'] == isArchived);
-    }
 
-    int cmp(Json a, Json b) {
-      if (sortBy == 'name') {
-        return (a['name'] as String).toLowerCase().compareTo((b['name'] as String).toLowerCase());
-      }
-      final ad = DateTime.tryParse(a['updatedAt'] as String) ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final bd = DateTime.tryParse(b['updatedAt'] as String) ?? DateTime.fromMillisecondsSinceEpoch(0);
-      return ad.compareTo(bd);
-    }
-
-    var sorted = results.toList()..sort(cmp);
-    if (descending) sorted = sorted.reversed.toList();
-
-    final end = (offset + limit).clamp(0, sorted.length);
+    final list = results.toList();
+    final end = (offset + limit).clamp(0, list.length);
     final start = offset.clamp(0, end);
-    final slice = sorted.sublist(start, end);
+    final slice = list.sublist(start, end);
 
     return ResponseWrapper(ok: true, data: slice);
   }
@@ -141,19 +127,14 @@ class NoteTagJsonRepository extends FakeRepository implements BaseEntity {
     return ResponseWrapper(ok: true, data: <Json>[_tags[idx]]);
   }
 
-  Future<ResponseWrapper<Json>> create({
-    required int userId,
-    String? name,
-    int? colorArgb,
-    bool? isArchived,
-  }) async {
+  Future<ResponseWrapper<Json>> create({required NoteTagFormData formData}) async {
     await randomWaitFuture;
-    final t = _newTagJson(userId: userId, nameOverride: name, colorArgb: colorArgb, isArchived: isArchived);
-    _tags.add(t);
+    final t = _newTagJson(userId: formData.userId, nameOverride: formData.name);
+    _tags.insert(0, t);
     return ResponseWrapper(ok: true, data: <Json>[t]);
   }
 
-  Future<ResponseWrapper<Json>> update(int tagId, {String? name, int? colorArgb, bool? isArchived}) async {
+  Future<ResponseWrapper<Json>> update(int tagId, {String? name}) async {
     await randomWaitFuture;
     final idx = _tags.indexWhere((e) => e['id'] == tagId);
     if (idx == -1) return const ResponseWrapper(ok: false, data: <Json>[]);
@@ -173,13 +154,16 @@ class NoteTagJsonRepository extends FakeRepository implements BaseEntity {
     final updated = {
       ...current,
       if (newName != null) 'name': newName,
-      if (colorArgb != null) 'colorArgb': colorArgb,
-      if (isArchived != null) 'isArchived': isArchived,
       'updatedAt': DateTime.now().toIso8601String(),
     };
 
     _tags[idx] = updated;
     return ResponseWrapper(ok: true, data: <Json>[updated]);
+  }
+
+  Future<bool> isNameAvailable(String name) async {
+    await randomWaitFuture;
+    return !_tags.any((map) => map['name'] as String == name);
   }
 
   Future<ResponseWrapper<Json>> delete(int tagId) async {

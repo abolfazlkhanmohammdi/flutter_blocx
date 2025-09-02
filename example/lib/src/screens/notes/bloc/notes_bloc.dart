@@ -4,7 +4,8 @@ import 'package:example/src/screens/notes/bloc/use_cases/get_notes_use_case.dart
 import 'package:example/src/screens/notes/data/models/note.dart';
 import 'package:example/src/screens/users/data/models/user.dart';
 
-class NotesBloc extends ListBloc<Note, (NoteTag, User)> with InfiniteListBlocMixin<Note, (NoteTag, User)> {
+class NotesBloc extends ListBloc<Note, (NoteTag, User)>
+    with InfiniteListBlocMixin<Note, (NoteTag, User)>, RefreshableListBlocMixin<Note, (NoteTag, User)> {
   NotesBloc() : super(ScreenManagerCubit(), InfiniteListBloc());
 
   @override
@@ -13,11 +14,13 @@ class NotesBloc extends ListBloc<Note, (NoteTag, User)> with InfiniteListBlocMix
   }
 
   @override
-  PaginationUseCase<Note, (NoteTag, User)>? get loadInitialPageUseCase => GetNotesUseCase(
-    queryInput: PaginationQuery(payload: payload, loadCount: loadCount, offset: 0),
-  );
+  PaginationUseCase<Note, (NoteTag, User)>? get loadInitialPageUseCase =>
+      GetNotesUseCase(user: payload?.$2, noteTag: payload?.$1, loadCount: loadCount, offset: 0);
   @override
-  PaginationUseCase<Note, (NoteTag, User)>? get loadNextPageUseCase => GetNotesUseCase(
-    queryInput: PaginationQuery(payload: payload, loadCount: loadCount, offset: offset),
-  );
+  PaginationUseCase<Note, (NoteTag, User)>? get loadNextPageUseCase =>
+      GetNotesUseCase(user: payload?.$2, noteTag: payload?.$1, loadCount: loadCount, offset: offset);
+
+  @override
+  PaginationUseCase<Note, (NoteTag, User)>? get refreshPageUseCase =>
+      GetNotesUseCase(user: payload?.$2, noteTag: payload?.$1, loadCount: loadCount, offset: list.length);
 }

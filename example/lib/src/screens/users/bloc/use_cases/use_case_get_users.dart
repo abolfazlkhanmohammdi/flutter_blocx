@@ -3,13 +3,11 @@ import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:example/src/screens/users/data/repositories/users_repository.dart';
 
 class UseCaseGetUsers extends PaginationUseCase<User, dynamic> {
-  UseCaseGetUsers({required super.queryInput});
+  UseCaseGetUsers({required super.loadCount, required super.offset});
+
   @override
   Future<UseCaseResult<Page<User>>> perform() async {
-    var result = await UserJsonRepository().getPaginated(
-      offset: queryInput.offset,
-      limit: queryInput.loadCount,
-    );
+    var result = await UserJsonRepository().getPaginated(offset: offset, limit: loadCount);
     if (!result.ok) {
       throw StateError("error fetching users");
     }

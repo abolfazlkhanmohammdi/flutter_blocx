@@ -28,7 +28,7 @@ class BlocxSearchField<T extends BaseEntity, P> extends StatelessWidget {
             context,
           ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade500, fontStyle: FontStyle.italic),
       prefixIcon: options.prefixIcon ?? const Icon(Icons.search),
-      suffixIcon: options.showClearButton
+      suffixIcon: options.showClearButton && controller.text.isNotEmpty
           ? IconButton(
               icon: const Icon(Icons.clear),
               onPressed: () {

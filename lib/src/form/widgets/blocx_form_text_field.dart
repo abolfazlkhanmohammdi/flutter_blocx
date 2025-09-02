@@ -1,4 +1,6 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_flutter/flutter_blocx.dart';
+import 'package:blocx_flutter/src/core/localizations/blocx_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -31,7 +33,7 @@ class BlocXFormTextField<F, P, E extends Enum> extends StatefulWidget {
   State<BlocXFormTextField<F, P, E>> createState() => BlocXFormTextFieldState<F, P, E>();
 }
 
-class BlocXFormTextFieldState<F, P, E extends Enum> extends State<BlocXFormTextField<F, P, E>> {
+class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<BlocXFormTextField<F, P, E>> {
   TextEditingController? _internalController;
   bool get _ownsController => widget.controller == null;
   TextEditingController get _controller => widget.controller ?? _internalController!;
@@ -94,20 +96,8 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends State<BlocXFormTextF
   InputDecoration _buildDecoration(BuildContext context) {
     final o = widget.textFieldOptions;
 
-    final bool canShowClear = o.showClearButton && _controller.text.isNotEmpty && !o.obscureText;
-    final Widget? suffix = canShowClear
-        ? IconButton(
-            visualDensity: VisualDensity.compact,
-            tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
-            icon: const Icon(Icons.clear),
-            onPressed: () {
-              _controller.clear();
-              bloc.add(FormEventUpdateData(data: '', key: widget.formKey));
-              setState(() {});
-            },
-          )
-        : null;
-
+    final Widget? suffix = getSuffix(o);
+    final String? errorText = getErrorText(o);
     // Hint style with lower opacity of primary color
     final hintStyle = o.hintStyle ?? TextStyle(color: Theme.of(context).colorScheme.primary.withAlpha(60));
 
@@ -122,7 +112,7 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends State<BlocXFormTextF
           hintStyle: hintStyle,
           helperText: o.helperText,
           helperStyle: o.helperStyle,
-          errorText: o.errorText,
+          errorText: errorText,
           errorStyle: o.errorStyle,
           prefixIcon: o.prefixIcon,
           suffixIcon: suffix,
@@ -152,7 +142,7 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends State<BlocXFormTextF
           hintStyle: hintStyle,
           helperText: o.helperText,
           helperStyle: o.helperStyle,
-          errorText: o.errorText,
+          errorText: errorText,
           errorStyle: o.errorStyle,
           prefixIcon: o.prefixIcon,
           suffixIcon: suffix,
@@ -200,6 +190,43 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends State<BlocXFormTextF
       _internalController?.dispose();
     }
     super.dispose();
+  }
+
+  bool get isCheckingUniqueField => bloc.state is FormStateCheckingUniqueFormField;
+  Widget? getSuffix(BlocXTextFieldOptions o) {
+    if (isCheckingUniqueField) {
+      return SizedBox.square(
+        dimension: 8,
+        child: CircularProgressIndicator(color: colorScheme.primary, padding: EdgeInsets.all(8)),
+      );
+    }
+    final bool canShowClear = o.showClearButton && _controller.text.isNotEmpty && !o.obscureText;
+    final Widget? suffix = canShowClear
+        ? IconButton(
+            visualDensity: VisualDensity.compact,
+            tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
+            icon: const Icon(Icons.clear),
+            onPressed: _controller.text.isEmpty
+                ? null
+                : () {
+                    _controller.clear();
+                    bloc.add(FormEventUpdateData(data: '', key: widget.formKey));
+                    setState(() {});
+                  },
+          )
+        : null;
+
+    return suffix;
+  }
+
+  String? getErrorText(BlocXTextFieldOptions options) {
+    int errorIndex = bloc.state.errors.keys.toList().indexWhere((e) => e == widget.formKey);
+    if (errorIndex >= 0) {
+      return BlocXLocalizations.localizations.errorCodeMessage(
+        bloc.state.errors.values.toList()[errorIndex].first,
+      );
+    }
+    return options.errorText;
   }
 }
 

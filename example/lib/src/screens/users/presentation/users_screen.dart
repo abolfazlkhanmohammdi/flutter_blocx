@@ -56,5 +56,5 @@ class _UsersScreenState extends CollectionWidgetState<UsersScreen, User, dynamic
   }
 
   @override
-  InfiniteGridOptions get gridOptions => InfiniteGridOptions(childAspectRatio: 0.75);
+  InfiniteGridOptions get gridOptions => InfiniteGridOptions(childAspectRatio: 0.65);
 }
