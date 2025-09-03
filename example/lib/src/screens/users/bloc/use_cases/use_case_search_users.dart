@@ -9,7 +9,7 @@ class UseCaseSearchUsers extends SearchUseCase<User> {
   Future<UseCaseResult<Page<User>>> perform() async {
     var result = await UserJsonRepository().searchUsers(searchText, offset, loadCount);
     if (!result.ok) {
-      throw StateError('Failed to search users');
+      throw Exception('Failed to search users');
     }
     var converted = result.data.map((e) => User.fromMap(e)).toList();
     return successResult(converted);

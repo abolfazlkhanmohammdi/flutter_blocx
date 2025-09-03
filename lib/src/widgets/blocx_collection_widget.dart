@@ -61,7 +61,7 @@ abstract class BlocxCollectionWidget<T extends BaseEntity, P> extends BlocxState
         ErrorSummary('Selection is not enabled for ListBloc<$T, $P>.'),
         ErrorDescription(
           'This action requires the bloc to implement SelectableBlocContract<$T>. '
-          'Make sure your ListBloc mixes in the selection capability and calls initSelectionMixin().',
+          'Make sure your ListBloc mixes in the selection capability',
         ),
       ]);
     }
@@ -87,7 +87,20 @@ abstract class BlocxCollectionWidget<T extends BaseEntity, P> extends BlocxState
         ErrorSummary('Deletion is not enabled for ListBloc<$T, $P>.'),
         ErrorDescription(
           'This action requires the bloc to implement DeletableListBlocContract<$T>. '
-          'Make sure your ListBloc mixes in the deletable capability and calls initDeletable().',
+          'Make sure your ListBloc mixes in the deletable capability',
+        ),
+      ]);
+    }
+  }
+
+  void _requireExpandable(BuildContext context) {
+    final b = bloc(context);
+    if (!b.isExpandable) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('Expansion is not enabled for ListBloc<$T, $P>.'),
+        ErrorDescription(
+          'This action requires the bloc to implement ExpandableListBlocContract<$T>. '
+          'Make sure your ListBloc mixes in the expandable capability',
         ),
       ]);
     }
@@ -140,6 +153,12 @@ abstract class BlocxCollectionWidget<T extends BaseEntity, P> extends BlocxState
   }
 
   @protected
+  void toggleSelection(BuildContext context) {
+    _requireSelectable(context);
+    isSelected(context) ? deselectItem(context) : selectItem(context);
+  }
+
+  @protected
   void highlightItem(BuildContext context) {
     _requireHighlightable(context);
     bloc(context).add(ListEventHighlightItem<T>(item: item));
@@ -149,6 +168,12 @@ abstract class BlocxCollectionWidget<T extends BaseEntity, P> extends BlocxState
   void clearHighlightedItem(BuildContext context) {
     _requireHighlightable(context);
     bloc(context).add(ListEventClearHighlightedItem<T>(item: item));
+  }
+
+  @protected
+  void toggleExpansion(BuildContext context) {
+    _requireExpandable(context);
+    bloc(context).add(ListEventToggleItemExpansion(item: item));
   }
 
   bool get confirmBeforeDelete => true;

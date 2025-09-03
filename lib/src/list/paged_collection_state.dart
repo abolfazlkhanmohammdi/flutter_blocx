@@ -184,6 +184,10 @@ abstract class CollectionWidgetState<W extends ListWidget<P>, T extends BaseEnti
     bloc.add(ListEventRemoveMultipleItems(items: items));
   }
 
+  deselectMultipleItems(List<T> items) {
+    bloc.add(ListEventDeselectMultipleItems(items: items));
+  }
+
   CollectionWidgetStateType get collectionDisplayType => CollectionWidgetStateType.list;
 
   InfiniteGridOptions get gridOptions => InfiniteGridOptions();

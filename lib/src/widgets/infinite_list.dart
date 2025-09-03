@@ -44,10 +44,18 @@ class InfiniteList<Entity extends BaseEntity> extends StatefulWidget {
 class InfiniteListWidgetState<Entity extends BaseEntity> extends State<InfiniteList<Entity>> {
   late final String uuid;
 
+  late ScrollController scrollController = widget.scrollController ?? ScrollController();
+
   @override
   void initState() {
     super.initState();
     uuid = 'InfiniteList-${identityHashCode(this)}';
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    if (widget.scrollController == null) scrollController.dispose();
   }
 
   InfiniteListBloc get bloc => widget.bloc;
@@ -104,14 +112,30 @@ class InfiniteListWidgetState<Entity extends BaseEntity> extends State<InfiniteL
     ).drive(Tween<double>(begin: 0, end: 1));
   }
 
-  bool get maySwipe {
-    final cond1 = bloc.state.isAtTop;
-    final cond2 = bloc.state.isScrollingUp;
-    final cond3 = !bloc.state.isRefreshing;
-    final cond4 = widget.refreshOnSwipe != null;
-    final result = cond1 && cond2 && cond3 && cond4;
-    return result;
+  bool get _atTopByController =>
+      widget.scrollController?.hasClients == true && widget.scrollController!.position.pixels <= 0.0;
+
+  bool get _atBottomByController =>
+      widget.scrollController?.hasClients == true &&
+      (widget.scrollController!.position.pixels >= widget.scrollController!.position.maxScrollExtent - 1.0);
+
+  bool get _atRefreshEdge {
+    return options.reverse
+        ? (bloc.state.isAtBottom || _atBottomByController)
+        : (bloc.state.isAtTop || _atTopByController);
   }
+
+  // was: atTop && isScrollingUp && !isRefreshing && refreshOnSwipe!=null
+  bool get maySwipe => _atRefreshEdge && !bloc.state.isRefreshing && widget.refreshOnSwipe != null;
+
+  // bool get maySwipe {
+  //   final cond1 = bloc.state.isAtTop;
+  //   final cond2 = bloc.state.isScrollingUp;
+  //   final cond3 = !bloc.state.isRefreshing;
+  //   final cond4 = widget.refreshOnSwipe != null;
+  //   final result = cond1 && cond2 && cond3 && cond4;
+  //   return result;
+  // }
 
   Widget _itemBuilder(BuildContext context, Entity data, InfiniteListState state) {
     int index = widget.items.indexOf(data);
@@ -142,11 +166,22 @@ class InfiniteListWidgetState<Entity extends BaseEntity> extends State<InfiniteL
     widget.loadBottomData!();
   }
 
-  bool onScroll(UserScrollNotification notification) {
-    bool isIdle = notification.direction == ScrollDirection.idle;
-    bool isScrollingUp = !isIdle && notification.direction == ScrollDirection.forward;
-    bool isAtTop = notification.metrics.pixels < 40;
-    bool isAtBottom = notification.metrics.pixels == notification.metrics.maxScrollExtent;
+  bool onScroll(UserScrollNotification n) {
+    final isIdle = n.direction == ScrollDirection.idle;
+
+    // Edge detection
+    final isAtTop = n.metrics.extentBefore <= 0.0;
+    final isAtBottom = n.metrics.extentAfter <= 0.0;
+
+    // Direction relative to visual "up"
+    bool isScrollingUp;
+    if (options.reverse) {
+      // in reverse lists, 'reverse' means "visually up"
+      isScrollingUp = !isIdle && n.direction == ScrollDirection.reverse;
+    } else {
+      isScrollingUp = !isIdle && n.direction == ScrollDirection.forward;
+    }
+
     bloc.add(
       InfiniteListEventOnScroll(
         isAtTop: isAtTop,
@@ -217,9 +252,9 @@ class InfiniteListWidgetState<Entity extends BaseEntity> extends State<InfiniteL
   Widget listWidget(BuildContext context, InfiniteListState state) {
     if (options.useAnimatedList) {
       return ImplicitlyAnimatedList<Entity>(
-        controller: widget.scrollController,
+        controller: scrollController,
         initialAnimation: options.animateAtStart,
-        physics: options.scrollPhysics,
+        physics: options.scrollPhysics ?? AlwaysScrollableScrollPhysics(),
         itemData: widget.items,
         shrinkWrap: options.shrinkWrap,
         padding: options.padding,
@@ -232,7 +267,7 @@ class InfiniteListWidgetState<Entity extends BaseEntity> extends State<InfiniteL
     }
     return ListView.separated(
       controller: widget.scrollController,
-      physics: options.scrollPhysics,
+      physics: options.scrollPhysics ?? AlwaysScrollableScrollPhysics(),
       shrinkWrap: options.shrinkWrap,
       itemCount: widget.items.length,
       padding: options.padding,
@@ -252,7 +287,7 @@ class InfiniteListOptions {
   final AnimatedChildBuilder? deleteAnimation;
   final AnimatedChildBuilder? insertAnimation;
   final int loadMoreTriggerItemDistance;
-  final ScrollPhysics? scrollPhysics;
+  final AlwaysScrollableScrollPhysics? scrollPhysics;
   final bool shrinkWrap;
 
   const InfiniteListOptions({
@@ -282,7 +317,7 @@ class InfiniteListOptions {
     bool Function(Object first, Object second)? itemEquality,
     int? topLoadingTriggerItemDistance,
     int? bottomLoadingTriggerItemDistance,
-    ScrollPhysics? scrollPhysics,
+    AlwaysScrollableScrollPhysics? scrollPhysics,
     bool? shrinkWrap,
     bool? useAnimatedList,
   }) {

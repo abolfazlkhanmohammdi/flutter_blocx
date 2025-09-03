@@ -9,7 +9,7 @@ class UseCaseGetUsers extends PaginationUseCase<User, dynamic> {
   Future<UseCaseResult<Page<User>>> perform() async {
     var result = await UserJsonRepository().getPaginated(offset: offset, limit: loadCount);
     if (!result.ok) {
-      throw StateError("error fetching users");
+      throw Exception("error fetching users");
     }
     var converted = result.data.map((e) => User.fromMap(e)).toList();
     return successResult(converted);
