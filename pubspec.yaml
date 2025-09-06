@@ -1,6 +1,6 @@
 name: flutter_blocx
 description: Ui widgets to work with blocx_core.
-version: 0.5.5-beta
+version: 0.5.7-beta
 repository: https://github.com/abolfazlkhanmohammdi/flutter_blocx
 issue_tracker: https://github.com/abolfazlkhanmohammdi/flutter_blocx/issues
 topics: [bloc, architecture, lists, forms]
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  blocx_core: ^0.5.1-beta
+  blocx_core: ^0.5.7-beta
   flutter_bloc: ^9.1.1
   implicitly_animated_list: ^2.3.0
   visibility_detector: ^0.4.0+2
