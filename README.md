@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/abolfazlkhanmohammdi/flutter_blocx/main/assets/pub/logo.png" height="120" alt="flutter_blocx" />
+  <img src="https://raw.githubusercontent.com/abolfazlkhanmohammdi/flutter_blocx/main/assets/pub/logo.png" height="300" alt="flutter_blocx" />
 </p>
 
 ## Installing
@@ -14,7 +14,7 @@ Add this to your `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_blocx: ^0.5.5-beta
+  flutter_blocx: ^0.5.7-beta
 ```
 
 Or add via the command line:
