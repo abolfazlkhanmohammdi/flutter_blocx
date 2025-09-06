@@ -1,4 +1,4 @@
-import 'package:blocx_flutter/src/widgets/collection/collection_options.dart';
+import 'package:flutter_blocx/src/widgets/collection/collection_options.dart';
 import 'package:flutter/material.dart';
 import 'package:implicitly_animated_list/implicitly_animated_list.dart';
 

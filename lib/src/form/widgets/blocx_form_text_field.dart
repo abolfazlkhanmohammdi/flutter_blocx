@@ -1,6 +1,6 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_flutter/flutter_blocx.dart';
-import 'package:blocx_flutter/src/core/localizations/blocx_localizations.dart';
+import 'package:flutter_blocx/flutter_blocx.dart';
+import 'package:flutter_blocx/src/core/localizations/blocx_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

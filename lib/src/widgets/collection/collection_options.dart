@@ -1,10 +1,10 @@
-import 'package:blocx_flutter/list_widget.dart';
-import 'package:blocx_flutter/src/widgets/collection/options/animated_infinite_list.dart';
-import 'package:blocx_flutter/src/widgets/collection/options/animated_sliver_infinite_list.dart';
-import 'package:blocx_flutter/src/widgets/collection/options/infinite_grid.dart';
-import 'package:blocx_flutter/src/widgets/collection/options/infinite_list.dart';
-import 'package:blocx_flutter/src/widgets/collection/options/sliver_infinite_grid.dart';
-import 'package:blocx_flutter/src/widgets/collection/options/sliver_infinite_list.dart';
+import 'package:flutter_blocx/list_widget.dart';
+import 'package:flutter_blocx/src/widgets/collection/options/animated_infinite_list.dart';
+import 'package:flutter_blocx/src/widgets/collection/options/animated_sliver_infinite_list.dart';
+import 'package:flutter_blocx/src/widgets/collection/options/infinite_grid.dart';
+import 'package:flutter_blocx/src/widgets/collection/options/infinite_list.dart';
+import 'package:flutter_blocx/src/widgets/collection/options/sliver_infinite_grid.dart';
+import 'package:flutter_blocx/src/widgets/collection/options/sliver_infinite_list.dart';
 
 abstract class CollectionOptions {
   const CollectionOptions();

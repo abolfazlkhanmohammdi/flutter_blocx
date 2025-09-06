@@ -1,11 +1,6 @@
 <p align="center">
-  <img src="./blocx_flutter_logo.png" alt="blocx_flutter" width="120">
+  <img src="https://raw.githubusercontent.com/abolfazlkhanmohammdi/flutter_blocx/main/assets/pub/logo.png" height="120" alt="flutter_blocx" />
 </p>
-
-<h1 align="center">blocx_flutter</h1>
-<p align="center"><em>Flutter widgets for fast lists, grids, and forms powered by <code>blocx_core</code>.</em></p>
-
----
 
 ## Installing
 
@@ -19,7 +14,7 @@ Add this to your `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  blocx_flutter: ^0.1.0
+  flutter_blocx: ^0.5.5-beta
 ```
 
 Or add via the command line:
@@ -27,22 +22,22 @@ Or add via the command line:
 **With Flutter:**
 
 ```sh
-flutter pub add blocx_flutter
+flutter pub add flutter_blocx
 ```
 
 **With Dart:**
 
 ```sh
-dart pub add blocx_flutter
+dart pub add flutter_blocx
 ```
 
 ### Import it
 
 ```dart
-import 'package:blocx_flutter/flutter_blocx.dart';
+import 'package:flutter_blocx/flutter_blocx.dart';
 // or import specific entry points:
-// import 'package:blocx_flutter/list_widget.dart';
-// import 'package:blocx_flutter/form_widget.dart';
+// import 'package:flutter_blocx/list_widget.dart';
+// import 'package:flutter_blocx/form_widget.dart';
 ```
 
 ---
@@ -114,11 +109,12 @@ A **ready-to-use** collection widget. Provide an `itemBuilder` and it handles:
 Typical usage:
 
 ```dart
-BlocxCollectionWidget<Todo, void>(
-  itemBuilder: (context, item, index) => ListTile(title: Text(item.title)),
-  onBottomReached: (state) => state.loadNextPage(),
-  onRefresh: (state) => state.refreshData(),
-);
+class UserCard extends BlocxCollectionWidget<User,dynamic>{
+    @override
+    Widget buildContent(BuildContext context, User item) {
+      // implement your item ui with ready data item
+    }
+}
 ```
 
 ### `BlocxSearchField<T, P>`
@@ -131,121 +127,440 @@ A text field that **wires directly to your list bloc’s search** mixin. It debo
 Customizable with controller, `hintText`, debounce, and decoration. Drop it into your app bar or header; no manual subscription required.
 
 ```dart
-BlocxSearchField<Todo, void>(
-  hintText: 'Search todos…',
+BlocxSearchField<User, dynamic>(
+  hintText: 'Search Users…',
   // controller: myController, // optional
 );
 ```
 
-### Example: Todos list with search, selection, and helpers
+### Example: Users list with search, selection, and helpers
 
 Below is a compact, end-to-end example that demonstrates how the widgets and helper methods reduce boilerplate.
 
 ```dart
-// 1) Entity
-class Todo extends BaseEntity {
+import 'dart:convert';
+import 'package:blocx_core/blocx_core.dart';
+class User extends BaseEntity {
+  final int id; // unique stable id
+  final String displayName;
+  final String email;
+  final String? avatarUrl;
+  final bool isActive;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  const User({
+    required this.id,
+    required this.displayName,
+    required this.email,
+    this.avatarUrl,
+    this.isActive = true,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
   @override
-  final String id;
-  final String title;
-  const Todo({required this.id, required this.title});
+  String get identifier => id.toString();
+
+  User copyWith({
+    int? id,
+    String? displayName,
+    String? email,
+    String? avatarUrl,
+    bool? isActive,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return User(
+      id: id ?? this.id,
+      displayName: displayName ?? this.displayName,
+      email: email ?? this.email,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      isActive: isActive ?? this.isActive,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'displayName': displayName,
+    'email': email,
+    'avatarUrl': avatarUrl,
+    'isActive': isActive,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+  };
+
+  factory User.fromMap(Map<String, dynamic> map) => User(
+    id: (map['id'] as int?) ?? -1,
+    displayName: (map['displayName'] as String?) ?? '',
+    email: (map['email'] as String?) ?? '',
+    avatarUrl: map['avatarUrl'] as String?,
+    isActive: (map['isActive'] as bool?) ?? true,
+    createdAt: DateTime.tryParse(map['createdAt'] as String? ?? '') ?? DateTime.now(),
+    updatedAt: DateTime.tryParse(map['updatedAt'] as String? ?? '') ?? DateTime.now(),
+  );
+
+  String toJson() => jsonEncode(toMap());
+  factory User.fromJson(String source) => User.fromMap(jsonDecode(source) as Map<String, dynamic>);
+
+  @override
+  String toString() => 'UserEntity(id:$id, name:$displayName)';
+
+  @override
+  bool operator ==(Object other) => other is User && other.id == id;
+  @override
+  int get hashCode => id.hashCode;
 }
 
+
 // 2) Use cases (pseudo-impl)
-class FetchTodos extends PaginationUseCase<Todo, void> {
-  final TodoRepo repo;
-  FetchTodos({required this.repo, required super.loadCount, required super.offset});
+class GetUsersUseCase extends PaginationUseCase<User, dynamic> {
+  GetUsersUseCase({required super.loadCount, required super.offset});
+
   @override
-  Future<UseCaseResult<Page<Todo>>> perform() async =>
-      successResult(await repo.fetch(limit: loadCount, offset: offset));
+  Future<UseCaseResult<Page<User>>> perform() async {
+    var result = await UserJsonRepository().getPaginated(offset: offset, limit: loadCount);
+    if (!result.ok) {
+      throw Exception("error fetching users");
+    }
+    var converted = result.data.map((e) => User.fromMap(e)).toList();
+    return successResult(converted);
+  }
 }
-class SearchTodos extends SearchUseCase<Todo> {
-  final TodoRepo repo;
-  SearchTodos({required this.repo, required super.searchText, required super.loadCount, required super.offset});
+
+
+class SearchUsersUseCase extends SearchUseCase<User> {
+  SearchUsersUseCase({required super.searchText, required super.loadCount, required super.offset});
+
   @override
-  Future<UseCaseResult<Page<Todo>>> perform() async =>
-      successResult(await repo.search(q: searchText, limit: loadCount, offset: offset));
+  Future<UseCaseResult<Page<User>>> perform() async {
+    var result = await UserJsonRepository().searchUsers(searchText, offset, loadCount);
+    if (!result.ok) {
+      throw Exception('Failed to search users');
+    }
+    var converted = result.data.map((e) => User.fromMap(e)).toList();
+    return successResult(converted);
+  }
+}
+
+class DeleteUserUseCase extends BaseUseCase<bool> {
+  final User user;
+
+  DeleteUserUseCase({required this.user});
+  @override
+  Future<UseCaseResult<bool>> perform() async {
+    var result = await UserJsonRepository().delete(user.id);
+    return UseCaseResult.success(result.ok);
+  }
 }
 
 // 3) Bloc (compose desired features)
-class TodosBloc extends ListBloc<Todo, void>
+import 'package:blocx_core/blocx_core.dart';
+import 'package:example/src/screens/users/bloc/use_cases/delete_user_use_case.dart';
+import 'package:example/src/screens/users/bloc/use_cases/get_users_use_case.dart';
+import 'package:example/src/screens/users/bloc/use_cases/search_users_use_case.dart';
+import 'package:example/src/screens/users/data/models/user.dart';
+
+class UsersBloc extends ListBloc<User, dynamic>
     with
-        ListBlocDataMixin<Todo, void>,
-        InfiniteListBlocMixin<Todo, void>,
-        SearchableListBlocMixin<Todo, void>,
-        RefreshableListBlocMixin<Todo, void>,
-        SelectableListBlocMixin<Todo, void> {
-  final TodoRepo repo;
-  TodosBloc({required this.repo, required ScreenManagerCubit screen}) : super(screen, InfiniteListBloc()) {
-    initDataMixin(); initInfiniteList(); initSearchable(); initRefresh(); initSelectable();
-    add(ListEventLoadInitialPage<Todo, void>());
+        InfiniteListBlocMixin<User, dynamic>,
+        SearchableListBlocMixin<User, dynamic>,
+        DeletableListBlocMixin<User, dynamic>,
+        HighlightableListBlocMixin<User, dynamic>,
+        SelectableListBlocMixin<User, dynamic> {
+  UsersBloc() : super(ScreenManagerCubit(), InfiniteListBloc());
+
+  @override
+  (String, String?) convertErrorToMessageAndTitle(Object error) {
+    return ("error", "an error occurred!");
   }
+
   @override
-  PaginationUseCase<Todo, void>? get loadInitialPageUseCase => FetchTodos(repo: repo, loadCount: 20, offset: 0);
+  PaginationUseCase<User, dynamic>? get loadInitialPageUseCase =>
+      GetUsersUseCase(loadCount: loadCount, offset: 0);
+
   @override
-  PaginationUseCase<Todo, void>? get loadNextPageUseCase => FetchTodos(repo: repo, loadCount: 20, offset: list.length);
+  PaginationUseCase<User, dynamic>? get loadNextPageUseCase =>
+      GetUsersUseCase(loadCount: loadCount, offset: offset);
+
   @override
-  PaginationUseCase<Todo, void>? get refreshPageUseCase => FetchTodos(repo: repo, loadCount: list.length, offset: 0);
+  BaseUseCase<bool>? deleteItemUseCase(User item) {
+    return DeleteUserUseCase(user: item);
+  }
+
   @override
-  SearchUseCase<Todo>? searchUseCase(String q, {int? loadCount, int? offset}) =>
-      SearchTodos(repo: repo, searchText: q, loadCount: loadCount ?? 20, offset: offset ?? 0);
+  SearchUseCase<User>? searchUseCase(String searchText, {int? loadCount, int? offset}) {
+    return SearchUsersUseCase(
+      searchText: searchText,
+      loadCount: loadCount ?? this.loadCount,
+      offset: offset ?? 0,
+    );
+  }
+
+  @override
+  ErrorDisplayPolicy get errorDisplayPolicy => ErrorDisplayPolicy.page;
+
+  @override
+  bool get isSingleSelect => false;
 }
 
+
 // 4) UI — search + ready-made collection widget
-class TodosPage extends StatelessWidget {
-  const TodosPage({super.key});
+class UsersScreen extends CollectionWidget<dynamic> {
+  const UsersScreen({super.key});
+
+  @override
+  State<UsersScreen> createState() => _UsersScreenState();
+}
+
+class _UsersScreenState extends CollectionWidgetState<UsersScreen, User, dynamic> {
+  TextEditingController searchController = TextEditingController();
+
+  _UsersScreenState() : super(bloc: UsersBloc());
+
+  @override
+  Widget? topWidget(BuildContext context, ListState<User> state) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: BlocxSearchField<User, dynamic>(
+        controller: searchController,
+        options: BlocxSearchFieldOptions(),
+      ),
+    );
+  }
+
+  @override
+  Widget itemBuilder(BuildContext context, User item) {
+    return UserCard(item: item);
+  }
+
+  @override
+  bool get wrapInScaffold => true;
+
+  @override
+  Scaffold scaffoldWidget(BuildContext context, Widget body) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Users", style: theme.appBarTheme.titleTextStyle),
+            Text("Select a user to see their note tags", style: textTheme.bodyMedium),
+          ],
+        ),
+      ),
+      body: body,
+    );
+  }
+
+  @override
+  CollectionInput get settings => CollectionInput(
+    type: CollectionWidgetStateType.grid,
+    options: InfiniteGridOptions.defaultOptions().copyWith(childAspectRatio: 0.75),
+  );
+}
+
+
+// 5) Card widget(extends BlocxCollectionWidget)
+class UserCard extends BlocxCollectionWidget<User, dynamic> {
+  const UserCard({super.key, required super.item, this.onEdit});
+
+  final VoidCallback? onEdit;
+
+  @override
+  Widget buildContent(BuildContext context, User item) {
+    final t = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+    final canDelete = bloc(context).isDeletable;
+    final canHighlight = bloc(context).isHighlightable;
+
+    return Card(
+      color: isHighlighted(context)
+          ? Colors.green.shade100
+          : isBeingRemoved(context)
+          ? Colors.red.shade100
+          : isSelected(context)
+          ? cs.primaryContainer
+          : Theme.of(context).cardColor,
+      shape: RoundedSuperellipseBorder(borderRadius: BorderRadius.circular(12)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () =>
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => NoteTagsScreen(payload: item))),
+        onLongPress: () => isSelected(context) ? deselectItem(context) : selectItem(context),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: LayoutBuilder(
+            builder: (context, box) {
+              final side = box.biggest.shortestSide;
+              final radius = (side * 0.22).clamp(20.0, 36.0).toDouble();
+
+              return Column(
+                spacing: 4,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Stack(
+                    children: [
+                      Center(
+                        child: Hero(
+                          tag: "user-${item.id}",
+                          child: _Avatar(url: item.avatarUrl, name: item.displayName, radius: radius),
+                        ),
+                      ),
+                      if (isSelected(context))
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          left: 0,
+                          bottom: 0,
+
+                          child: CircleAvatar(
+                            backgroundColor: cs.secondary.withAlpha(160),
+                            child: Icon(Icons.check_circle, size: 24, color: cs.primary),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    item.displayName,
+                    style: t.titleSmall,
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (item.email.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Opacity(
+                      opacity: 0.75,
+                      child: Text(
+                        item.email,
+                        style: t.bodySmall,
+                        maxLines: 1,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                  Center(child: _StatusPill(active: item.isActive)),
+                  const SizedBox(height: 10),
+                  if (onEdit != null)
+                    FilledButton.tonalIcon(
+                      icon: const Icon(Icons.edit),
+                      label: const Text('Edit'),
+                      onPressed: () {
+                        highlightItem(context);
+                        onEdit!.call();
+                      },
+                    ),
+                  if (onEdit != null && canDelete) const SizedBox(width: 8),
+                  if (canDelete)
+                    FilledButton.icon(
+                      icon: isBeingRemoved(context)
+                          ? SizedBox.square(
+                        dimension: 16,
+                        child: CircularProgressIndicator(color: Colors.red),
+                      )
+                          : const Icon(Icons.delete),
+                      label: Text(
+                        isBeingRemoved(context) ? "Deleting" : 'Delete',
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: isBeingRemoved(context) ? Colors.red : Colors.white,
+                        ),
+                      ),
+                      style: FilledButton.styleFrom(backgroundColor: cs.error, foregroundColor: cs.onError),
+                      onPressed: isBeingRemoved(context) ? null : () => removeItem(context),
+                    ),
+                  if (canHighlight)
+                    FilledButton.icon(
+                      icon: const Icon(Icons.highlight),
+                      label: const Text('highlight'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: cs.primary,
+                        foregroundColor: cs.onPrimary,
+                      ),
+                      onPressed: () => highlightItem(context),
+                    ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  ConfirmActionOptions get confirmDeleteOptions => ConfirmActionOptions(
+    title: "Delete ${item.displayName}",
+    question: "Are you sure you want to delete the user ${item.displayName}?",
+    imageUrl: item.avatarUrl,
+  );
+}
+
+class _Avatar extends StatelessWidget {
+  const _Avatar({required this.url, required this.name, required this.radius});
+
+  final String? url;
+  final String name;
+  final double radius;
 
   @override
   Widget build(BuildContext context) {
-    final screen = ScreenManagerCubit();
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<ScreenManagerCubit>.value(value: screen),
-        BlocProvider(create: (_) => TodosBloc(repo: context.read<TodoRepo>(), screen: screen)),
-      ],
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Todos'),
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(56),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: BlocxSearchField<Todo, void>(hintText: 'Search todos…'),
-            ),
+    final bg = Theme.of(context).colorScheme.secondaryContainer;
+    final fg = Theme.of(context).colorScheme.onSecondaryContainer;
+    final hasUrl = (url ?? '').isNotEmpty;
+
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: bg,
+      foregroundColor: fg,
+      backgroundImage: hasUrl ? NetworkImage(url!) : null,
+      child: hasUrl ? null : Text(_initials(name), style: const TextStyle(fontWeight: FontWeight.w600)),
+    );
+  }
+
+  String _initials(String s) {
+    final parts = s.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) {
+      final t = parts.first;
+      return (t.isNotEmpty ? t.characters.take(2).toString() : '?').toUpperCase();
+    }
+    return (parts.first.characters.first + parts.last.characters.first).toUpperCase();
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({required this.active});
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final bg = active ? cs.primaryContainer : cs.surfaceContainerHighest;
+    final fg = active ? cs.onPrimaryContainer : cs.onSurfaceVariant;
+    final label = active ? 'Active' : 'Inactive';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(999)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: fg, shape: BoxShape.circle),
           ),
-        ),
-        body: BlocxCollectionWidget<Todo, void>(
-          itemBuilder: (context, item, index) => ListTile(
-            title: Text(item.title),
-            onTap: () => context.read<TodosBloc>().add(ListEventSelectItem<Todo>(item: item)),
-          ),
-          onBottomReached: (s) => s.loadNextPage(), // helper
-          onRefresh: (s) => s.refreshData(),       // helper
-        ),
-        floatingActionButton: Builder(
-          builder: (context) {
-            final bloc = context.read<TodosBloc>();
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FloatingActionButton.extended(
-                  onPressed: () => bloc.add(ListEventRefreshData<Todo>()),
-                  label: const Text('Reload'),
-                ),
-                const SizedBox(height: 8),
-                FloatingActionButton.extended(
-                  onPressed: () {
-                    final first = bloc.state.list.firstOrNull;
-                    if (first != null) {
-                      // programmatic scroll with helper
-                      // (via CollectionWidgetState.scrollToItem)
-                    }
-                  },
-                  label: const Text('Scroll to 1st'),
-                ),
-              ],
-            );
-          },
-        ),
+          const SizedBox(width: 6),
+          Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: fg)),
+        ],
       ),
     );
   }
@@ -306,7 +621,7 @@ enum FormFieldKey { email, terms }
 
 ## Example app
 
-A full example lives in `blocx_flutter/example`. Run:
+A full example lives in `flutter_blocx/example`. Run:
 
 ```sh
 flutter pub get

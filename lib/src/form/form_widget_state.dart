@@ -1,7 +1,7 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_flutter/flutter_blocx.dart';
-import 'package:blocx_flutter/form_widget.dart';
-import 'package:blocx_flutter/src/form/widgets/blocx_form_checkbox.dart';
+import 'package:flutter_blocx/flutter_blocx.dart';
+import 'package:flutter_blocx/form_widget.dart';
+import 'package:flutter_blocx/src/form/widgets/blocx_form_checkbox.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

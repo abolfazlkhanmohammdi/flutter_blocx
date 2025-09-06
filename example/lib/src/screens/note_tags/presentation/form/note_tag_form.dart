@@ -4,7 +4,7 @@ import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag_form_data.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag_form_payload.dart';
 import 'package:flutter/material.dart';
-import 'package:blocx_flutter/form_widget.dart';
+import 'package:flutter_blocx/form_widget.dart';
 
 class NoteTagForm extends FormWidget<NoteTagFormPayload> {
   const NoteTagForm({super.key, required super.payload});

@@ -1,5 +1,5 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_flutter/list_widget.dart';
+import 'package:flutter_blocx/list_widget.dart';
 import 'package:example/src/screens/users/bloc/users_bloc.dart';
 import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:example/src/screens/users/presentation/user_card.dart';

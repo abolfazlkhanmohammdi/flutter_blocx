@@ -1,5 +1,5 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_flutter/src/core/widgets/blocx_stateless_widget.dart';
+import 'package:flutter_blocx/src/core/widgets/blocx_stateless_widget.dart';
 import 'package:flutter/material.dart';
 
 import 'form_register_button.dart';

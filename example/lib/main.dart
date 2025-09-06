@@ -1,7 +1,7 @@
-import 'package:blocx_core/src/core/enum_error_codes.dart';
-import 'package:blocx_flutter/flutter_blocx.dart';
+import 'package:blocx_core/blocx_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blocx/flutter_blocx.dart';
 
 import 'src/screens/splash/presentation/splash_screen.dart';
 

@@ -1,4 +1,4 @@
-import 'package:blocx_flutter/src/widgets/collection/collection_options.dart';
+import 'package:flutter_blocx/src/widgets/collection/collection_options.dart';
 import 'package:flutter/material.dart';
 
 class SliverInfiniteGridOptions extends CollectionOptions {

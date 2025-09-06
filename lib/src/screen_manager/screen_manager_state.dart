@@ -1,9 +1,9 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_flutter/src/core/base/bloc_x_widget_state.dart';
-import 'package:blocx_flutter/src/screen_manager/blocx_error_widget.dart';
+import 'package:flutter_blocx/src/core/base/bloc_x_widget_state.dart';
+import 'package:flutter_blocx/src/screen_manager/blocx_error_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:blocx_flutter/src/widgets/blocx_snack_bar.dart';
+import 'package:flutter_blocx/src/widgets/blocx_snack_bar.dart';
 
 abstract class ScreenManagerState<T extends StatefulWidget> extends BlocXWidgetState<T> {
   final ScreenManagerCubit _managerCubit;

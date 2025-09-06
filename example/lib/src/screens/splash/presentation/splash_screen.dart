@@ -1,4 +1,4 @@
-import 'package:blocx_flutter/flutter_blocx.dart';
+import 'package:flutter_blocx/flutter_blocx.dart';
 import 'package:example/src/screens/splash/bloc/splash_bloc.dart';
 import 'package:example/src/screens/users/presentation/users_screen.dart';
 import 'package:flutter/material.dart';

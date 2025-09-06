@@ -1,4 +1,4 @@
-import 'package:blocx_flutter/list_widget.dart';
+import 'package:flutter_blocx/list_widget.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag_form_payload.dart';
 import 'package:example/src/screens/note_tags/presentation/form/note_tag_form.dart';

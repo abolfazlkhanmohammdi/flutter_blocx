@@ -1,5 +1,5 @@
-import 'package:blocx_flutter/flutter_blocx.dart';
-import 'package:blocx_flutter/list_widget.dart';
+import 'package:flutter_blocx/flutter_blocx.dart';
+import 'package:flutter_blocx/list_widget.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
 import 'package:example/src/screens/notes/data/models/note.dart';
 import 'package:example/src/screens/users/data/models/user.dart';

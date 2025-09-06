@@ -2,8 +2,8 @@ import 'package:blocx_core/blocx_core.dart';
 import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:example/src/screens/users/data/repositories/users_repository.dart';
 
-class UseCaseSearchUsers extends SearchUseCase<User> {
-  UseCaseSearchUsers({required super.searchText, required super.loadCount, required super.offset});
+class SearchUsersUseCase extends SearchUseCase<User> {
+  SearchUsersUseCase({required super.searchText, required super.loadCount, required super.offset});
 
   @override
   Future<UseCaseResult<Page<User>>> perform() async {

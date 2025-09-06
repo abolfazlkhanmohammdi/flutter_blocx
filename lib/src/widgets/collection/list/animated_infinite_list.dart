@@ -1,5 +1,5 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_flutter/src/widgets/collection/options/animated_infinite_list.dart';
+import 'package:flutter_blocx/src/widgets/collection/options/animated_infinite_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
