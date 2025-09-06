@@ -49,13 +49,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.0"
-  blocx:
+  blocx_core:
     dependency: "direct main"
     description:
-      path: "../../blocx"
-      relative: true
-    source: path
-    version: "1.0.0"
+      name: blocx_core
+      sha256: a13d3667cfe7416f73537f2fa46cccb256fdada5f7ac69404801c51313f2699d
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.1-beta"
   boolean_selector:
     dependency: transitive
     description:
@@ -97,7 +98,7 @@ packages:
     source: hosted
     version: "3.0.2"
   build_runner:
-    dependency: "direct dev"
+    dependency: transitive
     description:
       name: build_runner
       sha256: fd3c09f4bbff7fa6e8d8ef688a0b2e8a6384e6483a25af0dac75fef362bcfe6f
@@ -184,6 +185,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.6"
+  cupertino_icons:
+    dependency: "direct main"
+    description:
+      name: cupertino_icons
+      sha256: ba631d1c7f7bef6b729a622b7b752645a2d076dba9976925b8f25725a30e1ee6
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.8"
   dart_style:
     dependency: transitive
     description:
@@ -240,10 +249,11 @@ packages:
   flutter_blocx:
     dependency: "direct main"
     description:
-      path: ".."
-      relative: true
-    source: path
-    version: "0.0.1"
+      name: flutter_blocx
+      sha256: da8cd13283b108ddd9ff00e27cd65fbd777cbf36715787044cc6f92acbc90bbb
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.0-beta"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -266,7 +276,7 @@ packages:
     source: hosted
     version: "3.2.0"
   freezed_annotation:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: freezed_annotation
       sha256: "7294967ff0a6d98638e7acb774aac3af2550777accd8149c90af5b014e6d44d8"
@@ -461,10 +471,10 @@ packages:
     dependency: transitive
     description:
       name: provider
-      sha256: "4abbd070a04e9ddc287673bf5a030c7ca8b685ff70218720abab8b092f53dd84"
+      sha256: "4e82183fa20e5ca25703ead7e05de9e4cceed1fbd1eadc1ac3cb6f565a09f272"
       url: "https://pub.dev"
     source: hosted
-    version: "6.1.5"
+    version: "6.1.5+1"
   pub_semver:
     dependency: transitive
     description:
@@ -481,6 +491,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.0"
+  scroll_to_index:
+    dependency: transitive
+    description:
+      name: scroll_to_index
+      sha256: b707546e7500d9f070d63e5acf74fd437ec7eeeb68d3412ef7b0afada0b4f176
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.1"
   shelf:
     dependency: transitive
     description:
@@ -626,10 +644,10 @@ packages:
     dependency: transitive
     description:
       name: watcher
-      sha256: "0b7fd4a0bbc4b92641dbf20adfd7e3fd1398fe17102d94b674234563e110088a"
+      sha256: "5bf046f41320ac97a469d506261797f35254fa61c641741ef32dacda98b7d39c"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.2"
+    version: "1.1.3"
   web:
     dependency: transitive
     description:

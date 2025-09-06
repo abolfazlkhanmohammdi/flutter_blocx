@@ -1,20 +1,21 @@
 name: flutter_blocx
-description: "A new Flutter package project."
-version: 0.0.1
-homepage:
-publish_to: 'none'
+description: Ui widgets to work with blocx_core.
+version: 0.5.5-beta
+repository: https://github.com/abolfazlkhanmohammdi/flutter_blocx
+issue_tracker: https://github.com/abolfazlkhanmohammdi/flutter_blocx/issues
+topics: [bloc, architecture, lists, forms]
 environment:
   sdk: ^3.8.1
-  flutter: ">=1.17.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  blocx:
-    path: ../blocx
+  blocx_core: ^0.5.1-beta
   flutter_bloc: ^9.1.1
   implicitly_animated_list: ^2.3.0
   visibility_detector: ^0.4.0+2
+  logger: ^2.6.1
+  scroll_to_index: ^3.0.1
 
 dev_dependencies:
   flutter_test:
@@ -25,7 +26,7 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
-flutter:
+#flutter:
 
   # To add assets to your package, add an assets section, like this:
   # assets:

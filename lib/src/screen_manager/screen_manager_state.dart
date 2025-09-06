@@ -1,9 +1,11 @@
-import 'package:blocx/blocx.dart';
+import 'package:blocx_core/blocx_core.dart';
+import 'package:flutter_blocx/src/core/base/bloc_x_widget_state.dart';
+import 'package:flutter_blocx/src/screen_manager/blocx_error_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx/src/widgets/blocx_snack_bar.dart';
 
-abstract class ScreenManagerState<T extends StatefulWidget> extends State<T> {
+abstract class ScreenManagerState<T extends StatefulWidget> extends BlocXWidgetState<T> {
   final ScreenManagerCubit _managerCubit;
   ScreenManagerState({required ScreenManagerCubit managerCubit}) : _managerCubit = managerCubit;
   @override
@@ -39,7 +41,9 @@ abstract class ScreenManagerState<T extends StatefulWidget> extends State<T> {
   bool get wrapInScaffold => false;
 
   @protected
-  Widget errorWidget(BuildContext context, ScreenManagerCubitStateDisplayErrorPage state);
+  Widget errorWidget(BuildContext context, ScreenManagerCubitStateDisplayErrorPage state) {
+    return BlocxErrorWidget.fromState(state);
+  }
 
   @protected
   Widget mainWidget(BuildContext context, ScreenManagerCubitState state);
