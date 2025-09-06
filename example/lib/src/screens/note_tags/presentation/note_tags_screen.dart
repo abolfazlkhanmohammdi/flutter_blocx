@@ -7,7 +7,7 @@ import 'package:example/src/screens/note_tags/presentation/widgets/note_tag_card
 import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:flutter/material.dart';
 
-class NoteTagsScreen extends ListWidget<User> {
+class NoteTagsScreen extends CollectionWidget<User> {
   const NoteTagsScreen({super.key, required super.payload});
 
   @override
@@ -52,9 +52,6 @@ class _NoteTagsScreenState extends CollectionWidgetState<NoteTagsScreen, NoteTag
   }
 
   @override
-  InfiniteListOptions get listOptions => InfiniteListOptions(useAnimatedList: true);
-
-  @override
   Future<void> onFabPressed(data) async {
     var result = await showModalBottomSheet<NoteTag>(
       context: context,
@@ -63,4 +60,10 @@ class _NoteTagsScreenState extends CollectionWidgetState<NoteTagsScreen, NoteTag
     if (result == null) return;
     addToList(result);
   }
+
+  @override
+  CollectionInput get settings => CollectionInput(
+    type: CollectionWidgetStateType.animatedList,
+    options: AnimatedInfiniteListOptions.defaultOptions(),
+  );
 }

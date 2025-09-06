@@ -1,14 +1,12 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_flutter/src/widgets/infinite_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:blocx_flutter/list_widget.dart';
 import 'package:blocx_flutter/src/screen_manager/screen_manager_state.dart';
-import 'package:blocx_flutter/src/widgets/infinite_list.dart';
 import 'package:implicitly_animated_list/implicitly_animated_list.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-abstract class CollectionWidgetState<W extends ListWidget<P>, T extends BaseEntity, P>
+abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends BaseEntity, P>
     extends ScreenManagerState<W> {
   late final ListBloc<T, P> bloc;
   ScrollController? scrollController;
@@ -24,14 +22,18 @@ abstract class CollectionWidgetState<W extends ListWidget<P>, T extends BaseEnti
   @override
   Widget mainWidget(BuildContext context, ScreenManagerCubitState state) {
     return BlocProvider<ListBloc<T, P>>.value(
-      value: bloc, // externally provided; don't dispose here
+      value: bloc,
       child: BlocConsumer<ListBloc<T, P>, ListState<T>>(
         buildWhen: (_, s) => s.shouldRebuild,
         listenWhen: (_, s) => s.shouldListen,
         listener: _listListener,
-        builder: listWrapperBuilder,
+        builder: _collectionDisplayType.isSliver ? sliverWrapperBuilder : listWrapperBuilder,
       ),
     );
+  }
+
+  Widget sliverWrapperBuilder(BuildContext context, ListState<T> state) {
+    return collectionWidget(context, state);
   }
 
   Widget listWrapperBuilder(BuildContext context, ListState<T> state) {
@@ -42,11 +44,8 @@ abstract class CollectionWidgetState<W extends ListWidget<P>, T extends BaseEnti
         ? loadingWidget(context, state)
         : state.list.isEmpty
         ? emptyWidget(context, state)
-        : collectionDisplayType == CollectionWidgetStateType.list
-        ? listWidget(context, state)
-        : gridWidget(context, state);
+        : collectionWidget(context, state);
 
-    // if neither top nor bottom exists, return list directly
     if (!hasTopOrBottomWidget) return listOrLoading;
 
     return Column(
@@ -60,16 +59,12 @@ abstract class CollectionWidgetState<W extends ListWidget<P>, T extends BaseEnti
     );
   }
 
-  /// Spacing inserted between top/bottom widgets and the list.
   double get topBottomAndListSpacing => 8.0;
 
-  /// Optional header above the list.
   Widget? topWidget(BuildContext context, ListState<T> state) => null;
 
-  /// Optional footer below the list.
   Widget? bottomWidget(BuildContext context, ListState<T> state) => null;
 
-  /// Renders a single list item.
   Widget itemBuilder(BuildContext context, T item);
 
   void _listListener(BuildContext context, ListState<T> state) {
@@ -117,7 +112,6 @@ abstract class CollectionWidgetState<W extends ListWidget<P>, T extends BaseEnti
 
   AnimatedChildBuilder? get insertAnimation => null;
 
-  // does not work with animated list variant
   Widget separatorBuilder(BuildContext context, int index) {
     return SizedBox.shrink();
   }
@@ -142,7 +136,6 @@ abstract class CollectionWidgetState<W extends ListWidget<P>, T extends BaseEnti
   }
 
   void scrollToItem(T item, {bool highlightItem = false}) {
-    // Ensure the bloc has the scrollable mixin
     if (!this.bloc.isScrollable) {
       throw StateError(
         'scrollToIndex can only be used on a bloc that mixes in '
@@ -188,39 +181,110 @@ abstract class CollectionWidgetState<W extends ListWidget<P>, T extends BaseEnti
     bloc.add(ListEventDeselectMultipleItems(items: items));
   }
 
-  CollectionWidgetStateType get collectionDisplayType => CollectionWidgetStateType.list;
+  CollectionWidgetStateType get _collectionDisplayType => settings.type;
+  CollectionOptions get _collectionOptions => settings.options;
+  CollectionInput get settings => CollectionInput(
+    type: CollectionWidgetStateType.animatedList,
+    options: AnimatedInfiniteListOptions.defaultOptions(),
+  );
 
-  InfiniteGridOptions get gridOptions => InfiniteGridOptions();
+  Widget collectionWidget(BuildContext context, ListState<T> state) {
+    final opts = _collectionOptions;
+    opts.assertCorrectType(_collectionDisplayType);
+    opts.verifyOrThrow(_collectionDisplayType);
 
-  Widget listWidget(BuildContext context, ListState<T> state) {
-    return InfiniteList<T>(
-      scrollController: scrollController,
-      refreshOnSwipe: bloc.isRefreshable ? refreshData : null,
-      loadBottomData: bloc.isInfinite ? loadNextPage : null,
-      itemBuilder: itemBuilder,
-      items: state.list,
-      bloc: bloc.infiniteListBloc,
-      deleteAnimation: deleteAnimation,
-      insertAnimation: insertAnimation,
-      separatorBuilder: separatorBuilder,
-      options: listOptions.copyWith(padding: padding),
-      refreshWidgetBuilder: refreshWidgetBuilder,
-      loadMoreWidgetBuilder: loadMoreWidgetBuilder,
-    );
-  }
+    switch (_collectionDisplayType) {
+      case CollectionWidgetStateType.list:
+        return InfiniteList<T>(
+          options: opts.asOrThrow<InfiniteListOptions>(),
+          items: state.list,
+          itemBuilder: itemBuilder,
+          bloc: bloc.infiniteListBloc,
+          scrollController: scrollController,
+          separatorBuilder: separatorBuilder,
+          refreshOnSwipe: bloc.isRefreshable ? refreshData : null,
+          loadBottomData: bloc.isInfinite ? loadNextPage : null,
+          loadMoreWidgetBuilder: loadMoreWidgetBuilder,
+          refreshWidgetBuilder: refreshWidgetBuilder,
+        );
 
-  Widget gridWidget(BuildContext context, ListState<T> state) {
-    return InfiniteGrid<T>(
-      scrollController: scrollController,
-      refreshOnSwipe: bloc.isRefreshable ? refreshData : null,
-      loadBottomData: bloc.isInfinite ? loadNextPage : null,
-      itemBuilder: itemBuilder,
-      items: state.list,
-      bloc: bloc.infiniteListBloc,
-      options: gridOptions.copyWith(padding: padding),
-      refreshWidgetBuilder: refreshWidgetBuilder,
-      loadMoreWidgetBuilder: loadMoreWidgetBuilder,
-    );
+      case CollectionWidgetStateType.sliverList:
+        return SliverInfiniteList<T>(
+          options: opts.asOrThrow<SliverInfiniteListOptions>(),
+          items: state.list,
+          itemBuilder: itemBuilder,
+          bloc: bloc.infiniteListBloc,
+          scrollController: scrollController,
+          refreshOnSwipe: bloc.isRefreshable ? refreshData : null,
+          loadBottomData: bloc.isInfinite ? loadNextPage : null,
+          loadMoreWidgetBuilder: loadMoreWidgetBuilder,
+          refreshWidgetBuilder: refreshWidgetBuilder,
+          topWidgetBuilder: (c) => topWidget(c, state),
+          bottomWidgetBuilder: (c) => bottomWidget(c, state),
+        );
+
+      case CollectionWidgetStateType.animatedList:
+        return AnimatedInfiniteList<T>(
+          options: opts.asOrThrow<AnimatedInfiniteListOptions>(),
+          items: state.list,
+          itemBuilder: itemBuilder,
+          bloc: bloc.infiniteListBloc,
+          scrollController: scrollController,
+          refreshOnSwipe: bloc.isRefreshable ? refreshData : null,
+          loadBottomData: bloc.isInfinite ? loadNextPage : null,
+          loadTopData: null,
+          loadMoreWidgetBuilder: loadMoreWidgetBuilder,
+          refreshWidgetBuilder: refreshWidgetBuilder,
+          separatorBuilder: separatorBuilder,
+          deleteAnimation: deleteAnimation,
+          insertAnimation: insertAnimation,
+        );
+
+      case CollectionWidgetStateType.animatedSliverList:
+        return AnimatedSliverInfiniteList<T>(
+          options: opts.asOrThrow<AnimatedSliverInfiniteListOptions>(),
+          items: state.list,
+          itemBuilder: itemBuilder,
+          bloc: bloc.infiniteListBloc,
+          separatorBuilder: separatorBuilder,
+          refreshOnSwipe: bloc.isRefreshable ? refreshData : null,
+          loadBottomData: bloc.isInfinite ? loadNextPage : null,
+          loadTopData: null,
+          scrollController: scrollController,
+          loadMoreWidgetBuilder: loadMoreWidgetBuilder,
+          refreshWidgetBuilder: refreshWidgetBuilder,
+          topWidgetBuilder: (c) => topWidget(c, state),
+          bottomWidgetBuilder: (c) => bottomWidget(c, state),
+        );
+
+      case CollectionWidgetStateType.grid:
+        return InfiniteGrid<T>(
+          options: opts.asOrThrow<InfiniteGridOptions>(),
+          items: state.list,
+          itemBuilder: itemBuilder,
+          bloc: bloc.infiniteListBloc,
+          scrollController: scrollController,
+          refreshOnSwipe: bloc.isRefreshable ? refreshData : null,
+          loadBottomData: bloc.isInfinite ? loadNextPage : null,
+          loadMoreWidgetBuilder: loadMoreWidgetBuilder,
+          refreshWidgetBuilder: refreshWidgetBuilder,
+        );
+
+      case CollectionWidgetStateType.sliverGrid:
+        return SliverInfiniteGrid<T>(
+          options: opts.asOrThrow<SliverInfiniteGridOptions>(),
+          items: state.list,
+          itemBuilder: itemBuilder,
+          bloc: bloc.infiniteListBloc,
+          scrollController: scrollController,
+          refreshOnSwipe: bloc.isRefreshable ? refreshData : null,
+          loadBottomData: bloc.isInfinite ? loadNextPage : null,
+          loadMoreWidgetBuilder: loadMoreWidgetBuilder,
+          refreshWidgetBuilder: refreshWidgetBuilder,
+          topWidgetBuilder: (c) => topWidget(c, state),
+          bottomWidgetBuilder: (c) => bottomWidget(c, state),
+        );
+    }
   }
 
   addToList(T item, {int index = 0}) {
@@ -228,4 +292,20 @@ abstract class CollectionWidgetState<W extends ListWidget<P>, T extends BaseEnti
   }
 }
 
-enum CollectionWidgetStateType { list, grid }
+enum CollectionWidgetStateType {
+  list(false),
+  sliverList(true),
+  animatedList(false),
+  animatedSliverList(true),
+  grid(false),
+  sliverGrid(true);
+
+  final bool isSliver;
+  const CollectionWidgetStateType(this.isSliver);
+}
+
+class CollectionInput {
+  final CollectionWidgetStateType type;
+  final CollectionOptions options;
+  CollectionInput({required this.type, required this.options});
+}

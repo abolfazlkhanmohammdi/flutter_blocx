@@ -1,6 +1,5 @@
 import 'package:blocx_core/blocx_core.dart';
 import 'package:blocx_flutter/flutter_blocx.dart';
-import 'package:blocx_flutter/src/widgets/confirm_action_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

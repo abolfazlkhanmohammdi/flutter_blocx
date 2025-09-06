@@ -5,7 +5,7 @@ import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:example/src/screens/users/presentation/user_card.dart';
 import 'package:flutter/material.dart';
 
-class UsersScreen extends ListWidget<dynamic> {
+class UsersScreen extends CollectionWidget<dynamic> {
   const UsersScreen({super.key});
 
   @override
@@ -16,9 +16,6 @@ class _UsersScreenState extends CollectionWidgetState<UsersScreen, User, dynamic
   TextEditingController searchController = TextEditingController();
 
   _UsersScreenState() : super(bloc: UsersBloc());
-
-  @override
-  CollectionWidgetStateType get collectionDisplayType => CollectionWidgetStateType.grid;
 
   @override
   Widget? topWidget(BuildContext context, ListState<User> state) {
@@ -56,5 +53,8 @@ class _UsersScreenState extends CollectionWidgetState<UsersScreen, User, dynamic
   }
 
   @override
-  InfiniteGridOptions get gridOptions => InfiniteGridOptions(childAspectRatio: 0.65);
+  CollectionInput get settings => CollectionInput(
+    type: CollectionWidgetStateType.grid,
+    options: InfiniteGridOptions.defaultOptions().copyWith(childAspectRatio: 0.75),
+  );
 }

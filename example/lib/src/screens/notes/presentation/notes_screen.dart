@@ -8,7 +8,7 @@ import 'package:example/src/screens/notes/presentation/widgets/number_nudge.dart
 import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:flutter/material.dart';
 
-class NotesScreen extends ListWidget<(NoteTag, User)> {
+class NotesScreen extends CollectionWidget<(NoteTag, User)> {
   const NotesScreen({super.key, super.payload});
 
   @override
