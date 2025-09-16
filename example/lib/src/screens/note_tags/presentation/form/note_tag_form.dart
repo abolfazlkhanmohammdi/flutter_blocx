@@ -15,7 +15,7 @@ class NoteTagForm extends FormWidget<NoteTagFormPayload> {
 
 class _NoteTagFormState
     extends FormWidgetState<NoteTagForm, NoteTagFormData, NoteTagFormPayload, NoteTagFormKey> {
-  _NoteTagFormState() : super(bloc: NoteTagFormBloc());
+  _NoteTagFormState() : super(_bloc: NoteTagFormBloc());
 
   @override
   formWidget(BuildContext context, FormBlocState<NoteTagFormData, NoteTagFormKey> state) {

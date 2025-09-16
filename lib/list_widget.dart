@@ -1,6 +1,6 @@
 export './src/list/collection_widget.dart';
-export './src/list/paged_collection_state.dart';
-export 'src/widgets/collection/blocx_collection_widget.dart';
+export './src/list/collection_widget_state.dart';
+export 'src/widgets/collection/blocx_collection_item.dart';
 export './src/widgets/blocx_search_field.dart';
 export 'src/widgets/collection/grid/infinite_grid.dart';
 export 'src/widgets/collection/grid/sliver_infinite_grid.dart';

@@ -1,7 +1,7 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_blocx/src/widgets/collection/options/animated_sliver_infinite_list.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:implicitly_animated_list/implicitly_animated_list.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -27,16 +27,19 @@ class AnimatedSliverInfiniteList<Entity extends BaseEntity> extends StatefulWidg
   final Widget Function(BuildContext context, Entity item) itemBuilder;
   final Widget Function(BuildContext context, int index)? separatorBuilder;
 
-  final void Function()? loadBottomData;
-  final void Function()? loadTopData;
-  final void Function()? refreshOnSwipe;
+  final VoidCallback? loadBottomData;
+  final VoidCallback? loadTopData;
+  final VoidCallback? refreshOnSwipe;
 
   final ScrollController? scrollController;
   final Widget? Function(BuildContext context, bool isLoadingMore)? loadMoreWidgetBuilder;
   final Widget? Function(BuildContext context, double swipeRefreshHeight)? refreshWidgetBuilder;
-
-  final Widget? Function(BuildContext context)? topWidgetBuilder;
-  final Widget? Function(BuildContext context)? bottomWidgetBuilder;
+  final Widget loading;
+  final Widget empty;
+  final bool? isLoading;
+  final bool? isEmpty;
+  final Widget? sliverTop;
+  final Widget? sliverBottom;
 
   const AnimatedSliverInfiniteList({
     super.key,
@@ -44,6 +47,8 @@ class AnimatedSliverInfiniteList<Entity extends BaseEntity> extends StatefulWidg
     required this.items,
     required this.itemBuilder,
     required this.bloc,
+    required this.loading,
+    required this.empty,
     this.separatorBuilder,
     this.refreshOnSwipe,
     this.loadBottomData,
@@ -51,8 +56,10 @@ class AnimatedSliverInfiniteList<Entity extends BaseEntity> extends StatefulWidg
     this.scrollController,
     this.loadMoreWidgetBuilder,
     this.refreshWidgetBuilder,
-    this.topWidgetBuilder,
-    this.bottomWidgetBuilder,
+    this.isLoading,
+    this.isEmpty,
+    this.sliverTop,
+    this.sliverBottom,
   });
 
   @override
@@ -80,25 +87,58 @@ class AnimatedSliverInfiniteListState<Entity extends BaseEntity>
       value: widget.bloc,
       child: BlocConsumer<InfiniteListBloc, InfiniteListState>(
         bloc: widget.bloc,
-        listener: blocListener,
-        buildWhen: (_, c) => c.shouldRebuild,
+        listenWhen: (_, s) => s.shouldListen,
+        buildWhen: (_, s) => s.shouldRebuild,
+        listener: (context, state) {
+          if (state is InfiniteListStateRefresh) {
+            widget.refreshOnSwipe?.call();
+          }
+        },
         builder: (context, state) {
+          final bool showLoading = widget.isLoading ?? false;
+          final bool showEmpty = !showLoading && (widget.isEmpty ?? widget.items.isEmpty);
+          final slivers = <Widget>[];
+
+          if (widget.sliverTop != null) {
+            slivers.add(widget.sliverTop!);
+          }
+
+          final refresh = _buildSwipeRefresh(context, state);
+          if (refresh != null) {
+            slivers.add(SliverToBoxAdapter(child: refresh));
+          }
+          if (showLoading || showEmpty) {
+            slivers.add(SliverFillRemaining(child: showLoading ? widget.loading : widget.empty));
+          } else {
+            final core = _buildAnimatedList(context, state);
+            slivers.add(_maybePad(core, options.padding));
+          }
+
+          final bottomLoader = _buildLoadMore(context, state);
+          if (bottomLoader != null) {
+            slivers.add(SliverToBoxAdapter(child: bottomLoader));
+          }
+
+          if (widget.sliverBottom != null) {
+            slivers.add(widget.sliverBottom!);
+          }
+
           return NotificationListener<UserScrollNotification>(
-            onNotification: onScroll,
+            onNotification: (n) => _onScroll(n),
             child: Listener(
               onPointerDown: (d) => bloc.add(InfiniteListEventVerticalDragStarted(globalY: d.position.dy)),
-              onPointerUp: (d) => bloc.add(InfiniteListEventVerticalDragEnded()),
-              onPointerMove: maySwipe
+              onPointerUp: (_) => bloc.add(InfiniteListEventVerticalDragEnded()),
+              onPointerMove: _maySwipe(state)
                   ? (d) => bloc.add(InfiniteListEventVerticalDragUpdated(globalY: d.position.dy))
                   : null,
-              onPointerCancel: maySwipe
+              onPointerCancel: _maySwipe(state)
                   ? (_) => bloc.add(InfiniteListEventVerticalDragUpdated(globalY: null))
                   : null,
               child: CustomScrollView(
                 controller: effectiveController,
-                physics: options.scrollPhysics ?? const AlwaysScrollableScrollPhysics(),
                 reverse: options.reverse,
-                slivers: _buildSlivers(context, state),
+                physics: options.scrollPhysics,
+                slivers: slivers,
               ),
             ),
           );
@@ -107,65 +147,7 @@ class AnimatedSliverInfiniteListState<Entity extends BaseEntity>
     );
   }
 
-  List<Widget> _buildSlivers(BuildContext context, InfiniteListState state) {
-    final slivers = <Widget>[];
-
-    if (widget.topWidgetBuilder != null) {
-      final w = widget.topWidgetBuilder!(context);
-      if (w != null) slivers.add(SliverToBoxAdapter(child: w));
-    } else {
-      slivers.add(
-        SliverToBoxAdapter(
-          child: options.reverse ? loadMoreWidget(context, state) : swipeRefreshWidget(context, state),
-        ),
-      );
-    }
-
-    final listSliver = _sliverAnimatedList(context, state);
-    if (options.padding != null) {
-      slivers.add(SliverPadding(padding: options.padding!, sliver: listSliver));
-    } else {
-      slivers.add(listSliver);
-    }
-
-    if (widget.bottomWidgetBuilder != null) {
-      final w = widget.bottomWidgetBuilder!(context);
-      if (w != null) slivers.add(SliverToBoxAdapter(child: w));
-    } else {
-      slivers.add(
-        SliverToBoxAdapter(
-          child: options.reverse ? swipeRefreshWidget(context, state) : loadMoreWidget(context, state),
-        ),
-      );
-    }
-
-    return slivers;
-  }
-
-  bool get _atTopByController => effectiveController.hasClients && effectiveController.position.pixels <= 0.0;
-
-  bool get _atBottomByController =>
-      effectiveController.hasClients &&
-      (effectiveController.position.pixels >= effectiveController.position.maxScrollExtent - 1.0);
-
-  bool get _atRefreshEdge => options.reverse
-      ? (bloc.state.isAtBottom || _atBottomByController)
-      : (bloc.state.isAtTop || _atTopByController);
-
-  bool get maySwipe => _atRefreshEdge && !bloc.state.isRefreshing && widget.refreshOnSwipe != null;
-
-  void onVisibilityChanged(VisibilityInfo c, InfiniteListState state) {
-    if (c.visibleFraction < 0.5 ||
-        state.isLoadingMore ||
-        widget.loadBottomData == null ||
-        state.isScrollingUp) {
-      return;
-    }
-    bloc.setLoadingBottomStatus(true);
-    widget.loadBottomData!();
-  }
-
-  bool onScroll(UserScrollNotification n) {
+  bool _onScroll(UserScrollNotification n) {
     final isIdle = n.direction == ScrollDirection.idle;
     final isAtTop = n.metrics.extentBefore <= 0.0;
     final isAtBottom = n.metrics.extentAfter <= 0.0;
@@ -185,39 +167,23 @@ class AnimatedSliverInfiniteListState<Entity extends BaseEntity>
     return false;
   }
 
-  void blocListener(BuildContext context, InfiniteListState state) {
-    if (state is InfiniteListStateRefresh) {
-      widget.refreshOnSwipe?.call();
-    }
-  }
+  bool get _atTopByController => effectiveController.hasClients && effectiveController.position.pixels <= 0.0;
 
-  Widget loadMoreWidget(BuildContext context, InfiniteListState state) {
-    final external = widget.loadMoreWidgetBuilder?.call(context, state.isLoadingMore);
-    if (external != null) return external;
+  bool get _atBottomByController =>
+      effectiveController.hasClients &&
+      (effectiveController.position.pixels >= effectiveController.position.maxScrollExtent - 1.0);
 
-    final scheme = Theme.of(context).colorScheme;
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 300),
-      child: state.isLoadingMore
-          ? Container(
-              padding: const EdgeInsets.all(16),
-              color: scheme.primary,
-              child: Center(
-                child: SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: CircularProgressIndicator(color: scheme.onPrimary),
-                ),
-              ),
-            )
-          : const SizedBox(),
-    );
-  }
+  bool _atRefreshEdge(InfiniteListState state) =>
+      options.reverse ? (state.isAtBottom || _atBottomByController) : (state.isAtTop || _atTopByController);
 
-  Widget swipeRefreshWidget(BuildContext context, InfiniteListState state) {
+  bool _maySwipe(InfiniteListState state) =>
+      _atRefreshEdge(state) && !state.isRefreshing && widget.refreshOnSwipe != null;
+
+  Widget? _buildSwipeRefresh(BuildContext context, InfiniteListState state) {
     final external = widget.refreshWidgetBuilder?.call(context, state.swipeRefreshHeight);
     if (external != null) return external;
 
+    if (state.swipeRefreshHeight <= 0) return null;
     final primary = Theme.of(context).colorScheme.primary;
     return Container(
       color: primary,
@@ -228,7 +194,38 @@ class AnimatedSliverInfiniteListState<Entity extends BaseEntity>
     );
   }
 
-  Widget wrapInAutoScrollTag(Widget child, Entity data, int index) {
+  Widget? _buildLoadMore(BuildContext context, InfiniteListState state) {
+    final external = widget.loadMoreWidgetBuilder?.call(context, state.isLoadingMore);
+    if (external != null) return external;
+
+    if (!state.isLoadingMore) return null;
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      color: scheme.primary,
+      child: Center(
+        child: SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: scheme.onPrimary)),
+      ),
+    );
+  }
+
+  Widget _maybePad(Widget sliver, EdgeInsets? padding) {
+    if (padding == null) return sliver;
+    return SliverPadding(padding: padding, sliver: sliver);
+  }
+
+  void _onVisibilityChanged(VisibilityInfo c, InfiniteListState state) {
+    if (c.visibleFraction < 0.5 ||
+        state.isLoadingMore ||
+        widget.loadBottomData == null ||
+        state.isScrollingUp) {
+      return;
+    }
+    bloc.setLoadingBottomStatus(true);
+    widget.loadBottomData!.call();
+  }
+
+  Widget _wrapInAutoScrollTag(Widget child, Entity data, int index) {
     final c = effectiveController;
     if (c is! AutoScrollController) return child;
     return AutoScrollTag(key: ValueKey(data.identifier), controller: c, index: index, child: child);
@@ -251,16 +248,16 @@ class AnimatedSliverInfiniteListState<Entity extends BaseEntity>
 
     if (isBottomLoadingTrigger && !state.hasReachedEnd) {
       child = VisibilityDetector(
-        key: Key("$uuid-LoadMore-$index"),
-        onVisibilityChanged: (c) => onVisibilityChanged(c, state),
+        key: Key("${uuid}_LoadMore_$index"),
+        onVisibilityChanged: (c) => _onVisibilityChanged(c, state),
         child: child,
       );
     }
 
-    return wrapInAutoScrollTag(child, data, index);
+    return _wrapInAutoScrollTag(child, data, index);
   }
 
-  Widget _sliverAnimatedList(BuildContext context, InfiniteListState state) {
+  Widget _buildAnimatedList(BuildContext context, InfiniteListState state) {
     return SliverImplicitlyAnimatedList<Entity>(
       itemData: widget.items,
       itemBuilder: (c, data) => _animatedItemWithOptionalSeparator(c, data, state),

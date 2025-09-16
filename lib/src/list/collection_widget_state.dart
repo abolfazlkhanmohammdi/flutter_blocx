@@ -1,62 +1,59 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_core/src/blocs/list/models/selection_changed_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx/list_widget.dart';
+import 'package:flutter_blocx/src/core/localizations/loc_provider.dart';
 import 'package:flutter_blocx/src/screen_manager/screen_manager_state.dart';
 import 'package:implicitly_animated_list/implicitly_animated_list.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends BaseEntity, P>
     extends ScreenManagerState<W> {
-  late final ListBloc<T, P> bloc;
+  late final ListBloc<T, P> _bloc;
   ScrollController? scrollController;
-  CollectionWidgetState({required this.bloc}) : super(managerCubit: bloc.screenManagerCubit);
 
   @override
   void initState() {
+    _bloc = generateBloc;
     setScrollController();
-    bloc.add(ListEventLoadInitialPage<T, P>(payload: widget.payload));
+    if (loadOnInit) {
+      _bloc.add(ListEventLoadInitialPage<T, P>(payload: widget.payload));
+    }
     super.initState();
   }
 
   @override
   Widget mainWidget(BuildContext context, ScreenManagerCubitState state) {
     return BlocProvider<ListBloc<T, P>>.value(
-      value: bloc,
+      value: _bloc,
       child: BlocConsumer<ListBloc<T, P>, ListState<T>>(
         buildWhen: (_, s) => s.shouldRebuild,
         listenWhen: (_, s) => s.shouldListen,
         listener: _listListener,
-        builder: _collectionDisplayType.isSliver ? sliverWrapperBuilder : listWrapperBuilder,
+        builder: collectionWrapperBuilder,
       ),
     );
   }
 
-  Widget sliverWrapperBuilder(BuildContext context, ListState<T> state) {
-    return collectionWidget(context, state);
-  }
-
-  Widget listWrapperBuilder(BuildContext context, ListState<T> state) {
+  Widget collectionWrapperBuilder(BuildContext context, ListState<T> state) {
     final top = topWidget(context, state);
     final bottom = bottomWidget(context, state);
-    bool hasTopOrBottomWidget = top != null || bottom != null;
-    final listOrLoading = isLoading || isSearching
-        ? loadingWidget(context, state)
-        : state.list.isEmpty
-        ? emptyWidget(context, state)
-        : collectionWidget(context, state);
+    final bool isLoadingOrSearching = isLoading || isSearching;
+    final bool isEmpty = !isLoading && state.list.isEmpty;
+    final Widget coreBox = (isLoadingOrSearching || isEmpty)
+        ? (isLoadingOrSearching ? loadingWidget(context, state) : emptyWidget(context, state))
+        : collectionWidget(context, state); // must return a regular Widget*
 
-    if (!hasTopOrBottomWidget) return listOrLoading;
+    final children = <Widget>[
+      if (top != null) top,
+      if (top != null) SizedBox(height: topBottomAndListSpacing),
+      _collectionOptions.shrinkWrap ? coreBox : Expanded(child: coreBox),
+      if (bottom != null) SizedBox(height: topBottomAndListSpacing),
+      if (bottom != null) bottom,
+    ];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: topBottomAndListSpacing,
-      children: [
-        ?top,
-        Expanded(child: listOrLoading),
-        ?bottom,
-      ],
-    );
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children);
   }
 
   double get topBottomAndListSpacing => 8.0;
@@ -65,6 +62,10 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
 
   Widget? bottomWidget(BuildContext context, ListState<T> state) => null;
 
+  Widget? sliverTopWidget(BuildContext context, ListState<T> state) => null;
+
+  Widget? sliverBottomWidget(BuildContext context, ListState<T> state) => null;
+
   Widget itemBuilder(BuildContext context, T item);
 
   void _listListener(BuildContext context, ListState<T> state) {
@@ -72,12 +73,19 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
       var sc = scrollController as AutoScrollController;
       sc.scrollToIndex(state.index, preferPosition: AutoScrollPosition.middle);
     }
+    blocListener(context, state);
   }
 
-  bool get isLoading => bloc.state is ListStateLoading;
-  bool get isSearching => bloc.state.isSearching;
+  void blocListener(BuildContext context, ListState<T> state) {
+    if (state is ListStateSelectionChanged<T>) {
+      onSelectionChanged(context, state.selectionData);
+    }
+  }
+
+  bool get isLoading => _bloc.state is ListStateLoading;
+  bool get isSearching => _bloc.state.isSearching;
   void search(String text) {
-    bloc.add(ListEventSearch<T>(searchText: text));
+    _bloc.add(ListEventSearch<T>(searchText: text));
   }
 
   Widget loadingWidget(BuildContext context, ListState<T> state) {
@@ -88,7 +96,7 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
       children: [
         CircularProgressIndicator(),
         Text(
-          state.isSearching ? searchingText : loadingText,
+          state.isSearching ? searchingText : loc.loadingText,
           style: textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary),
         ),
         Row(),
@@ -96,17 +104,13 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
     );
   }
 
-  String get loadingText => "loading data please wait";
-
   void refreshData() {
-    bloc.add(ListEventRefreshData<T>());
+    _bloc.add(ListEventRefreshData<T>());
   }
 
   void loadNextPage() {
-    bloc.add(ListEventLoadNextPage<T>());
+    _bloc.add(ListEventLoadNextPage<T>());
   }
-
-  InfiniteListOptions get listOptions => InfiniteListOptions.defaultOptions();
 
   AnimatedChildBuilder? get deleteAnimation => null;
 
@@ -117,9 +121,6 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
   }
 
   P? get payload => widget.payload;
-  EdgeInsets get padding => EdgeInsets.all(8);
-
-  String get emptyListText => "No data";
 
   String get searchingText => "Searching data, please wait";
 
@@ -130,24 +131,26 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
       children: [
         Icon(Icons.data_object_rounded, size: 80, color: theme.colorScheme.primary),
         SizedBox(height: 8),
-        Text(emptyListText, style: textTheme.titleMedium, textAlign: TextAlign.center),
+        Text(loc.emptyListText, style: textTheme.titleMedium, textAlign: TextAlign.center),
       ],
     );
   }
 
   void scrollToItem(T item, {bool highlightItem = false}) {
-    if (!this.bloc.isScrollable) {
+    if (!this._bloc.isScrollable) {
       throw StateError(
         'scrollToIndex can only be used on a bloc that mixes in '
         'ScrollableListBlocMixin<$T, $P>.',
       );
     }
-    final bloc = this.bloc as ScrollableListBlocMixin<T, P>;
+    final bloc = this._bloc as ScrollableListBlocMixin<T, P>;
     bloc.add(ListEventScrollToItem<T>(item: item, highlightItem: highlightItem));
   }
 
+  ScrollController? get scrollControllerProvider => null;
   void setScrollController() {
-    scrollController = bloc.isScrollable ? AutoScrollController() : ScrollController();
+    scrollController ??=
+        scrollControllerProvider ?? (_bloc.isScrollable ? AutoScrollController() : ScrollController());
     if (scrollController is AutoScrollController) {
       (scrollController as AutoScrollController).addListener(_onScroll);
     }
@@ -165,7 +168,7 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
     }
     if (_hasAutoScrolled && !sc.isAutoScrolling) {
       _hasAutoScrolled = false;
-      bloc.add(ListEventHighlightScrolledToItems());
+      _bloc.add(ListEventHighlightScrolledToItems());
     }
   }
 
@@ -174,24 +177,30 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
   }
 
   deleteMultipleItems(List<T> items) {
-    bloc.add(ListEventRemoveMultipleItems(items: items));
+    _bloc.add(ListEventRemoveMultipleItems(items: items));
   }
 
   deselectMultipleItems(List<T> items) {
-    bloc.add(ListEventDeselectMultipleItems(items: items));
+    _bloc.add(ListEventDeselectMultipleItems(items: items));
   }
 
   CollectionWidgetStateType get _collectionDisplayType => settings.type;
   CollectionOptions get _collectionOptions => settings.options;
-  CollectionInput get settings => CollectionInput(
+  CollectionSettings get settings => CollectionSettings(
     type: CollectionWidgetStateType.animatedList,
-    options: AnimatedInfiniteListOptions.defaultOptions(),
+    options: AnimatedInfiniteListOptions(),
   );
+
+  bool get autoDisposeBloc => true;
+
+  bool get loadOnInit => true;
+
+  ListBloc<T, P> get generateBloc;
+  ListBloc<T, P> get bloc => _bloc;
 
   Widget collectionWidget(BuildContext context, ListState<T> state) {
     final opts = _collectionOptions;
     opts.assertCorrectType(_collectionDisplayType);
-    opts.verifyOrThrow(_collectionDisplayType);
 
     switch (_collectionDisplayType) {
       case CollectionWidgetStateType.list:
@@ -199,11 +208,12 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
           options: opts.asOrThrow<InfiniteListOptions>(),
           items: state.list,
           itemBuilder: itemBuilder,
-          bloc: bloc.infiniteListBloc,
+          isRefreshable: bloc.isRefreshable,
+          bloc: _bloc.infiniteListBloc,
           scrollController: scrollController,
           separatorBuilder: separatorBuilder,
-          refreshOnSwipe: bloc.isRefreshable ? refreshData : null,
-          loadBottomData: bloc.isInfinite ? loadNextPage : null,
+          refreshOnSwipe: _bloc.isRefreshable ? refreshData : null,
+          loadBottomData: _bloc.isInfinite ? loadNextPage : null,
           loadMoreWidgetBuilder: loadMoreWidgetBuilder,
           refreshWidgetBuilder: refreshWidgetBuilder,
         );
@@ -213,25 +223,30 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
           options: opts.asOrThrow<SliverInfiniteListOptions>(),
           items: state.list,
           itemBuilder: itemBuilder,
-          bloc: bloc.infiniteListBloc,
+          bloc: _bloc.infiniteListBloc,
           scrollController: scrollController,
-          refreshOnSwipe: bloc.isRefreshable ? refreshData : null,
-          loadBottomData: bloc.isInfinite ? loadNextPage : null,
+          refreshOnSwipe: _bloc.isRefreshable ? refreshData : null,
+          loadBottomData: _bloc.isInfinite ? loadNextPage : null,
           loadMoreWidgetBuilder: loadMoreWidgetBuilder,
           refreshWidgetBuilder: refreshWidgetBuilder,
-          topWidgetBuilder: (c) => topWidget(c, state),
-          bottomWidgetBuilder: (c) => bottomWidget(c, state),
+          loading: loadingWidget(context, state),
+          empty: emptyWidget(context, state),
+          isEmpty: state.list.isEmpty,
+          isLoading: isLoading,
+          sliverBottom: sliverBottomWidget(context, state),
+          sliverTop: sliverTopWidget(context, state),
         );
 
       case CollectionWidgetStateType.animatedList:
         return AnimatedInfiniteList<T>(
+          isRefreshable: _bloc.isRefreshable,
           options: opts.asOrThrow<AnimatedInfiniteListOptions>(),
           items: state.list,
           itemBuilder: itemBuilder,
-          bloc: bloc.infiniteListBloc,
+          bloc: _bloc.infiniteListBloc,
           scrollController: scrollController,
-          refreshOnSwipe: bloc.isRefreshable ? refreshData : null,
-          loadBottomData: bloc.isInfinite ? loadNextPage : null,
+          refreshOnSwipe: _bloc.isRefreshable ? refreshData : null,
+          loadBottomData: _bloc.isInfinite ? loadNextPage : null,
           loadTopData: null,
           loadMoreWidgetBuilder: loadMoreWidgetBuilder,
           refreshWidgetBuilder: refreshWidgetBuilder,
@@ -245,16 +260,20 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
           options: opts.asOrThrow<AnimatedSliverInfiniteListOptions>(),
           items: state.list,
           itemBuilder: itemBuilder,
-          bloc: bloc.infiniteListBloc,
+          bloc: _bloc.infiniteListBloc,
           separatorBuilder: separatorBuilder,
-          refreshOnSwipe: bloc.isRefreshable ? refreshData : null,
-          loadBottomData: bloc.isInfinite ? loadNextPage : null,
+          refreshOnSwipe: _bloc.isRefreshable ? refreshData : null,
+          loadBottomData: _bloc.isInfinite ? loadNextPage : null,
           loadTopData: null,
+          isLoading: isLoading,
+          isEmpty: state.list.isEmpty,
           scrollController: scrollController,
+          sliverTop: sliverTopWidget(context, state),
+          sliverBottom: sliverBottomWidget(context, state),
           loadMoreWidgetBuilder: loadMoreWidgetBuilder,
           refreshWidgetBuilder: refreshWidgetBuilder,
-          topWidgetBuilder: (c) => topWidget(c, state),
-          bottomWidgetBuilder: (c) => bottomWidget(c, state),
+          loading: loadingWidget(context, state),
+          empty: emptyWidget(context, state),
         );
 
       case CollectionWidgetStateType.grid:
@@ -262,10 +281,10 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
           options: opts.asOrThrow<InfiniteGridOptions>(),
           items: state.list,
           itemBuilder: itemBuilder,
-          bloc: bloc.infiniteListBloc,
+          bloc: _bloc.infiniteListBloc,
           scrollController: scrollController,
-          refreshOnSwipe: bloc.isRefreshable ? refreshData : null,
-          loadBottomData: bloc.isInfinite ? loadNextPage : null,
+          refreshOnSwipe: _bloc.isRefreshable ? refreshData : null,
+          loadBottomData: _bloc.isInfinite ? loadNextPage : null,
           loadMoreWidgetBuilder: loadMoreWidgetBuilder,
           refreshWidgetBuilder: refreshWidgetBuilder,
         );
@@ -275,21 +294,30 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
           options: opts.asOrThrow<SliverInfiniteGridOptions>(),
           items: state.list,
           itemBuilder: itemBuilder,
-          bloc: bloc.infiniteListBloc,
+          bloc: _bloc.infiniteListBloc,
           scrollController: scrollController,
-          refreshOnSwipe: bloc.isRefreshable ? refreshData : null,
-          loadBottomData: bloc.isInfinite ? loadNextPage : null,
+          refreshOnSwipe: _bloc.isRefreshable ? refreshData : null,
+          loadBottomData: _bloc.isInfinite ? loadNextPage : null,
           loadMoreWidgetBuilder: loadMoreWidgetBuilder,
           refreshWidgetBuilder: refreshWidgetBuilder,
-          topWidgetBuilder: (c) => topWidget(c, state),
-          bottomWidgetBuilder: (c) => bottomWidget(c, state),
         );
     }
   }
 
   addToList(T item, {int index = 0}) {
-    bloc.add(ListEventAddItem(item: item, index: index));
+    _bloc.add(ListEventAddItem(item: item, index: index));
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+    if (autoDisposeBloc) _bloc.close();
+  }
+
+  @override
+  ScreenManagerCubit get managerCubit => _bloc.screenManagerCubit;
+
+  void onSelectionChanged(BuildContext context, SelectionChangedData<T> selectionData) {}
 }
 
 enum CollectionWidgetStateType {
@@ -304,8 +332,8 @@ enum CollectionWidgetStateType {
   const CollectionWidgetStateType(this.isSliver);
 }
 
-class CollectionInput {
+class CollectionSettings {
   final CollectionWidgetStateType type;
   final CollectionOptions options;
-  CollectionInput({required this.type, required this.options});
+  CollectionSettings({required this.type, required this.options});
 }

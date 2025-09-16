@@ -6,8 +6,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx/src/widgets/blocx_snack_bar.dart';
 
 abstract class ScreenManagerState<T extends StatefulWidget> extends BlocXWidgetState<T> {
-  final ScreenManagerCubit _managerCubit;
-  ScreenManagerState({required ScreenManagerCubit managerCubit}) : _managerCubit = managerCubit;
+  late final ScreenManagerCubit _managerCubit;
+  @override
+  void initState() {
+    super.initState();
+    _managerCubit = managerCubit;
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ScreenManagerCubit>.value(
@@ -39,6 +44,8 @@ abstract class ScreenManagerState<T extends StatefulWidget> extends BlocXWidgetS
   }
 
   bool get wrapInScaffold => false;
+
+  ScreenManagerCubit get managerCubit;
 
   @protected
   Widget errorWidget(BuildContext context, ScreenManagerCubitStateDisplayErrorPage state) {

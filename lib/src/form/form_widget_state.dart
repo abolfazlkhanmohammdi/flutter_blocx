@@ -6,18 +6,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> extends BlocXWidgetState<W> {
-  final FormBloc<F, P, E> bloc;
+  late final FormBloc<F, P, E> bloc;
   GlobalKey<FormState> formKey = GlobalKey();
 
   final Map<E, TextEditingController> _controllersMap = {};
 
-  FormWidgetState({required this.bloc});
-
   @override
   void initState() {
     super.initState();
+    bloc = generateBloc();
     bloc.add(FormEventInit(payload: widget.payload));
   }
+
+  FormBloc<F, P, E> generateBloc();
 
   @override
   Widget build(BuildContext context) {
@@ -102,9 +103,13 @@ abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> ex
 
   bool get isUpdate => widget.payload != null;
 
-  void applyInitialDataToForm(F formData);
+  void applyInitialDataToForm(F formData) {}
 
-  void onFormSubmitted(FormStateFormSubmitted<F, E> state);
+  void onFormSubmitted(FormStateFormSubmitted<F, E> state) {}
 
   P? get payload => widget.payload;
+
+  void changeListener(dynamic data, E key) {
+    bloc.add(FormEventUpdateData(data: data, key: key));
+  }
 }

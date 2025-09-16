@@ -1,6 +1,7 @@
 import 'package:blocx_core/blocx_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_blocx/src/core/localizations/loc_provider.dart';
 
 @immutable
 class BlocxErrorWidget extends StatelessWidget {
@@ -80,7 +81,7 @@ class BlocxErrorWidget extends StatelessWidget {
                   Icon(Icons.error_outline, size: 40, color: scheme.onErrorContainer),
                   const SizedBox(height: 12),
                   Text(
-                    title ?? 'Something went wrong',
+                    title ?? loc.somethingWentWrong,
                     style: textTheme.titleLarge?.copyWith(
                       color: scheme.onErrorContainer,
                       fontWeight: FontWeight.w700,
@@ -117,12 +118,12 @@ class BlocxErrorWidget extends StatelessWidget {
                             foregroundColor: scheme.onPrimary,
                           ),
                           onPressed: onRetry,
-                          child: const Text('Try again'),
+                          child: Text(loc.tryAgain),
                         ),
                       OutlinedButton.icon(
                         onPressed: () => _copyDetails(context),
                         icon: const Icon(Icons.copy),
-                        label: const Text('Copy details'),
+                        label: Text(loc.copyDetails),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: scheme.onErrorContainer,
                           side: BorderSide(color: scheme.onErrorContainer.withValues(alpha: 0.4)),
@@ -132,9 +133,19 @@ class BlocxErrorWidget extends StatelessWidget {
                         TextButton.icon(
                           onPressed: onReport,
                           icon: const Icon(Icons.bug_report_outlined),
-                          label: const Text('Report'),
+                          label: Text(loc.report),
                           style: TextButton.styleFrom(foregroundColor: scheme.onErrorContainer),
                         ),
+
+                      OutlinedButton.icon(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.exit_to_app_rounded),
+                        label: Text(loc.close),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: scheme.onErrorContainer,
+                          side: BorderSide(color: scheme.onErrorContainer.withValues(alpha: 0.4)),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -163,7 +174,7 @@ class BlocxErrorWidget extends StatelessWidget {
     await Clipboard.setData(ClipboardData(text: buf.toString()));
 
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error details copied')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(loc.errorDetailsCopied)));
     }
   }
 }
@@ -192,7 +203,7 @@ class _DetailsTile extends StatelessWidget {
         initiallyExpanded: expanded,
         tilePadding: EdgeInsets.zero,
         childrenPadding: EdgeInsets.zero,
-        title: Text('Details', style: textTheme.titleSmall?.copyWith(color: color)),
+        title: Text(loc.details, style: textTheme.titleSmall?.copyWith(color: color)),
         children: [
           const SizedBox(height: 8),
           Container(

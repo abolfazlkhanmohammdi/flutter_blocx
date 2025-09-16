@@ -16,7 +16,7 @@ class NoteTagsScreen extends CollectionWidget<User> {
 
 class _NoteTagsScreenState extends CollectionWidgetState<NoteTagsScreen, NoteTag, User>
     with HideOnScrollFabMixin {
-  _NoteTagsScreenState() : super(bloc: NoteTagsBloc());
+  _NoteTagsScreenState() : super(_bloc: NoteTagsBloc());
 
   @override
   Widget itemBuilder(BuildContext context, NoteTag item) {

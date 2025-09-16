@@ -30,7 +30,7 @@ class _NotesScreenState extends CollectionWidgetState<NotesScreen, Note, (NoteTa
     searchController.dispose();
   }
 
-  _NotesScreenState() : super(bloc: NotesBloc());
+  _NotesScreenState() : super(_bloc: NotesBloc());
 
   @override
   Widget itemBuilder(BuildContext context, Note item) {

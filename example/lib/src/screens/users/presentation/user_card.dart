@@ -13,8 +13,8 @@ class UserCard extends BlocxCollectionWidget<User, dynamic> {
   Widget buildContent(BuildContext context, User item) {
     final t = Theme.of(context).textTheme;
     final cs = Theme.of(context).colorScheme;
-    final canDelete = bloc(context).isDeletable;
-    final canHighlight = bloc(context).isHighlightable;
+    final canDelete = _bloc(context).isDeletable;
+    final canHighlight = _bloc(context).isHighlightable;
 
     return Card(
       color: isHighlighted(context)

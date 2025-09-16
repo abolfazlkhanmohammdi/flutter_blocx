@@ -30,10 +30,6 @@ class SliverInfiniteGrid<Entity extends BaseEntity> extends StatefulWidget {
   final Widget? Function(BuildContext context, bool isLoadingMore)? loadMoreWidgetBuilder;
   final Widget? Function(BuildContext context, double swipeRefreshHeight)? refreshWidgetBuilder;
 
-  /// Top/Bottom sliver builders (placed outside the grid sliver).
-  final Widget? Function(BuildContext context)? topWidgetBuilder;
-  final Widget? Function(BuildContext context)? bottomWidgetBuilder;
-
   const SliverInfiniteGrid({
     super.key,
     required this.options,
@@ -47,8 +43,6 @@ class SliverInfiniteGrid<Entity extends BaseEntity> extends StatefulWidget {
     this.scrollController,
     this.loadMoreWidgetBuilder,
     this.refreshWidgetBuilder,
-    this.topWidgetBuilder,
-    this.bottomWidgetBuilder,
   });
 
   @override
@@ -96,61 +90,12 @@ class SliverInfiniteGridState<Entity extends BaseEntity> extends State<SliverInf
               onPointerCancel: maySwipe
                   ? (_) => bloc.add(InfiniteListEventVerticalDragUpdated(globalY: null))
                   : null,
-              child: CustomScrollView(
-                controller: effectiveController,
-                scrollDirection: options.scrollDirection,
-                reverse: options.reverse,
-                primary: options.primary,
-                physics: options.scrollPhysics ?? const AlwaysScrollableScrollPhysics(),
-                cacheExtent: options.cacheExtent,
-                anchor: options.anchor,
-                clipBehavior: options.clipBehavior,
-                keyboardDismissBehavior: options.keyboardDismissBehavior,
-                slivers: _buildSlivers(context, state),
-              ),
+              child: _sliverGrid(context, state),
             ),
           );
         },
       ),
     );
-  }
-
-  List<Widget> _buildSlivers(BuildContext context, InfiniteListState state) {
-    final slivers = <Widget>[];
-
-    // Top section
-    if (widget.topWidgetBuilder != null) {
-      final w = widget.topWidgetBuilder!(context);
-      if (w != null) slivers.add(SliverToBoxAdapter(child: w));
-    } else {
-      slivers.add(
-        SliverToBoxAdapter(
-          child: options.reverse ? loadMoreWidget(context, state) : swipeRefreshWidget(context, state),
-        ),
-      );
-    }
-
-    // Grid section
-    final gridSliver = _sliverGrid(context, state);
-    if (options.gridPadding != null) {
-      slivers.add(SliverPadding(padding: options.gridPadding!, sliver: gridSliver));
-    } else {
-      slivers.add(gridSliver);
-    }
-
-    // Bottom section
-    if (widget.bottomWidgetBuilder != null) {
-      final w = widget.bottomWidgetBuilder!(context);
-      if (w != null) slivers.add(SliverToBoxAdapter(child: w));
-    } else {
-      slivers.add(
-        SliverToBoxAdapter(
-          child: options.reverse ? swipeRefreshWidget(context, state) : loadMoreWidget(context, state),
-        ),
-      );
-    }
-
-    return slivers;
   }
 
   bool get _atTopByController => effectiveController.hasClients && effectiveController.position.pixels <= 0.0;
@@ -228,14 +173,13 @@ class SliverInfiniteGridState<Entity extends BaseEntity> extends State<SliverInf
         addAutomaticKeepAlives: options.addAutomaticKeepAlives,
         addRepaintBoundaries: options.addRepaintBoundaries,
         addSemanticIndexes: options.addSemanticIndexes,
-        semanticIndexCallback: options.semanticIndexCallback??_defaultSemanticIndexCallback,
+        semanticIndexCallback: options.semanticIndexCallback ?? _defaultSemanticIndexCallback,
         semanticIndexOffset: options.semanticIndexOffset,
       ),
     );
   }
 
   int? _defaultSemanticIndexCallback(Widget _, int index) => index;
-
 
   Widget _itemBuilder(BuildContext context, Entity data, int index, InfiniteListState state) {
     final isBottomTrigger =
@@ -299,4 +243,3 @@ class SliverInfiniteGridState<Entity extends BaseEntity> extends State<SliverInf
     );
   }
 }
-

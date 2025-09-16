@@ -27,12 +27,15 @@ class AnimatedInfiniteList<Entity extends BaseEntity> extends StatefulWidget {
   final Widget? Function(BuildContext context, bool isLoadingMore)? loadMoreWidgetBuilder;
   final Widget? Function(BuildContext context, double swipeRefreshHeight)? refreshWidgetBuilder;
 
+  final bool isRefreshable;
+
   const AnimatedInfiniteList({
     super.key,
     required this.options,
     required this.items,
     required this.itemBuilder,
     required this.bloc,
+    required this.isRefreshable,
     this.separatorBuilder, // not used by animated list
     this.deleteAnimation,
     this.insertAnimation,
@@ -76,31 +79,41 @@ class AnimatedInfiniteListState<Entity extends BaseEntity> extends State<Animate
         listener: blocListener,
         buildWhen: (_, c) => c.shouldRebuild,
         builder: (context, state) {
+          var core = _animatedList(context, state);
+          core = maybeSetupRefresh(state, child: core);
+          core = putInExpandedIfNotShrunk(context, state, core);
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               options.reverse ? loadMoreWidget(context, state) : swipeRefreshWidget(context, state),
-              Expanded(
-                child: NotificationListener<UserScrollNotification>(
-                  onNotification: onScroll,
-                  child: Listener(
-                    onPointerDown: (d) =>
-                        bloc.add(InfiniteListEventVerticalDragStarted(globalY: d.position.dy)),
-                    onPointerUp: (d) => bloc.add(InfiniteListEventVerticalDragEnded()),
-                    onPointerMove: maySwipe
-                        ? (d) => bloc.add(InfiniteListEventVerticalDragUpdated(globalY: d.position.dy))
-                        : null,
-                    onPointerCancel: maySwipe
-                        ? (_) => bloc.add(InfiniteListEventVerticalDragUpdated(globalY: null))
-                        : null,
-                    child: _animatedList(context, state),
-                  ),
-                ),
-              ),
+              core,
               options.reverse ? swipeRefreshWidget(context, state) : loadMoreWidget(context, state),
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget putInExpandedIfNotShrunk(BuildContext context, InfiniteListState state, Widget child) {
+    if (options.shrinkWrap) return child;
+    return Expanded(child: child);
+  }
+
+  Widget maybeSetupRefresh(InfiniteListState state, {required Widget child}) {
+    if (!widget.isRefreshable) return child;
+    return NotificationListener<UserScrollNotification>(
+      onNotification: onScroll,
+      child: Listener(
+        onPointerDown: (d) => bloc.add(InfiniteListEventVerticalDragStarted(globalY: d.position.dy)),
+        onPointerUp: (d) => bloc.add(InfiniteListEventVerticalDragEnded()),
+        onPointerMove: maySwipe
+            ? (d) => bloc.add(InfiniteListEventVerticalDragUpdated(globalY: d.position.dy))
+            : null,
+        onPointerCancel: maySwipe
+            ? (_) => bloc.add(InfiniteListEventVerticalDragUpdated(globalY: null))
+            : null,
+        child: child,
       ),
     );
   }
@@ -177,6 +190,7 @@ class AnimatedInfiniteListState<Entity extends BaseEntity> extends State<Animate
   }
 
   Widget swipeRefreshWidget(BuildContext context, InfiniteListState state) {
+    if (!widget.isRefreshable || state.swipeRefreshHeight == 0) return SizedBox.square(dimension: 0);
     final external = widget.refreshWidgetBuilder?.call(context, state.swipeRefreshHeight);
     if (external != null) return external;
     final primary = Theme.of(context).colorScheme.primary;

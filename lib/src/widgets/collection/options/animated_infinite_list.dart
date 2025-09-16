@@ -1,33 +1,29 @@
 import 'package:flutter_blocx/src/widgets/collection/collection_options.dart';
 import 'package:flutter/material.dart';
 
-class AnimatedInfiniteListOptions extends CollectionOptions{
-  final bool reverse;
+class AnimatedInfiniteListOptions extends ListOptions {
   final bool animateAtStart;
-  final EdgeInsets? padding;
   final Duration? animationDuration; // reserved, not directly used by ImplicitlyAnimatedList
-  final int loadMoreTriggerItemDistance;
-  final AlwaysScrollableScrollPhysics? scrollPhysics;
-  final bool shrinkWrap;
 
   const AnimatedInfiniteListOptions({
-    this.reverse = false,
-    this.animateAtStart = true,
-    this.padding,
+    super.scrollBehavior,
+    super.reverse,
+    this.animateAtStart = false,
+    super.padding,
     this.animationDuration,
-    this.loadMoreTriggerItemDistance = 2,
-    this.scrollPhysics,
-    this.shrinkWrap = false,
+    super.loadMoreTriggerItemDistance,
+    super.scrollPhysics,
+    super.shrinkWrap,
+    super.scrollDirection,
   });
-
-  factory AnimatedInfiniteListOptions.defaultOptions() => const AnimatedInfiniteListOptions();
 
   AnimatedInfiniteListOptions copyWith({
     bool? reverse,
     bool? animateAtStart,
     EdgeInsets? padding,
     Duration? animationDuration,
-    int? bottomLoadingTriggerItemDistance,
+    int? bottomLoadingTriggerItemDistance, // legacy alias
+    int? loadMoreTriggerItemDistance,
     AlwaysScrollableScrollPhysics? scrollPhysics,
     bool? shrinkWrap,
   }) {
@@ -36,7 +32,9 @@ class AnimatedInfiniteListOptions extends CollectionOptions{
       animateAtStart: animateAtStart ?? this.animateAtStart,
       padding: padding ?? this.padding,
       animationDuration: animationDuration ?? this.animationDuration,
-      loadMoreTriggerItemDistance: bottomLoadingTriggerItemDistance ?? loadMoreTriggerItemDistance,
+      loadMoreTriggerItemDistance:
+          (bottomLoadingTriggerItemDistance ?? loadMoreTriggerItemDistance) ??
+          this.loadMoreTriggerItemDistance,
       scrollPhysics: scrollPhysics ?? this.scrollPhysics,
       shrinkWrap: shrinkWrap ?? this.shrinkWrap,
     );

@@ -14,7 +14,7 @@ class NoteTagCard extends BlocxCollectionWidget<NoteTag, User> {
   Widget buildContent(BuildContext context, NoteTag item) {
     final cs = Theme.of(context).colorScheme;
     final t = Theme.of(context).textTheme;
-    final canDelete = bloc(context).isDeletable;
+    final canDelete = _bloc(context).isDeletable;
     final color = Color(item.colorArgb ?? cs.primary.value);
 
     return Card(
