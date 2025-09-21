@@ -12,7 +12,6 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
     extends ScreenManagerState<W> {
   late final ListBloc<T, P> _bloc;
   ScrollController? scrollController;
-
   @override
   void initState() {
     _bloc = generateBloc;

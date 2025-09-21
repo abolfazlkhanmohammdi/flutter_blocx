@@ -6,19 +6,13 @@ import 'package:flutter_blocx/src/core/localizations/loc_provider.dart';
 @immutable
 class BlocxErrorWidget extends StatelessWidget {
   /// The thrown error (e.g., Exception, DioError, etc.)
-  final Object error;
-
-  /// Optional stack trace to show in the expandable details.
-  final StackTrace? stackTrace;
+  final ReadableError error;
 
   /// Optional "Try again" callback.
   final VoidCallback? onRetry;
 
   /// Optional callback when user taps "Report".
   final VoidCallback? onReport;
-
-  /// Optional title override (defaults to a friendly message).
-  final String? title;
 
   /// Controls overall padding; defaults to symmetric 24.
   final EdgeInsetsGeometry padding;
@@ -29,10 +23,8 @@ class BlocxErrorWidget extends StatelessWidget {
   const BlocxErrorWidget({
     super.key,
     required this.error,
-    this.stackTrace,
     this.onRetry,
     this.onReport,
-    this.title,
     this.padding = const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
     this.expandDetails = false,
   });
@@ -50,10 +42,8 @@ class BlocxErrorWidget extends StatelessWidget {
     return BlocxErrorWidget(
       key: key,
       error: state.error,
-      stackTrace: state.stackTrace,
       onRetry: onRetry,
       onReport: onReport,
-      title: title,
       padding: padding,
       expandDetails: expandDetails,
     );
@@ -81,11 +71,17 @@ class BlocxErrorWidget extends StatelessWidget {
                   Icon(Icons.error_outline, size: 40, color: scheme.onErrorContainer),
                   const SizedBox(height: 12),
                   Text(
-                    title ?? loc.somethingWentWrong,
+                    error.title ?? loc.somethingWentWrong,
                     style: textTheme.titleLarge?.copyWith(
                       color: scheme.onErrorContainer,
                       fontWeight: FontWeight.w700,
                     ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    error.message,
+                    style: textTheme.bodyMedium?.copyWith(color: scheme.onErrorContainer),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
@@ -96,12 +92,12 @@ class BlocxErrorWidget extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  if (stackTrace != null) ...[
+                  if (error.stackTrace != null) ...[
                     const SizedBox(height: 12),
                     _DetailsTile(
                       color: scheme.onErrorContainer,
                       expanded: expandDetails,
-                      stackTrace: stackTrace!,
+                      stackTrace: error.stackTrace!,
                       error: error,
                     ),
                   ],
@@ -169,7 +165,7 @@ class BlocxErrorWidget extends StatelessWidget {
       ..writeln('Error: $error')
       ..writeln()
       ..writeln('StackTrace:')
-      ..writeln(stackTrace?.toString() ?? '<none>');
+      ..writeln(error.stackTrace?.toString() ?? '<none>');
 
     await Clipboard.setData(ClipboardData(text: buf.toString()));
 

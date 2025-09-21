@@ -1,11 +1,11 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:flutter_blocx/flutter_blocx.dart';
 import 'package:flutter_blocx/form_widget.dart';
 import 'package:flutter_blocx/src/form/widgets/blocx_form_checkbox.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_blocx/src/screen_manager/screen_manager_state.dart';
 
-abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> extends BlocXWidgetState<W> {
+abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> extends ScreenManagerState<W> {
   late final FormBloc<F, P, E> bloc;
   GlobalKey<FormState> formKey = GlobalKey();
 
@@ -13,15 +13,15 @@ abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> ex
 
   @override
   void initState() {
-    super.initState();
     bloc = generateBloc();
     bloc.add(FormEventInit(payload: widget.payload));
+    super.initState();
   }
 
   FormBloc<F, P, E> generateBloc();
 
   @override
-  Widget build(BuildContext context) {
+  Widget mainWidget(BuildContext context, ScreenManagerCubitState state) {
     return BlocProvider(
       create: (context) => bloc,
       child: BlocConsumer<FormBloc<F, P, E>, FormBlocState<F, E>>(
@@ -112,4 +112,7 @@ abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> ex
   void changeListener(dynamic data, E key) {
     bloc.add(FormEventUpdateData(data: data, key: key));
   }
+
+  @override
+  ScreenManagerCubit get managerCubit => bloc.screenManagerCubit;
 }
