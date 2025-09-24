@@ -1,5 +1,4 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_core/src/blocs/list/models/selection_changed_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx/list_widget.dart';

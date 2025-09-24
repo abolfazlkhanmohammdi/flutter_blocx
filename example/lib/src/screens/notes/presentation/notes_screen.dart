@@ -1,12 +1,10 @@
-import 'package:blocx_core/blocx_core.dart';
-import 'package:flutter_blocx/list_widget.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
-import 'package:example/src/screens/notes/bloc/notes_bloc.dart';
 import 'package:example/src/screens/notes/data/models/note.dart';
 import 'package:example/src/screens/notes/presentation/widgets/note_card.dart';
 import 'package:example/src/screens/notes/presentation/widgets/number_nudge.dart';
 import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blocx/list_widget.dart';
 
 class NotesScreen extends CollectionWidget<(NoteTag, User)> {
   const NotesScreen({super.key, super.payload});
@@ -29,8 +27,6 @@ class _NotesScreenState extends CollectionWidgetState<NotesScreen, Note, (NoteTa
     super.dispose();
     searchController.dispose();
   }
-
-  _NotesScreenState() : super(_bloc: NotesBloc());
 
   @override
   Widget itemBuilder(BuildContext context, Note item) {
