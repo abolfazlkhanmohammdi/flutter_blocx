@@ -1,4 +1,5 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:flutter_blocx/form_widget.dart';
 import 'package:flutter_blocx/src/core/widgets/blocx_stateless_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,7 +18,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class FormRegisterButton<F, P, E extends Enum> extends BlocxStatelessWidget {
   /// Current form state (used to detect submitting).
   final FormBlocState state;
-  final bool isFormValid;
 
   /// Which visual variant to render.
   final RegisterButtonType type;
@@ -52,13 +52,14 @@ class FormRegisterButton<F, P, E extends Enum> extends BlocxStatelessWidget {
   /// Spacing between spinner and text.
   final double spacing;
   final ButtonStyle? style;
+  final VoidCallback? onPressed;
 
   const FormRegisterButton({
     super.key,
-    required this.isFormValid,
     required this.state,
     required this.buttonText,
     required this.submitText,
+    required this.onPressed,
     this.type = RegisterButtonType.filled,
     this.elevatedStyle,
     this.filledStyle,
@@ -76,8 +77,7 @@ class FormRegisterButton<F, P, E extends Enum> extends BlocxStatelessWidget {
   bool get isCheckingFields => state is FormStateCheckingUniqueFormField;
   @override
   Widget build(BuildContext context) {
-    final disabled =
-        isSubmittingForm || !isFormValid || isCheckingFields || bloc(context).state.errors.isNotEmpty;
+    final disabled = isSubmittingForm || isCheckingFields || bloc(context).state.errors.isNotEmpty;
     final label = isSubmittingForm ? submitText : buttonText;
 
     switch (type) {
@@ -104,7 +104,7 @@ class FormRegisterButton<F, P, E extends Enum> extends BlocxStatelessWidget {
   Widget buildElevatedButton(BuildContext context, {required String label, required bool disabled}) {
     return ElevatedButton(
       style: style ?? elevatedStyle,
-      onPressed: disabled ? null : () => onPressed(context),
+      onPressed: onPressed,
       child: _buildContent(context, label: label, disabled: disabled),
     );
   }
@@ -114,7 +114,7 @@ class FormRegisterButton<F, P, E extends Enum> extends BlocxStatelessWidget {
   Widget buildFilledButton(BuildContext context, {required String label, required bool disabled}) {
     return FilledButton(
       style: style ?? filledStyle,
-      onPressed: disabled ? null : () => onPressed(context),
+      onPressed: onPressed,
       child: _buildContent(context, label: label, disabled: disabled),
     );
   }
@@ -124,7 +124,7 @@ class FormRegisterButton<F, P, E extends Enum> extends BlocxStatelessWidget {
   Widget buildTextButton(BuildContext context, {required String label, required bool disabled}) {
     return TextButton(
       style: style ?? textStyle,
-      onPressed: disabled ? null : () => onPressed(context),
+      onPressed: onPressed,
       child: _buildContent(context, label: label, disabled: disabled),
     );
   }
@@ -134,13 +134,9 @@ class FormRegisterButton<F, P, E extends Enum> extends BlocxStatelessWidget {
   Widget buildOutlinedButton(BuildContext context, {required String label, required bool disabled}) {
     return OutlinedButton(
       style: style ?? outlinedStyle,
-      onPressed: disabled ? null : () => onPressed(context),
+      onPressed: onPressed,
       child: _buildContent(context, label: label, disabled: disabled),
     );
-  }
-
-  void onPressed(BuildContext context) {
-    bloc(context).add(FormEventSubmit());
   }
 
   FormBloc<F, P, E> bloc(BuildContext context) {

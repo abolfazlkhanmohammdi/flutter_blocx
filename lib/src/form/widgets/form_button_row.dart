@@ -17,7 +17,6 @@ import 'form_register_button.dart';
 class FormButtonRow<F, P, E extends Enum> extends BlocxStatelessWidget {
   /// Current form state used by [FormRegisterButton].
   final FormBlocState formState;
-  final bool isFormValid;
 
   /// Text shown on the register button when idle.
   final String registerText;
@@ -51,7 +50,6 @@ class FormButtonRow<F, P, E extends Enum> extends BlocxStatelessWidget {
   const FormButtonRow({
     super.key,
     this.onSecondButtonPressed,
-    required this.isFormValid,
     required this.formState,
     required this.registerText,
     required this.registerSubmittingText,
@@ -103,7 +101,7 @@ class FormButtonRow<F, P, E extends Enum> extends BlocxStatelessWidget {
       buttonText: registerText,
       submitText: registerSubmittingText,
       type: registerType,
-      isFormValid: isFormValid,
+      onPressed: onRegisterPressed,
     );
   }
 

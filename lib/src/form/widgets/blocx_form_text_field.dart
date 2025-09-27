@@ -1,6 +1,5 @@
 import 'package:blocx_core/blocx_core.dart';
 import 'package:flutter_blocx/flutter_blocx.dart';
-import 'package:flutter_blocx/src/core/localizations/blocx_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -167,7 +166,7 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<Blo
           hintStyle: hintStyle,
           helperText: o.helperText,
           helperStyle: o.helperStyle,
-          errorText: o.errorText,
+          errorText: errorText,
           errorStyle: o.errorStyle,
           prefixIcon: o.prefixIcon,
           suffixIcon: suffix,
@@ -222,9 +221,7 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<Blo
   String? getErrorText(BlocXTextFieldOptions options) {
     int errorIndex = bloc.state.errors.keys.toList().indexWhere((e) => e == widget.formKey);
     if (errorIndex >= 0) {
-      return BlocXLocalizations.localizations.errorCodeMessage(
-        bloc.state.errors.values.toList()[errorIndex].first,
-      );
+      return bloc.state.errors.values.toList()[errorIndex].first;
     }
     return options.errorText;
   }

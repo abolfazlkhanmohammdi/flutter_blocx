@@ -42,7 +42,7 @@ abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> ex
   }
 
   Widget _blocBuilder(BuildContext context, FormBlocState<F, E> state) {
-    return Form(key: formKey, child: formWidget(context, state));
+    return Form(key: formKey, autovalidateMode: autovalidateMode, child: formWidget(context, state));
   }
 
   BlocXFormTextField<F, P, E> textField(
@@ -91,13 +91,7 @@ abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> ex
 
   double get formVerticalSpacing => 16;
 
-  bool additionalValidityChecks(FormBlocState<F, E> state) {
-    return true;
-  }
-
-  isFormValid(FormBlocState<F, E> state) {
-    return (formKey.currentState?.validate() ?? true) && additionalValidityChecks(state);
-  }
+  bool get isValid => bloc.state.errors.isEmpty;
 
   formWidget(BuildContext context, FormBlocState<F, E> state);
 
@@ -107,6 +101,10 @@ abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> ex
 
   void onFormSubmitted(FormStateFormSubmitted<F, E> state) {}
 
+  void submit() {
+    bloc.add(FormEventSubmit());
+  }
+
   P? get payload => widget.payload;
 
   void changeListener(dynamic data, E key) {
@@ -115,4 +113,5 @@ abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> ex
 
   @override
   ScreenManagerCubit get managerCubit => bloc.screenManagerCubit;
+  AutovalidateMode get autovalidateMode => AutovalidateMode.onUserInteraction;
 }

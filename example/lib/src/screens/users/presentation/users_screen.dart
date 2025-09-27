@@ -15,7 +15,7 @@ class UsersScreen extends CollectionWidget<dynamic> {
 class _UsersScreenState extends CollectionWidgetState<UsersScreen, User, dynamic> {
   TextEditingController searchController = TextEditingController();
 
-  _UsersScreenState() : super(_bloc: UsersBloc());
+  _UsersScreenState() : super(bloc: UsersBloc());
 
   @override
   Widget? topWidget(BuildContext context, ListState<User> state) {

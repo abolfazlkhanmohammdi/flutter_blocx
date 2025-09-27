@@ -1,15 +1,16 @@
 import 'package:blocx_core/blocx_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blocx/src/core/localizations/loc_provider.dart';
 
 class BlocxSnackBar extends StatelessWidget {
   final String message;
   final String? title;
   final BlocXSnackbarType snackbarType;
-
   const BlocxSnackBar({super.key, required this.message, this.title, required this.snackbarType});
 
   static void show(
     BuildContext context, {
+
     required String message,
     String? title,
     required BlocXSnackbarType type,
@@ -35,27 +36,31 @@ class BlocxSnackBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = _colorsFor(theme.colorScheme, snackbarType);
-
-    return DecoratedBox(
+    final mainWidget = Container(
+      constraints: BoxConstraints(maxWidth: 800),
       decoration: BoxDecoration(color: colors.bg, borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(snackbarType.icon, color: colors.onBg),
-            const SizedBox(width: 12),
-            Expanded(child: _titleMessage(context, colors.onBg)),
-            const SizedBox(width: 8),
-            IconButton(
-              onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
-              icon: Icon(Icons.close, color: colors.onBg),
-              tooltip: 'Close',
-            ),
-          ],
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(snackbarType.icon, color: colors.onBg),
+          const SizedBox(width: 12),
+          Expanded(child: _titleMessage(context, colors.onBg)),
+          const SizedBox(width: 8),
+          IconButton(
+            onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+            icon: Icon(Icons.close, color: colors.onBg),
+            tooltip: 'Close',
+          ),
+        ],
       ),
     );
+    final width = MediaQuery.sizeOf(context).width;
+    if (width > 800) {
+      return Row(mainAxisAlignment: MainAxisAlignment.center, children: [mainWidget]);
+    }
+    return mainWidget;
   }
 
   Widget _titleMessage(BuildContext context, Color onBg) {

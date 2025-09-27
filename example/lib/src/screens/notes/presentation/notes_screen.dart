@@ -1,3 +1,4 @@
+import 'package:blocx_core/blocx_core.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
 import 'package:example/src/screens/notes/data/models/note.dart';
 import 'package:example/src/screens/notes/presentation/widgets/note_card.dart';
