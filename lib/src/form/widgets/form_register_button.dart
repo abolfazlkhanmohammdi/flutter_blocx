@@ -1,5 +1,4 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:flutter_blocx/form_widget.dart';
 import 'package:flutter_blocx/src/core/widgets/blocx_stateless_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -74,7 +73,7 @@ class FormRegisterButton<F, P, E extends Enum> extends BlocxStatelessWidget {
 
   /// True while the form is in submitting state.
   bool get isSubmittingForm => state is FormStateSubmittingForm;
-  bool get isCheckingFields => state is FormStateCheckingUniqueFormField;
+  bool get isCheckingFields => state.checkingUniqueFields.isNotEmpty;
   @override
   Widget build(BuildContext context) {
     final disabled = isSubmittingForm || isCheckingFields || bloc(context).state.errors.isNotEmpty;

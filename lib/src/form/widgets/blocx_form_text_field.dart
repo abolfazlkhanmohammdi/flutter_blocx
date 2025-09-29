@@ -98,7 +98,7 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<Blo
     final Widget? suffix = getSuffix(o);
     final String? errorText = getErrorText(o);
     // Hint style with lower opacity of primary color
-    final hintStyle = o.hintStyle ?? TextStyle(color: Theme.of(context).colorScheme.primary.withAlpha(60));
+    // final hintStyle = o.hintStyle ?? TextStyle(color: Theme.of(context).colorScheme.primary.withAlpha(60));
 
     final BorderRadius radius = o.borderRadius ?? const BorderRadius.all(Radius.circular(8));
 
@@ -108,7 +108,7 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<Blo
           labelText: o.labelText,
           labelStyle: o.labelStyle,
           hintText: o.hintText,
-          hintStyle: hintStyle,
+          hintStyle: o.hintStyle,
           helperText: o.helperText,
           helperStyle: o.helperStyle,
           errorText: errorText,
@@ -138,7 +138,7 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<Blo
           labelText: o.labelText,
           labelStyle: o.labelStyle,
           hintText: o.hintText,
-          hintStyle: hintStyle,
+          hintStyle: o.hintStyle,
           helperText: o.helperText,
           helperStyle: o.helperStyle,
           errorText: errorText,
@@ -163,7 +163,7 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<Blo
           labelText: o.labelText,
           labelStyle: o.labelStyle,
           hintText: o.hintText,
-          hintStyle: hintStyle,
+          hintStyle: o.hintStyle,
           helperText: o.helperText,
           helperStyle: o.helperStyle,
           errorText: errorText,
@@ -191,7 +191,7 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<Blo
     super.dispose();
   }
 
-  bool get isCheckingUniqueField => bloc.state is FormStateCheckingUniqueFormField;
+  bool get isCheckingUniqueField => bloc.state.checkingUniqueFields.contains(widget.formKey);
   Widget? getSuffix(BlocXTextFieldOptions o) {
     if (isCheckingUniqueField) {
       return SizedBox.square(
@@ -199,7 +199,7 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<Blo
         child: CircularProgressIndicator(color: colorScheme.primary, padding: EdgeInsets.all(8)),
       );
     }
-    final bool canShowClear = o.showClearButton && _controller.text.isNotEmpty && !o.obscureText;
+    final bool canShowClear = o.showClearButton && _controller.text.isNotEmpty;
     final Widget? suffix = canShowClear
         ? IconButton(
             visualDensity: VisualDensity.compact,
