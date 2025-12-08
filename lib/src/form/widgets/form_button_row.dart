@@ -46,10 +46,12 @@ class FormButtonRow<F, P, E extends Enum> extends BlocxStatelessWidget {
 
   /// If true, both buttons expand equally to fill the row.
   final bool expandEqually;
+  final TextStyle? registerTextStyle;
 
   const FormButtonRow({
     super.key,
     this.onSecondButtonPressed,
+    this.registerTextStyle,
     required this.formState,
     required this.registerText,
     required this.registerSubmittingText,
@@ -98,6 +100,7 @@ class FormButtonRow<F, P, E extends Enum> extends BlocxStatelessWidget {
     return FormRegisterButton<F, P, E>(
       style: submitButtonStyle,
       state: formState,
+      labelTextStyle: registerTextStyle,
       buttonText: registerText,
       submitText: registerSubmittingText,
       type: registerType,

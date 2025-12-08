@@ -103,48 +103,52 @@ class _ConfirmDeleteSheetState extends State<ConfirmActionWidget> {
             ),
           ],
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: _isDeleting
-                      ? null
-                      : () {
-                          Navigator.of(context).pop(false);
-                        },
-                  child: Text(options.cancelText),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton(
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll(cs.error),
-                    foregroundColor: WidgetStatePropertyAll(cs.onError),
+          SizedBox(
+            height: 40,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: _isDeleting
+                        ? null
+                        : () {
+                      Navigator.of(context).pop(false);
+                    },
+                    child: Text(options.cancelText),
                   ),
-                  onPressed: _canConfirm
-                      ? () async {
-                          setState(() => _isDeleting = true);
-                          try {
-                            Navigator.of(context).pop(true);
-                          } finally {
-                            if (mounted) setState(() => _isDeleting = false);
-                          }
-                        }
-                      : null,
-                  child: _isDeleting
-                      ? SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(cs.onError),
-                          ),
-                        )
-                      : Text(options.confirmText),
                 ),
-              ),
-            ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStatePropertyAll(cs.error),
+                      foregroundColor: WidgetStatePropertyAll(cs.onError),
+                    ),
+                    onPressed: _canConfirm
+                        ? () async {
+                      setState(() => _isDeleting = true);
+                      try {
+                        Navigator.of(context).pop(true);
+                      } finally {
+                        if (mounted) setState(() => _isDeleting = false);
+                      }
+                    }
+                        : null,
+                    child: _isDeleting
+                        ? SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(cs.onError),
+                      ),
+                    )
+                        : Text(options.confirmText),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 8),
           const SafeArea(top: false, child: SizedBox(height: 4)),

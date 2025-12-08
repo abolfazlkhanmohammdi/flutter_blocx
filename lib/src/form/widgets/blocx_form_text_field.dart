@@ -1,4 +1,5 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_blocx/flutter_blocx.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -63,8 +64,11 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<Blo
       controller: _controller,
       autofocus: o.autofocus,
       style: o.style,
+      inputFormatters: o.inputFormatters,
+      enabled: o.enabled,
+      maxLength: o.maxLength,
       keyboardType: o.keyboardType,
-      textDirection: isRtl(_controller.text) ? TextDirection.rtl : TextDirection.ltr,
+      textDirection: o.textDirection ?? (isRtl(_controller.text) ? TextDirection.rtl : TextDirection.ltr),
       textCapitalization: o.textCapitalization,
       textInputAction: o.textInputAction,
       textAlign: o.textAlign,
@@ -113,22 +117,22 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<Blo
           helperStyle: o.helperStyle,
           errorText: errorText,
           errorStyle: o.errorStyle,
-          prefixIcon: o.prefixIcon,
+          prefixIcon: o.prefix,
           suffixIcon: suffix,
           filled: o.filled,
-          fillColor: o.fillColor ?? Theme.of(context).colorScheme.surfaceContainerHighest,
-          border: OutlineInputBorder(
-            borderRadius: radius,
-            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: radius,
-            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: radius,
-            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1),
-          ),
+          fillColor: o.fillColor,
+          // border: OutlineInputBorder(
+          //   borderRadius: radius,
+          //   borderSide: theme.inputDecorationTheme.border?.borderSide,
+          // ),
+          // focusedBorder: OutlineInputBorder(
+          //   borderRadius: radius,
+          //   borderSide: theme.inputDecorationTheme.focusedBorder?.borderSide,
+          // ),
+          // enabledBorder: OutlineInputBorder(
+          //   borderRadius: radius,
+          //   borderSide: theme.inputDecorationTheme.enabledBorder?.borderSide,
+          // ),
           isDense: true,
           contentPadding: o.contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         );
@@ -143,17 +147,17 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<Blo
           helperStyle: o.helperStyle,
           errorText: errorText,
           errorStyle: o.errorStyle,
-          prefixIcon: o.prefixIcon,
+          prefixIcon: o.prefix,
           suffixIcon: suffix,
           filled: o.filled,
-          fillColor: o.fillColor ?? Theme.of(context).colorScheme.surfaceContainerHighest,
-          border: UnderlineInputBorder(borderSide: BorderSide(color: Theme.of(context).colorScheme.primary)),
-          focusedBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-          ),
-          enabledBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1),
-          ),
+          fillColor: o.fillColor,
+          // border: UnderlineInputBorder(borderSide: theme.inputDecorationTheme.border?.borderSide,)),
+          // focusedBorder: UnderlineInputBorder(
+          //   borderSide: theme.inputDecorationTheme.focusedBorder?.borderSide,
+          // ),
+          // enabledBorder: UnderlineInputBorder(
+          //   borderSide: theme.inputDecorationTheme.enabledBorder?.borderSide,
+          // ),
           isDense: true,
           contentPadding: o.contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         );
@@ -168,15 +172,15 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<Blo
           helperStyle: o.helperStyle,
           errorText: errorText,
           errorStyle: o.errorStyle,
-          prefixIcon: o.prefixIcon,
+          prefixIcon: o.prefix,
           suffixIcon: suffix,
           filled: o.filled,
-          fillColor: o.fillColor ?? Theme.of(context).colorScheme.surfaceContainerHighest,
-          border: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none),
-          enabledBorder: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none),
-          focusedBorder: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none),
-          errorBorder: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none),
-          disabledBorder: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none),
+          fillColor: o.fillColor,
+          // border: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none),
+          // enabledBorder: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none),
+          // focusedBorder: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none),
+          // errorBorder: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none),
+          // disabledBorder: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none),
           isDense: true,
           contentPadding: o.contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         );
@@ -199,6 +203,8 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<Blo
         child: CircularProgressIndicator(color: colorScheme.primary, padding: EdgeInsets.all(8)),
       );
     }
+    if (o.suffix != null) return o.suffix;
+
     final bool canShowClear = o.showClearButton && _controller.text.isNotEmpty;
     final Widget? suffix = canShowClear
         ? IconButton(
@@ -240,9 +246,12 @@ class BlocXTextFieldOptions {
   final TextAlign textAlign;
   final int? maxLines;
   final int? minLines;
+  final int? maxLength;
+  final int? minLength;
   final bool autofocus;
+  final bool enabled;
   final bool obscureText;
-
+  final List<TextInputFormatter> inputFormatters;
   // Label
   final String? labelText;
   final TextStyle? labelStyle;
@@ -260,7 +269,8 @@ class BlocXTextFieldOptions {
   final TextStyle? errorStyle;
 
   // Icons
-  final Widget? prefixIcon;
+  final Widget? prefix;
+  final Widget? suffix;
 
   /// Shows a clear (✕) suffix icon while there is text (ignored when [obscureText] is true).
   final bool showClearButton;
@@ -275,6 +285,8 @@ class BlocXTextFieldOptions {
   /// Border radius for the default outline (when [decoration] is null).
   final BorderRadius? borderRadius;
 
+  final TextDirection? textDirection;
+
   /// Content padding for the default decoration (when [decoration] is null).
   final EdgeInsetsGeometry? contentPadding;
 
@@ -282,11 +294,15 @@ class BlocXTextFieldOptions {
     this.decoration,
     this.style,
     this.keyboardType,
+    this.textDirection,
     this.textCapitalization = TextCapitalization.none,
     this.textInputAction,
     this.textAlign = TextAlign.start,
     this.maxLines = 1,
     this.minLines,
+    this.maxLength,
+    this.inputFormatters = const [],
+    this.minLength,
     this.autofocus = false,
     this.obscureText = false,
     // label
@@ -302,7 +318,8 @@ class BlocXTextFieldOptions {
     this.errorText,
     this.errorStyle,
     // icons
-    this.prefixIcon,
+    this.prefix,
+    this.suffix,
     // behavior
     this.showClearButton = true,
     // filled defaults
@@ -310,5 +327,7 @@ class BlocXTextFieldOptions {
     this.fillColor,
     this.borderRadius,
     this.contentPadding,
+
+    this.enabled = true,
   });
 }

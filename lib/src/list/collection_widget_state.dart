@@ -175,7 +175,7 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
   }
 
   deleteMultipleItems(List<T> items) {
-    _bloc.add(ListEventRemoveMultipleItems(items: items));
+    _bloc.add(ListEventRemoveMultipleItems<T>(items: items));
   }
 
   deselectMultipleItems(List<T> items) {

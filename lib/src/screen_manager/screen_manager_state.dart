@@ -30,7 +30,11 @@ abstract class ScreenManagerState<T extends StatefulWidget> extends BlocXWidgetS
     final body = state is ScreenManagerCubitStateDisplayErrorPage
         ? errorWidget(context, state)
         : mainWidget(context, state);
-    return wrapInScaffold ? scaffoldWidget(context, body) : SafeArea(child: body);
+    return wrapInScaffold ? decorateScaffold(scaffoldWidget(context, body)) : SafeArea(child: body);
+  }
+
+  Widget decorateScaffold(Widget scaffold) {
+    return scaffold;
   }
 
   void _managerListener(BuildContext context, ScreenManagerCubitState state) {
@@ -56,7 +60,7 @@ abstract class ScreenManagerState<T extends StatefulWidget> extends BlocXWidgetS
   Widget mainWidget(BuildContext context, ScreenManagerCubitState state);
 
   @protected
-  Scaffold scaffoldWidget(BuildContext context, Widget body) {
+  Widget scaffoldWidget(BuildContext context, Widget body) {
     throw UnimplementedError(
       'wrapInScaffold is true, but scaffoldWidget() is not overridden. '
       'Either override scaffoldWidget() to provide a Scaffold, or set wrapInScaffold to false.',

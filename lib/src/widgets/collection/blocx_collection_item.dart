@@ -128,6 +128,8 @@ abstract class BlocxCollectionItem<T extends BaseEntity, P> extends BlocxStatele
   // Dispatch helpers (validated)
   // ---------------------------------------------------------------------------
 
+  int index(BuildContext context) => bloc(context).list.indexOf(item);
+
   @protected
   void removeItem(BuildContext context) {
     _requireDeletable(context);
@@ -186,6 +188,10 @@ abstract class BlocxCollectionItem<T extends BaseEntity, P> extends BlocxStatele
       },
     );
     if (result == null || !result) return;
+    onDeleteConfirmed(context);
+  }
+
+  void onDeleteConfirmed(BuildContext context) {
     bloc(context).add(ListEventRemoveItem(item: item));
   }
 
@@ -198,4 +204,25 @@ abstract class BlocxCollectionItem<T extends BaseEntity, P> extends BlocxStatele
   }
 
   ConfirmActionOptions get confirmDeleteOptions => ConfirmActionOptions();
+
+  bool areAllSelected(BuildContext context) =>
+      bloc(context).state.selectedItemIds.length == bloc(context).list.length;
+
+  void toggleAllItemsSelection(BuildContext context) {
+    var blocc = bloc(context);
+    blocc.add(
+      areAllSelected(context)
+          ? ListEventDeselectMultipleItems(items: blocc.list)
+          : ListEventSelectMultipleItems(items: blocc.list),
+    );
+  }
+
+  void toggleMultipleItemsSelection(BuildContext context, List<T> selectionTargetItems, bool areAlreadySelected) {
+    var blocc = bloc(context);
+    blocc.add(
+      areAlreadySelected
+          ? ListEventDeselectMultipleItems(items: selectionTargetItems)
+          : ListEventSelectMultipleItems(items: selectionTargetItems),
+    );
+  }
 }
