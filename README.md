@@ -14,7 +14,7 @@ Add this to your `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_blocx: ^0.5.9-beta
+  flutter_blocx: ^0.6.0
 ```
 
 Or add via the command line:
