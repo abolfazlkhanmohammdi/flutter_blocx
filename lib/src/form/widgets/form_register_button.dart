@@ -1,11 +1,12 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_core/form_bloc.dart';
 import 'package:flutter_blocx/src/core/widgets/blocx_stateless_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// A reusable submit/register button that reacts to a form [state].
 ///
-/// - While the form is submitting (`FormStateSubmittingForm`) the button:
+/// - While the form is submitting (`BlocxFormStateSubmittingForm`) the button:
 ///   - disables `onPressed`
 ///   - swaps `buttonText` with `submitText`
 ///   - shows a small progress indicator (customizable)
@@ -14,9 +15,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// - Customize per-type styles using the provided `*Style` parameters.
 /// - Override `buildOtherButton` in a subclass to provide a custom button.
 ///   The base `other` implementation returns a [SizedBox.shrink] by design.
-class FormRegisterButton<F, P, E extends Enum> extends BlocxStatelessWidget {
+class FormRegisterButton<F extends BaseFormEntity<F, E>, P, E extends Enum> extends BlocxStatelessWidget {
   /// Current form state (used to detect submitting).
-  final FormBlocState state;
+  final BlocxFormState state;
 
   /// Which visual variant to render.
   final RegisterButtonType type;
@@ -72,7 +73,7 @@ class FormRegisterButton<F, P, E extends Enum> extends BlocxStatelessWidget {
   });
 
   /// True while the form is in submitting state.
-  bool get isSubmittingForm => state is FormStateSubmittingForm;
+  bool get isSubmittingForm => state is BlocxFormStateSubmittingForm;
   bool get isCheckingFields => state.checkingUniqueFields.isNotEmpty;
   @override
   Widget build(BuildContext context) {
@@ -138,8 +139,8 @@ class FormRegisterButton<F, P, E extends Enum> extends BlocxStatelessWidget {
     );
   }
 
-  FormBloc<F, P, E> bloc(BuildContext context) {
-    return BlocProvider.of<FormBloc<F, P, E>>(context);
+  BlocxFormBloc<F, P, E> bloc(BuildContext context) {
+    return BlocProvider.of<BlocxFormBloc<F, P, E>>(context);
   }
 
   /// Default implementation for custom/other style.

@@ -1,4 +1,5 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_core/form_bloc.dart' show BaseFormEntity;
 import 'package:flutter_blocx/src/core/widgets/blocx_stateless_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -14,9 +15,9 @@ import 'form_register_button.dart';
 /// - The secondary button can be styled; by default it's an [OutlinedButton].
 /// - Optionally disable the pop button while the form is submitting.
 /// - Optional pre-pop callback (e.g., for analytics or side-effects).
-class FormButtonRow<F, P, E extends Enum> extends BlocxStatelessWidget {
+class FormButtonRow<F extends BaseFormEntity<F, E>, P, E extends Enum> extends BlocxStatelessWidget {
   /// Current form state used by [FormRegisterButton].
-  final FormBlocState formState;
+  final BlocxFormState formState;
 
   /// Text shown on the register button when idle.
   final String registerText;
@@ -65,7 +66,7 @@ class FormButtonRow<F, P, E extends Enum> extends BlocxStatelessWidget {
     this.expandEqually = true,
   });
 
-  bool get _isSubmitting => formState is FormStateSubmittingForm;
+  bool get _isSubmitting => formState is BlocxFormStateSubmittingForm;
 
   @override
   Widget build(BuildContext context) {

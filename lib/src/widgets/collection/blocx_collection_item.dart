@@ -33,9 +33,9 @@ abstract class BlocxCollectionItem<T extends BaseEntity, P> extends BlocxStatele
   // ---------------------------------------------------------------------------
 
   @protected
-  ListBloc<T, P> bloc(BuildContext context) => BlocProvider.of<ListBloc<T, P>>(context);
+  BlocxListBloc<T, P> bloc(BuildContext context) => BlocProvider.of<BlocxListBloc<T, P>>(context);
 
-  ListBloc<T, P> _blocOrThrow(BuildContext context) {
+  BlocxListBloc<T, P> _blocOrThrow(BuildContext context) {
     try {
       return bloc(context);
     } catch (_) {
@@ -136,21 +136,21 @@ abstract class BlocxCollectionItem<T extends BaseEntity, P> extends BlocxStatele
     if (confirmBeforeDelete) {
       confirmThenDelete(context);
     } else {
-      bloc(context).add(ListEventRemoveItem<T>(item: item));
+      bloc(context).add(BlocxListEventRemoveItem<T>(item: item));
     }
   }
 
   @protected
   void selectItem(BuildContext context) {
     _requireSelectable(context);
-    bloc(context).add(ListEventSelectItem<T>(item: item));
+    bloc(context).add(BlocxListEventSelectItem<T>(item: item));
   }
 
   @protected
   void deselectItem(BuildContext context) {
     _requireSelectable(context);
     // Use the exact event name your API defines (DeSelect vs Deselect).
-    bloc(context).add(ListEventDeselectItem<T>(item: item));
+    bloc(context).add(BlocxListEventDeselectItem<T>(item: item));
   }
 
   @protected
@@ -162,19 +162,19 @@ abstract class BlocxCollectionItem<T extends BaseEntity, P> extends BlocxStatele
   @protected
   void highlightItem(BuildContext context) {
     _requireHighlightable(context);
-    bloc(context).add(ListEventHighlightItem<T>(item: item));
+    bloc(context).add(BlocxListEventHighlightItem<T>(item: item));
   }
 
   @protected
   void clearHighlightedItem(BuildContext context) {
     _requireHighlightable(context);
-    bloc(context).add(ListEventClearHighlightedItem<T>(item: item));
+    bloc(context).add(BlocxListEventClearHighlightedItem<T>(item: item));
   }
 
   @protected
   void toggleExpansion(BuildContext context) {
     _requireExpandable(context);
-    bloc(context).add(ListEventToggleItemExpansion(item: item));
+    bloc(context).add(BlocxListEventToggleItemExpansion(item: item));
   }
 
   bool get confirmBeforeDelete => true;
@@ -192,15 +192,15 @@ abstract class BlocxCollectionItem<T extends BaseEntity, P> extends BlocxStatele
   }
 
   void onDeleteConfirmed(BuildContext context) {
-    bloc(context).add(ListEventRemoveItem(item: item));
+    bloc(context).add(BlocxListEventRemoveItem(item: item));
   }
 
   void updateItem(BuildContext context, T item) {
-    bloc(context).add(ListEventUpdateItem(item: item));
+    bloc(context).add(BlocxListEventUpdateItem(item: item));
   }
 
   void insertItem(BuildContext context, T item, {int index = 0}) {
-    bloc(context).add(ListEventAddItem(item: item, index: index));
+    bloc(context).add(BlocxListEventAddItem(item: item, index: index));
   }
 
   ConfirmActionOptions get confirmDeleteOptions => ConfirmActionOptions();
@@ -212,17 +212,21 @@ abstract class BlocxCollectionItem<T extends BaseEntity, P> extends BlocxStatele
     var blocc = bloc(context);
     blocc.add(
       areAllSelected(context)
-          ? ListEventDeselectMultipleItems(items: blocc.list)
-          : ListEventSelectMultipleItems(items: blocc.list),
+          ? BlocxListEventDeselectMultipleItems(items: blocc.list)
+          : BlocxListEventSelectMultipleItems(items: blocc.list),
     );
   }
 
-  void toggleMultipleItemsSelection(BuildContext context, List<T> selectionTargetItems, bool areAlreadySelected) {
+  void toggleMultipleItemsSelection(
+    BuildContext context,
+    List<T> selectionTargetItems,
+    bool areAlreadySelected,
+  ) {
     var blocc = bloc(context);
     blocc.add(
       areAlreadySelected
-          ? ListEventDeselectMultipleItems(items: selectionTargetItems)
-          : ListEventSelectMultipleItems(items: selectionTargetItems),
+          ? BlocxListEventDeselectMultipleItems(items: selectionTargetItems)
+          : BlocxListEventSelectMultipleItems(items: selectionTargetItems),
     );
   }
 }

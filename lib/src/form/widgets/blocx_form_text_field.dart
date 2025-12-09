@@ -3,8 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_blocx/flutter_blocx.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:blocx_core/form_bloc.dart' show BaseFormEntity;
 
-class BlocXFormTextField<F, P, E extends Enum> extends StatefulWidget {
+class BlocXFormTextField<F extends BaseFormEntity<F, E>, P, E extends Enum> extends StatefulWidget {
   /// The enum key that identifies this field in your form.
   final E formKey;
 
@@ -33,7 +34,8 @@ class BlocXFormTextField<F, P, E extends Enum> extends StatefulWidget {
   State<BlocXFormTextField<F, P, E>> createState() => BlocXFormTextFieldState<F, P, E>();
 }
 
-class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<BlocXFormTextField<F, P, E>> {
+class BlocXFormTextFieldState<F extends BaseFormEntity<F, E>, P, E extends Enum>
+    extends BlocXWidgetState<BlocXFormTextField<F, P, E>> {
   TextEditingController? _internalController;
   bool get _ownsController => widget.controller == null;
   TextEditingController get _controller => widget.controller ?? _internalController!;
@@ -78,7 +80,7 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<Blo
       decoration: _buildDecoration(context),
       onChanged: (text) {
         // Notify the bloc about this field’s new value.
-        bloc.add(FormEventUpdateData(data: text, key: widget.formKey));
+        bloc.add(BlocxFormEventUpdateData(data: text, key: widget.formKey));
         // Rebuild to reflect clear-button visibility.
         if (o.showClearButton) setState(() {});
       },
@@ -92,8 +94,8 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<Blo
     return rtlPattern.hasMatch(text);
   }
 
-  /// Access the nearest [FormBloc] in the tree.
-  FormBloc<F, P, E> get bloc => BlocProvider.of<FormBloc<F, P, E>>(context);
+  /// Access the nearest [BlocxFormBloc] in the tree.
+  BlocxFormBloc<F, P, E> get bloc => BlocProvider.of<BlocxFormBloc<F, P, E>>(context);
 
   /// Build the resolved [InputDecoration] based on the [TextFieldType].
   InputDecoration _buildDecoration(BuildContext context) {
@@ -101,10 +103,6 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<Blo
 
     final Widget? suffix = getSuffix(o);
     final String? errorText = getErrorText(o);
-    // Hint style with lower opacity of primary color
-    // final hintStyle = o.hintStyle ?? TextStyle(color: Theme.of(context).colorScheme.primary.withAlpha(60));
-
-    final BorderRadius radius = o.borderRadius ?? const BorderRadius.all(Radius.circular(8));
 
     switch (widget.textFieldType) {
       case TextFieldType.outlined:
@@ -215,7 +213,7 @@ class BlocXFormTextFieldState<F, P, E extends Enum> extends BlocXWidgetState<Blo
                 ? null
                 : () {
                     _controller.clear();
-                    bloc.add(FormEventUpdateData(data: '', key: widget.formKey));
+                    bloc.add(BlocxFormEventUpdateData(data: '', key: widget.formKey));
                     setState(() {});
                   },
           )

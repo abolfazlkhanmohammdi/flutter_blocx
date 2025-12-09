@@ -1,9 +1,10 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_core/form_bloc.dart' show BaseFormEntity;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx/flutter_blocx.dart';
 
-class BlocXFormDropdown<F, P, E extends Enum, T> extends StatefulWidget {
+class BlocXFormDropdown<F extends BaseFormEntity<F, E>, P, E extends Enum, T> extends StatefulWidget {
   final E formKey;
   final List<DropdownMenuItem<T>> items;
   final T? value;
@@ -21,7 +22,7 @@ class BlocXFormDropdown<F, P, E extends Enum, T> extends StatefulWidget {
   State<BlocXFormDropdown<F, P, E, T>> createState() => _BlocXFormDropdownState<F, P, E, T>();
 }
 
-class _BlocXFormDropdownState<F, P, E extends Enum, T>
+class _BlocXFormDropdownState<F extends BaseFormEntity<F, E>, P, E extends Enum, T>
     extends BlocXWidgetState<BlocXFormDropdown<F, P, E, T>> {
   T? _selectedValue;
 
@@ -36,29 +37,15 @@ class _BlocXFormDropdownState<F, P, E extends Enum, T>
     final o = widget.options;
     final errorText = getErrorText();
 
-    final border = o.showBorder
-        ? OutlineInputBorder(
-            borderRadius: o.borderRadius ?? BorderRadius.circular(8),
-            borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-          )
-        : OutlineInputBorder(
-            borderRadius: o.borderRadius ?? BorderRadius.circular(8),
-            borderSide: BorderSide.none,
-          );
     return DropdownButtonFormField<T>(
       style: o.textStyle,
-      value: _selectedValue,
+      initialValue: _selectedValue,
       selectedItemBuilder: o.selectedItemBuilder,
       decoration: InputDecoration(
         filled: o.filled,
         fillColor: o.fillColor,
         errorText: errorText,
         labelText: o.labelText,
-        // border: border,
-        // enabledBorder: OutlineInputBorder(
-        //   borderSide: BorderSide.none,
-        //   borderRadius: BorderRadius.circular(8),
-        // ),
         hintText: o.hintText,
         hintStyle: o.hintStyle,
         contentPadding: o.contentPadding,
@@ -67,7 +54,7 @@ class _BlocXFormDropdownState<F, P, E extends Enum, T>
       borderRadius: BorderRadius.circular(8),
       alignment: Alignment.center,
       items: widget.items,
-      onChanged: (v) => bloc.add(FormEventUpdateData(data: v, key: widget.formKey)),
+      onChanged: (v) => bloc.add(BlocxFormEventUpdateData(data: v, key: widget.formKey)),
     );
   }
 
@@ -79,7 +66,7 @@ class _BlocXFormDropdownState<F, P, E extends Enum, T>
     return widget.options.errorText;
   }
 
-  FormBloc<F, P, E> get bloc => BlocProvider.of<FormBloc<F, P, E>>(context);
+  BlocxFormBloc<F, P, E> get bloc => BlocProvider.of<BlocxFormBloc<F, P, E>>(context);
 }
 
 class BlocXDropdownOptions {

@@ -265,12 +265,12 @@ import 'package:example/src/screens/users/data/models/user.dart';
 
 class UsersBloc extends ListBloc<User, dynamic>
     with
-        InfiniteListBlocMixin<User, dynamic>,
+        BlocxInfiniteListBlocMixin<User, dynamic>,
         SearchableListBlocMixin<User, dynamic>,
         DeletableListBlocMixin<User, dynamic>,
         HighlightableListBlocMixin<User, dynamic>,
         SelectableListBlocMixin<User, dynamic> {
-  UsersBloc() : super(ScreenManagerCubit(), InfiniteListBloc());
+  UsersBloc() : super(ScreenManagerCubit(), BlocxInfiniteListBloc());
 
   @override
   (String, String?) convertErrorToMessageAndTitle(Object error) {
@@ -573,7 +573,7 @@ class _StatusPill extends StatelessWidget {
 
 ## Forms
 
-Widgets that pair a `FormBloc` (from `blocx_core`) with ready-made inputs.
+Widgets that pair a `BlocxFormBloc` (from `blocx_core`) with ready-made inputs.
 
 ### Quickstart
 
@@ -585,10 +585,10 @@ class RegisterForm extends FormWidget<void> {
 }
 
 class _RegisterFormState extends FormWidgetState<RegisterForm, Map<String, dynamic>, void, FormFieldKey> {
-  _RegisterFormState() : super(bloc: RegisterFormBloc());
+  _RegisterFormState() : super(bloc: RegisterBlocxFormBloc());
 
   @override
-  Widget buildForm(BuildContext context, FormBlocState<Map<String, dynamic>, FormFieldKey> state) {
+  Widget buildForm(BuildContext context, BlocxFormState<Map<String, dynamic>, FormFieldKey> state) {
     return Column(
       children: [
         BlocXFormTextField<Map<String, dynamic>, void, FormFieldKey>(

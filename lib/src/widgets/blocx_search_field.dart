@@ -4,8 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// A search text field that integrates with a [SearchableListBlocMixin].
 ///
-/// - Typing triggers [ListEventSearch].
-/// - Clearing input triggers [ListEventClearSearch].
+/// - Typing triggers [BlocxListEventSearch].
+/// - Clearing input triggers [BlocxListEventClearSearch].
 class BlocxSearchField<T extends BaseEntity, P> extends StatelessWidget {
   final TextEditingController controller;
   final BlocxSearchFieldOptions options;
@@ -33,7 +33,7 @@ class BlocxSearchField<T extends BaseEntity, P> extends StatelessWidget {
               icon: const Icon(Icons.clear),
               onPressed: () {
                 controller.clear();
-                bloc.add(ListEventClearSearch<T>());
+                bloc.add(BlocxListEventClearSearch<T>());
               },
             )
           : null,
@@ -54,8 +54,8 @@ class BlocxSearchField<T extends BaseEntity, P> extends StatelessWidget {
       autofocus: options.autofocus,
       obscureText: options.obscureText,
       // ← keep onChange exactly as you had it
-      onChanged: (text) => bloc.add(ListEventSearch<T>(searchText: text)),
-      onSubmitted: (text) => bloc.add(ListEventSearch<T>(searchText: text)),
+      onChanged: (text) => bloc.add(BlocxListEventSearch<T>(searchText: text)),
+      onSubmitted: (text) => bloc.add(BlocxListEventSearch<T>(searchText: text)),
     );
   }
 
@@ -64,8 +64,8 @@ class BlocxSearchField<T extends BaseEntity, P> extends StatelessWidget {
   /// Throws a clear [FlutterError] if:
   /// - No `ListBloc<T, P>` is found in the widget tree, or
   /// - The bloc does not implement `SearchableListBlocContract<T>`.
-  ListBloc<T, P> _blocOrThrowSearchable(BuildContext context) {
-    final b = BlocProvider.of<ListBloc<T, P>>(context, listen: false);
+  BlocxListBloc<T, P> _blocOrThrowSearchable(BuildContext context) {
+    final b = BlocProvider.of<BlocxListBloc<T, P>>(context, listen: false);
     if (!b.isSearchable) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('BlocxSearchField requires a searchable ListBloc.'),

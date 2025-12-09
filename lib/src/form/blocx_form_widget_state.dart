@@ -1,31 +1,36 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_core/form_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blocx/form_widget.dart';
 import 'package:flutter_blocx/src/form/widgets/blocx_form_checkbox.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx/src/screen_manager/screen_manager_state.dart';
 
-abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> extends ScreenManagerState<W> {
-  late final FormBloc<F, P, E> bloc;
-  GlobalKey<FormState> formKey = GlobalKey();
+abstract class BlocxFormWidgetState<
+  W extends FormWidget<P>,
+  F extends BaseFormEntity<F, E>,
+  P,
+  E extends Enum
+>
+    extends ScreenManagerState<W> {
+  late final BlocxFormBloc<F, P, E> bloc;
 
   final Map<E, TextEditingController> _controllersMap = {};
 
   @override
   void initState() {
     bloc = generateBloc();
-    bloc.add(FormEventInit(payload: widget.payload));
+    bloc.add(BlocxFormEventInit(payload: widget.payload));
     super.initState();
   }
 
-  FormBloc<F, P, E> generateBloc();
+  BlocxFormBloc<F, P, E> generateBloc();
 
   @override
   Widget mainWidget(BuildContext context, ScreenManagerCubitState state) {
     return BlocProvider.value(
       value: bloc,
-      child: BlocConsumer<FormBloc<F, P, E>, FormBlocState<F, E>>(
+      child: BlocConsumer<BlocxFormBloc<F, P, E>, BlocxFormState<F, E>>(
         builder: _blocBuilder,
         buildWhen: (_, c) => c.shouldRebuild,
         listener: blocListener,
@@ -35,18 +40,18 @@ abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> ex
   }
 
   @mustCallSuper
-  void blocListener(BuildContext context, FormBlocState<F, E> state) {
-    if (state is FormStateApplyInitialDataToForm) {
+  void blocListener(BuildContext context, BlocxFormState<F, E> state) {
+    if (state is BlocxFormStateApplyInitialDataToForm) {
       applyInitialDataToForm(state.formData);
-    } else if (state is FormStateFormSubmitted<F, E>) {
+    } else if (state is BlocxFormStateFormSubmitted<F, E>) {
       onFormSubmitted(state);
-    } else if (state is FormStateFormUpdated) {
+    } else if (state is BlocxFormStateFormUpdated) {
       onFormUpdated(state.formData);
     }
   }
 
-  Widget _blocBuilder(BuildContext context, FormBlocState<F, E> state) {
-    return Form(key: formKey, autovalidateMode: autovalidateMode, child: formWidget(context, state));
+  Widget _blocBuilder(BuildContext context, BlocxFormState<F, E> state) {
+    return formWidget(context, state);
   }
 
   BlocXFormTextField<F, P, E> textField(
@@ -98,6 +103,10 @@ abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> ex
     return _controllersMap[key]!;
   }
 
+  TextEditingController? _getTextEditingControllerIfExists(E key) {
+    return _controllersMap[key];
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -113,22 +122,28 @@ abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> ex
 
   bool get isValid => bloc.state.errors.isEmpty;
 
-  formWidget(BuildContext context, FormBlocState<F, E> state);
+  formWidget(BuildContext context, BlocxFormState<F, E> state);
 
   bool get isUpdate => widget.payload != null;
 
-  void applyInitialDataToForm(F formData) {}
+  void applyInitialDataToForm(F formData) {
+    for (E key in keys) {
+      var controller = _getTextEditingControllerIfExists(key);
+      if (controller == null) continue;
+      controller.text = formData.getFormattedValueByKey(key) ?? formData.getValueByKey(key);
+    }
+  }
 
-  void onFormSubmitted(FormStateFormSubmitted<F, E> state) {}
+  void onFormSubmitted(BlocxFormStateFormSubmitted<F, E> state) {}
 
   void submit() {
-    bloc.add(FormEventSubmit());
+    bloc.add(BlocxFormEventSubmit());
   }
 
   P? get payload => widget.payload;
 
   void changeListener(dynamic data, E key) {
-    bloc.add(FormEventUpdateData(data: data, key: key));
+    bloc.add(BlocxFormEventUpdateData(data: data, key: key));
   }
 
   @override
@@ -136,18 +151,20 @@ abstract class FormWidgetState<W extends FormWidget<P>, F, P, E extends Enum> ex
   AutovalidateMode get autovalidateMode => AutovalidateMode.onUserInteraction;
 
   void setErrorToField(E key, String message) {
-    bloc.add(FormEventSetErrorToField(message: message, key: key));
+    bloc.add(BlocxFormEventSetErrorToField(message: message, key: key));
   }
 
   void setTimedErrorToField(E key, String message, {Duration? duration}) {
-    bloc.add(FormEventSetTimedErrorToField(message: message, key: key, duration: duration));
+    bloc.add(BlocxFormEventSetTimedErrorToField(message: message, key: key, duration: duration));
   }
 
   void clearFieldError(E key, {String? message}) {
-    bloc.add(FormEventClearFieldError(key: key, message: message));
+    bloc.add(BlocxFormEventClearFieldError(key: key, message: message));
   }
 
   bool get autoCloseBloc => true;
 
   void onFormUpdated(F formData) {}
+
+  List<E> get keys;
 }

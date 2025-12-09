@@ -9,23 +9,23 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 
 abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends BaseEntity, P>
     extends ScreenManagerState<W> {
-  late final ListBloc<T, P> _bloc;
+  late final BlocxListBloc<T, P> _bloc;
   ScrollController? scrollController;
   @override
   void initState() {
     _bloc = generateBloc;
     setScrollController();
     if (loadOnInit) {
-      _bloc.add(ListEventLoadInitialPage<T, P>(payload: widget.payload));
+      _bloc.add(BlocxListEventLoadInitialPage<T, P>(payload: widget.payload));
     }
     super.initState();
   }
 
   @override
   Widget mainWidget(BuildContext context, ScreenManagerCubitState state) {
-    return BlocProvider<ListBloc<T, P>>.value(
+    return BlocProvider<BlocxListBloc<T, P>>.value(
       value: _bloc,
-      child: BlocConsumer<ListBloc<T, P>, ListState<T>>(
+      child: BlocConsumer<BlocxListBloc<T, P>, BlocxListState<T>>(
         buildWhen: (_, s) => s.shouldRebuild,
         listenWhen: (_, s) => s.shouldListen,
         listener: _listListener,
@@ -34,7 +34,7 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
     );
   }
 
-  Widget collectionWrapperBuilder(BuildContext context, ListState<T> state) {
+  Widget collectionWrapperBuilder(BuildContext context, BlocxListState<T> state) {
     final top = topWidget(context, state);
     final bottom = bottomWidget(context, state);
     final bool isLoadingOrSearching = isLoading || isSearching;
@@ -56,37 +56,37 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
 
   double get topBottomAndListSpacing => 8.0;
 
-  Widget? topWidget(BuildContext context, ListState<T> state) => null;
+  Widget? topWidget(BuildContext context, BlocxListState<T> state) => null;
 
-  Widget? bottomWidget(BuildContext context, ListState<T> state) => null;
+  Widget? bottomWidget(BuildContext context, BlocxListState<T> state) => null;
 
-  Widget? sliverTopWidget(BuildContext context, ListState<T> state) => null;
+  Widget? sliverTopWidget(BuildContext context, BlocxListState<T> state) => null;
 
-  Widget? sliverBottomWidget(BuildContext context, ListState<T> state) => null;
+  Widget? sliverBottomWidget(BuildContext context, BlocxListState<T> state) => null;
 
   Widget itemBuilder(BuildContext context, T item);
 
-  void _listListener(BuildContext context, ListState<T> state) {
-    if (state is ListStateScrollToItem<T>) {
+  void _listListener(BuildContext context, BlocxListState<T> state) {
+    if (state is BlocxListStateScrollToItem<T>) {
       var sc = scrollController as AutoScrollController;
       sc.scrollToIndex(state.index, preferPosition: AutoScrollPosition.middle);
     }
     blocListener(context, state);
   }
 
-  void blocListener(BuildContext context, ListState<T> state) {
-    if (state is ListStateSelectionChanged<T>) {
+  void blocListener(BuildContext context, BlocxListState<T> state) {
+    if (state is BlocxListStateSelectionChanged<T>) {
       onSelectionChanged(context, state.selectionData);
     }
   }
 
-  bool get isLoading => _bloc.state is ListStateLoading;
+  bool get isLoading => _bloc.state is BlocxListStateLoading;
   bool get isSearching => _bloc.state.isSearching;
   void search(String text) {
-    _bloc.add(ListEventSearch<T>(searchText: text));
+    _bloc.add(BlocxListEventSearch<T>(searchText: text));
   }
 
-  Widget loadingWidget(BuildContext context, ListState<T> state) {
+  Widget loadingWidget(BuildContext context, BlocxListState<T> state) {
     return Column(
       spacing: 24,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -103,11 +103,11 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
   }
 
   void refreshData() {
-    _bloc.add(ListEventRefreshData<T>());
+    _bloc.add(BlocxListEventRefreshData<T>());
   }
 
   void loadNextPage() {
-    _bloc.add(ListEventLoadNextPage<T>());
+    _bloc.add(BlocxListEventLoadNextPage<T>());
   }
 
   AnimatedChildBuilder? get deleteAnimation => null;
@@ -122,7 +122,7 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
 
   String get searchingText => "Searching data, please wait";
 
-  Widget emptyWidget(BuildContext context, ListState<T> state) {
+  Widget emptyWidget(BuildContext context, BlocxListState<T> state) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -135,14 +135,14 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
   }
 
   void scrollToItem(T item, {bool highlightItem = false}) {
-    if (!this._bloc.isScrollable) {
+    if (!_bloc.isScrollable) {
       throw StateError(
         'scrollToIndex can only be used on a bloc that mixes in '
-        'ScrollableListBlocMixin<$T, $P>.',
+        'ScrollableBlocxListBlocMixin<$T, $P>.',
       );
     }
-    final bloc = this._bloc as ScrollableListBlocMixin<T, P>;
-    bloc.add(ListEventScrollToItem<T>(item: item, highlightItem: highlightItem));
+    final bloc = _bloc as BlocxScrollableListBlocMixin<T, P>;
+    bloc.add(BlocxListEventScrollToItem<T>(item: item, highlightItem: highlightItem));
   }
 
   ScrollController? get scrollControllerProvider => null;
@@ -166,7 +166,7 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
     }
     if (_hasAutoScrolled && !sc.isAutoScrolling) {
       _hasAutoScrolled = false;
-      _bloc.add(ListEventHighlightScrolledToItems());
+      _bloc.add(BlocxListEventHighlightScrolledToItems());
     }
   }
 
@@ -175,11 +175,11 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
   }
 
   deleteMultipleItems(List<T> items) {
-    _bloc.add(ListEventRemoveMultipleItems<T>(items: items));
+    _bloc.add(BlocxListEventRemoveMultipleItems<T>(items: items));
   }
 
   deselectMultipleItems(List<T> items) {
-    _bloc.add(ListEventDeselectMultipleItems(items: items));
+    _bloc.add(BlocxListEventDeselectMultipleItems(items: items));
   }
 
   CollectionWidgetStateType get _collectionDisplayType => settings.type;
@@ -193,10 +193,10 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
 
   bool get loadOnInit => true;
 
-  ListBloc<T, P> get generateBloc;
-  ListBloc<T, P> get bloc => _bloc;
+  BlocxListBloc<T, P> get generateBloc;
+  BlocxListBloc<T, P> get bloc => _bloc;
 
-  Widget collectionWidget(BuildContext context, ListState<T> state) {
+  Widget collectionWidget(BuildContext context, BlocxListState<T> state) {
     final opts = _collectionOptions;
     opts.assertCorrectType(_collectionDisplayType);
 
@@ -303,7 +303,7 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Ba
   }
 
   addToList(T item, {int index = 0}) {
-    _bloc.add(ListEventAddItem(item: item, index: index));
+    _bloc.add(BlocxListEventAddItem(item: item, index: index));
   }
 
   @override

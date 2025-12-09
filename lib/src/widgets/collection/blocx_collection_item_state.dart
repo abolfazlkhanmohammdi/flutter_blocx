@@ -43,9 +43,9 @@ abstract class BlocxCollectionItemState<W extends BlocxStatefulCollectionItem<T>
   // ---------------------------------------------------------------------------
 
   @protected
-  ListBloc<T, P> get bloc => BlocProvider.of<ListBloc<T, P>>(context);
+  BlocxListBloc<T, P> get bloc => BlocProvider.of<BlocxListBloc<T, P>>(context);
 
-  ListBloc<T, P> _blocOrThrow() {
+  BlocxListBloc<T, P> _blocOrThrow() {
     try {
       return bloc;
     } catch (_) {
@@ -144,20 +144,20 @@ abstract class BlocxCollectionItemState<W extends BlocxStatefulCollectionItem<T>
     if (confirmBeforeDelete) {
       confirmThenDelete();
     } else {
-      bloc.add(ListEventRemoveItem<T>(item: item));
+      bloc.add(BlocxListEventRemoveItem<T>(item: item));
     }
   }
 
   @protected
   void selectItem() {
     _requireSelectable();
-    bloc.add(ListEventSelectItem<T>(item: item));
+    bloc.add(BlocxListEventSelectItem<T>(item: item));
   }
 
   @protected
   void deselectItem() {
     _requireSelectable();
-    bloc.add(ListEventDeselectItem<T>(item: item));
+    bloc.add(BlocxListEventDeselectItem<T>(item: item));
   }
 
   @protected
@@ -169,19 +169,19 @@ abstract class BlocxCollectionItemState<W extends BlocxStatefulCollectionItem<T>
   @protected
   void highlightItem() {
     _requireHighlightable();
-    bloc.add(ListEventHighlightItem<T>(item: item));
+    bloc.add(BlocxListEventHighlightItem<T>(item: item));
   }
 
   @protected
   void clearHighlightedItem() {
     _requireHighlightable();
-    bloc.add(ListEventClearHighlightedItem<T>(item: item));
+    bloc.add(BlocxListEventClearHighlightedItem<T>(item: item));
   }
 
   @protected
   void toggleExpansion() {
     _requireExpandable();
-    bloc.add(ListEventToggleItemExpansion(item: item));
+    bloc.add(BlocxListEventToggleItemExpansion(item: item));
   }
 
   bool get confirmBeforeDelete => true;
@@ -193,15 +193,15 @@ abstract class BlocxCollectionItemState<W extends BlocxStatefulCollectionItem<T>
       builder: (_) => ConfirmActionWidget(options: confirmDeleteOptions),
     );
     if (result != true) return;
-    bloc.add(ListEventRemoveItem(item: item));
+    bloc.add(BlocxListEventRemoveItem(item: item));
   }
 
   void updateItem(T newItem) {
-    bloc.add(ListEventUpdateItem(item: newItem));
+    bloc.add(BlocxListEventUpdateItem(item: newItem));
   }
 
   void insertItem(T newItem, {int index = 0}) {
-    bloc.add(ListEventAddItem(item: newItem, index: index));
+    bloc.add(BlocxListEventAddItem(item: newItem, index: index));
   }
 
   ConfirmActionOptions get confirmDeleteOptions => ConfirmActionOptions();

@@ -9,7 +9,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 class SliverInfiniteGrid<Entity extends BaseEntity> extends StatefulWidget {
   final SliverInfiniteGridOptions options;
   final List<Entity> items;
-  final InfiniteListBloc bloc;
+  final BlocxInfiniteListBloc bloc;
 
   /// Builder for each grid item.
   final Widget Function(BuildContext context, Entity item) itemBuilder;
@@ -53,7 +53,7 @@ class SliverInfiniteGridState<Entity extends BaseEntity> extends State<SliverInf
   late final String uuid;
   late final ScrollController _internalController = ScrollController();
 
-  InfiniteListBloc get bloc => widget.bloc;
+  BlocxInfiniteListBloc get bloc => widget.bloc;
   SliverInfiniteGridOptions get options => widget.options;
 
   ScrollController get effectiveController => widget.scrollController ?? _internalController;
@@ -72,9 +72,9 @@ class SliverInfiniteGridState<Entity extends BaseEntity> extends State<SliverInf
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<InfiniteListBloc>.value(
+    return BlocProvider<BlocxInfiniteListBloc>.value(
       value: widget.bloc,
-      child: BlocConsumer<InfiniteListBloc, InfiniteListState>(
+      child: BlocConsumer<BlocxInfiniteListBloc, BlocxInfiniteListState>(
         bloc: widget.bloc,
         listener: blocListener,
         buildWhen: (_, c) => c.shouldRebuild,
@@ -82,13 +82,14 @@ class SliverInfiniteGridState<Entity extends BaseEntity> extends State<SliverInf
           return NotificationListener<UserScrollNotification>(
             onNotification: onScroll,
             child: Listener(
-              onPointerDown: (d) => bloc.add(InfiniteListEventVerticalDragStarted(globalY: d.position.dy)),
-              onPointerUp: (d) => bloc.add(InfiniteListEventVerticalDragEnded()),
+              onPointerDown: (d) =>
+                  bloc.add(BlocxInfiniteListEventVerticalDragStarted(globalY: d.position.dy)),
+              onPointerUp: (d) => bloc.add(BlocxInfiniteListEventVerticalDragEnded()),
               onPointerMove: maySwipe
-                  ? (d) => bloc.add(InfiniteListEventVerticalDragUpdated(globalY: d.position.dy))
+                  ? (d) => bloc.add(BlocxInfiniteListEventVerticalDragUpdated(globalY: d.position.dy))
                   : null,
               onPointerCancel: maySwipe
-                  ? (_) => bloc.add(InfiniteListEventVerticalDragUpdated(globalY: null))
+                  ? (_) => bloc.add(BlocxInfiniteListEventVerticalDragUpdated(globalY: null))
                   : null,
               child: _sliverGrid(context, state),
             ),
@@ -112,8 +113,8 @@ class SliverInfiniteGridState<Entity extends BaseEntity> extends State<SliverInf
 
   bool get maySwipe => _atRefreshEdge && !bloc.state.isRefreshing && widget.refreshOnSwipe != null;
 
-  void blocListener(BuildContext context, InfiniteListState state) {
-    if (state is InfiniteListStateRefresh) {
+  void blocListener(BuildContext context, BlocxInfiniteListState state) {
+    if (state is BlocxInfiniteListStateRefresh) {
       widget.refreshOnSwipe?.call();
     }
   }
@@ -131,7 +132,7 @@ class SliverInfiniteGridState<Entity extends BaseEntity> extends State<SliverInf
     }
 
     bloc.add(
-      InfiniteListEventOnScroll(
+      BlocxInfiniteListEventOnScroll(
         isAtTop: isAtTop,
         isScrollingUp: isScrollingUp,
         isAtBottom: isAtBottom,
@@ -141,7 +142,7 @@ class SliverInfiniteGridState<Entity extends BaseEntity> extends State<SliverInf
     return false;
   }
 
-  void onVisibilityChanged(VisibilityInfo c, InfiniteListState state) {
+  void onVisibilityChanged(VisibilityInfo c, BlocxInfiniteListState state) {
     if (c.visibleFraction < 0.5 ||
         state.isLoadingMore ||
         widget.loadBottomData == null ||
@@ -152,7 +153,7 @@ class SliverInfiniteGridState<Entity extends BaseEntity> extends State<SliverInf
     widget.loadBottomData!.call();
   }
 
-  Widget _sliverGrid(BuildContext context, InfiniteListState state) {
+  Widget _sliverGrid(BuildContext context, BlocxInfiniteListState state) {
     final delegate =
         widget.gridDelegateBuilder?.call(options) ??
         SliverGridDelegateWithFixedCrossAxisCount(
@@ -181,7 +182,7 @@ class SliverInfiniteGridState<Entity extends BaseEntity> extends State<SliverInf
 
   int? _defaultSemanticIndexCallback(Widget _, int index) => index;
 
-  Widget _itemBuilder(BuildContext context, Entity data, int index, InfiniteListState state) {
+  Widget _itemBuilder(BuildContext context, Entity data, int index, BlocxInfiniteListState state) {
     final isBottomTrigger =
         index == (widget.items.length - options.loadMoreTriggerItemDistance) && !state.hasReachedEnd;
 
@@ -208,7 +209,7 @@ class SliverInfiniteGridState<Entity extends BaseEntity> extends State<SliverInf
     return child;
   }
 
-  Widget loadMoreWidget(BuildContext context, InfiniteListState state) {
+  Widget loadMoreWidget(BuildContext context, BlocxInfiniteListState state) {
     final external = widget.loadMoreWidgetBuilder?.call(context, state.isLoadingMore);
     if (external != null) return external;
     final scheme = Theme.of(context).colorScheme;
@@ -230,7 +231,7 @@ class SliverInfiniteGridState<Entity extends BaseEntity> extends State<SliverInf
     );
   }
 
-  Widget swipeRefreshWidget(BuildContext context, InfiniteListState state) {
+  Widget swipeRefreshWidget(BuildContext context, BlocxInfiniteListState state) {
     final external = widget.refreshWidgetBuilder?.call(context, state.swipeRefreshHeight);
     if (external != null) return external;
     final primary = Theme.of(context).colorScheme.primary;

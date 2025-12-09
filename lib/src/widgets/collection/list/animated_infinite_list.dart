@@ -11,7 +11,7 @@ class AnimatedInfiniteList<Entity extends BaseEntity> extends StatefulWidget {
   final AnimatedInfiniteListOptions options;
 
   final List<Entity> items;
-  final InfiniteListBloc bloc;
+  final BlocxInfiniteListBloc bloc;
 
   final Widget Function(BuildContext context, Entity item) itemBuilder;
   final Widget Function(BuildContext context, int index)? separatorBuilder; // ignored here
@@ -48,14 +48,14 @@ class AnimatedInfiniteList<Entity extends BaseEntity> extends StatefulWidget {
   });
 
   @override
-  AnimatedInfiniteListState<Entity> createState() => AnimatedInfiniteListState<Entity>();
+  AnimatedBlocxInfiniteListState<Entity> createState() => AnimatedBlocxInfiniteListState<Entity>();
 }
 
-class AnimatedInfiniteListState<Entity extends BaseEntity> extends State<AnimatedInfiniteList<Entity>> {
+class AnimatedBlocxInfiniteListState<Entity extends BaseEntity> extends State<AnimatedInfiniteList<Entity>> {
   late final String uuid;
   late final ScrollController scrollController = widget.scrollController ?? ScrollController();
 
-  InfiniteListBloc get bloc => widget.bloc;
+  BlocxInfiniteListBloc get bloc => widget.bloc;
   AnimatedInfiniteListOptions get options => widget.options;
 
   @override
@@ -72,9 +72,9 @@ class AnimatedInfiniteListState<Entity extends BaseEntity> extends State<Animate
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<InfiniteListBloc>.value(
+    return BlocProvider<BlocxInfiniteListBloc>.value(
       value: widget.bloc,
-      child: BlocConsumer<InfiniteListBloc, InfiniteListState>(
+      child: BlocConsumer<BlocxInfiniteListBloc, BlocxInfiniteListState>(
         bloc: widget.bloc,
         listener: blocListener,
         buildWhen: (_, c) => c.shouldRebuild,
@@ -95,23 +95,23 @@ class AnimatedInfiniteListState<Entity extends BaseEntity> extends State<Animate
     );
   }
 
-  Widget putInExpandedIfNotShrunk(BuildContext context, InfiniteListState state, Widget child) {
+  Widget putInExpandedIfNotShrunk(BuildContext context, BlocxInfiniteListState state, Widget child) {
     if (options.shrinkWrap) return child;
     return Expanded(child: child);
   }
 
-  Widget maybeSetupRefresh(InfiniteListState state, {required Widget child}) {
+  Widget maybeSetupRefresh(BlocxInfiniteListState state, {required Widget child}) {
     if (!widget.isRefreshable) return child;
     return NotificationListener<UserScrollNotification>(
       onNotification: onScroll,
       child: Listener(
-        onPointerDown: (d) => bloc.add(InfiniteListEventVerticalDragStarted(globalY: d.position.dy)),
-        onPointerUp: (d) => bloc.add(InfiniteListEventVerticalDragEnded()),
+        onPointerDown: (d) => bloc.add(BlocxInfiniteListEventVerticalDragStarted(globalY: d.position.dy)),
+        onPointerUp: (d) => bloc.add(BlocxInfiniteListEventVerticalDragEnded()),
         onPointerMove: maySwipe
-            ? (d) => bloc.add(InfiniteListEventVerticalDragUpdated(globalY: d.position.dy))
+            ? (d) => bloc.add(BlocxInfiniteListEventVerticalDragUpdated(globalY: d.position.dy))
             : null,
         onPointerCancel: maySwipe
-            ? (_) => bloc.add(InfiniteListEventVerticalDragUpdated(globalY: null))
+            ? (_) => bloc.add(BlocxInfiniteListEventVerticalDragUpdated(globalY: null))
             : null,
         child: child,
       ),
@@ -133,7 +133,7 @@ class AnimatedInfiniteListState<Entity extends BaseEntity> extends State<Animate
 
   bool get maySwipe => _atRefreshEdge && !bloc.state.isRefreshing && widget.refreshOnSwipe != null;
 
-  void onVisibilityChanged(VisibilityInfo c, InfiniteListState state) {
+  void onVisibilityChanged(VisibilityInfo c, BlocxInfiniteListState state) {
     if (c.visibleFraction < 0.5 ||
         state.isLoadingMore ||
         widget.loadBottomData == null ||
@@ -157,7 +157,7 @@ class AnimatedInfiniteListState<Entity extends BaseEntity> extends State<Animate
     }
 
     bloc.add(
-      InfiniteListEventOnScroll(
+      BlocxInfiniteListEventOnScroll(
         isAtTop: isAtTop,
         isScrollingUp: isScrollingUp,
         isAtBottom: isAtBottom,
@@ -167,7 +167,7 @@ class AnimatedInfiniteListState<Entity extends BaseEntity> extends State<Animate
     return false;
   }
 
-  Widget loadMoreWidget(BuildContext context, InfiniteListState state) {
+  Widget loadMoreWidget(BuildContext context, BlocxInfiniteListState state) {
     final external = widget.loadMoreWidgetBuilder?.call(context, state.isLoadingMore);
     if (external != null) return external;
     final scheme = Theme.of(context).colorScheme;
@@ -189,7 +189,7 @@ class AnimatedInfiniteListState<Entity extends BaseEntity> extends State<Animate
     );
   }
 
-  Widget swipeRefreshWidget(BuildContext context, InfiniteListState state) {
+  Widget swipeRefreshWidget(BuildContext context, BlocxInfiniteListState state) {
     if (!widget.isRefreshable || state.swipeRefreshHeight == 0) return SizedBox.square(dimension: 0);
     final external = widget.refreshWidgetBuilder?.call(context, state.swipeRefreshHeight);
     if (external != null) return external;
@@ -203,8 +203,8 @@ class AnimatedInfiniteListState<Entity extends BaseEntity> extends State<Animate
     );
   }
 
-  void blocListener(BuildContext context, InfiniteListState state) {
-    if (state is InfiniteListStateRefresh) {
+  void blocListener(BuildContext context, BlocxInfiniteListState state) {
+    if (state is BlocxInfiniteListStateRefresh) {
       widget.refreshOnSwipe?.call();
     }
   }
@@ -218,7 +218,7 @@ class AnimatedInfiniteListState<Entity extends BaseEntity> extends State<Animate
     );
   }
 
-  Widget _itemBuilder(BuildContext context, Entity data, InfiniteListState state) {
+  Widget _itemBuilder(BuildContext context, Entity data, BlocxInfiniteListState state) {
     final index = widget.items.indexOf(data);
     final isBottomLoadingTrigger =
         index == (widget.items.length - options.loadMoreTriggerItemDistance) && !state.hasReachedEnd;
@@ -240,7 +240,7 @@ class AnimatedInfiniteListState<Entity extends BaseEntity> extends State<Animate
     return itemWidget;
   }
 
-  Widget _animatedList(BuildContext context, InfiniteListState state) {
+  Widget _animatedList(BuildContext context, BlocxInfiniteListState state) {
     return ImplicitlyAnimatedList<Entity>(
       controller: scrollController,
       initialAnimation: options.animateAtStart,
