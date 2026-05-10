@@ -1,4 +1,13 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_core/list_bloc.dart'
+    show
+        BlocxInfiniteListBloc,
+        BlocxInfiniteListState,
+        BlocxInfiniteListStateRefresh,
+        BlocxInfiniteListEventVerticalDragUpdated,
+        BlocxInfiniteListEventVerticalDragStarted,
+        BlocxInfiniteListEventVerticalDragEnded,
+        BlocxInfiniteListEventOnScroll;
 import 'package:flutter_blocx/src/widgets/collection/options/infinite_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -18,7 +27,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 /// - Uses `GridView.builder` with a configurable grid delegate
 /// - No third-party animated grid. For simple entry effects, wrap your
 ///   `itemBuilder` content in an `AnimatedSwitcher`/`FadeTransition` yourself.
-class InfiniteGrid<Entity extends BaseEntity> extends StatefulWidget {
+class InfiniteGrid<Entity extends BlocxBaseEntity> extends StatefulWidget {
   final InfiniteGridOptions options;
   final Widget Function(BuildContext context, Entity item) itemBuilder;
 
@@ -54,7 +63,7 @@ class InfiniteGrid<Entity extends BaseEntity> extends StatefulWidget {
   InfiniteGridState<Entity> createState() => InfiniteGridState<Entity>();
 }
 
-class InfiniteGridState<Entity extends BaseEntity> extends State<InfiniteGrid<Entity>> {
+class InfiniteGridState<Entity extends BlocxBaseEntity> extends State<InfiniteGrid<Entity>> {
   late final String uuid;
 
   @override

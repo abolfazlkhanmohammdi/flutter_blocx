@@ -1,9 +1,8 @@
-import 'package:blocx_core/blocx_core.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_blocx/flutter_blocx.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:blocx_core/form_bloc.dart' show BaseFormEntity;
+import 'package:blocx_core/form_bloc.dart' show BaseFormEntity, BlocxFormEventUpdateData, BlocxFormBloc;
 
 class BlocXFormTextField<F extends BaseFormEntity<F, E>, P, E extends Enum> extends StatefulWidget {
   /// The enum key that identifies this field in your form.

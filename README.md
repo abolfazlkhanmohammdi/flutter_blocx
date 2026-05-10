@@ -62,7 +62,7 @@ abstract class CollectionWidget<P> extends StatefulWidget {
 - **What is `P`?** A freeform **payload type**. Use it to provide extra context to your collection (e.g., `{ categoryId: 'books' }`, a simple `int`, or a richer object).
 - **What is the `payload`?** The **value** of type `P` you pass when constructing your widget. It’s available in your `State` and often forwarded into your bloc/use cases.
 
-### `CollectionWidgetState<W extends CollectionWidget<P>, T extends BaseEntity, P>`
+### `CollectionWidgetState<W extends CollectionWidget<P>, T extends BlocxBaseEntity, P>`
 
 The state base class provides batteries-included wiring to a `ListBloc<T, P>` so you don’t hand-roll pagination, search, selection, or scrolling.
 
@@ -140,7 +140,7 @@ Below is a compact, end-to-end example that demonstrates how the widgets and hel
 ```dart
 import 'dart:convert';
 import 'package:blocx_core/blocx_core.dart';
-class User extends BaseEntity {
+class User extends BlocxBaseEntity {
   final int id; // unique stable id
   final String displayName;
   final String email;

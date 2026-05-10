@@ -1,4 +1,22 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_core/list_bloc.dart'
+    show
+        BlocxListBloc,
+        BlocxListState,
+        BlocxListStateScrollToItem,
+        BlocxListStateSelectionChanged,
+        BlocxListStateLoading,
+        BlocxScrollableListBlocMixin,
+        SelectionChangedData,
+        BlocxListEventLoadInitialPage,
+        BlocxListEventSearch,
+        BlocxListEventRefreshData,
+        BlocxListEventLoadNextPage,
+        BlocxListEventScrollToItem,
+        BlocxListEventHighlightScrolledToItems,
+        BlocxListEventRemoveMultipleItems,
+        BlocxListEventDeselectMultipleItems,
+        BlocxListEventAddItem;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx/list_widget.dart';
@@ -7,7 +25,7 @@ import 'package:flutter_blocx/src/screen_manager/screen_manager_state.dart';
 import 'package:implicitly_animated_list/implicitly_animated_list.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends BaseEntity, P>
+abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends BlocxBaseEntity, P>
     extends ScreenManagerState<W> {
   late final BlocxListBloc<T, P> _bloc;
   ScrollController? scrollController;

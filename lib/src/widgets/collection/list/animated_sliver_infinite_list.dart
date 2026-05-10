@@ -1,4 +1,13 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_core/list_bloc.dart'
+    show
+        BlocxInfiniteListBloc,
+        BlocxInfiniteListState,
+        BlocxInfiniteListStateRefresh,
+        BlocxInfiniteListEventVerticalDragUpdated,
+        BlocxInfiniteListEventVerticalDragStarted,
+        BlocxInfiniteListEventVerticalDragEnded,
+        BlocxInfiniteListEventOnScroll;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_blocx/src/widgets/collection/options/animated_sliver_infinite_list.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +27,7 @@ Widget _defaultAnimation(BuildContext context, Widget child, Animation<double> a
   );
 }
 
-class AnimatedSliverInfiniteList<Entity extends BaseEntity> extends StatefulWidget {
+class AnimatedSliverInfiniteList<Entity extends BlocxBaseEntity> extends StatefulWidget {
   final AnimatedSliverInfiniteListOptions options;
 
   final List<Entity> items;
@@ -67,7 +76,7 @@ class AnimatedSliverInfiniteList<Entity extends BaseEntity> extends StatefulWidg
       AnimatedSliverBlocxInfiniteListState<Entity>();
 }
 
-class AnimatedSliverBlocxInfiniteListState<Entity extends BaseEntity>
+class AnimatedSliverBlocxInfiniteListState<Entity extends BlocxBaseEntity>
     extends State<AnimatedSliverInfiniteList<Entity>> {
   late final String uuid = 'AnimatedSliverInfiniteList-${identityHashCode(this)}';
   late final ScrollController _internalController = ScrollController();

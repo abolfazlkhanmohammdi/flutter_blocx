@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:blocx_core/blocx_core.dart';
 
 /// Minimal user profile usable across data layers.
-class User extends BaseEntity {
+class User extends BlocxBaseEntity {
   final int id; // unique stable id
   final String displayName;
   final String email;

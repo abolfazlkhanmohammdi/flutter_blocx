@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:blocx_core/blocx_core.dart';
 
-class NoteTag extends BaseEntity {
+class NoteTag extends BlocxBaseEntity {
   final int id;
   final int userId;
   final String name;

@@ -1,8 +1,6 @@
-import 'package:blocx_core/blocx_core.dart';
 import 'package:blocx_core/form_bloc.dart';
 import 'package:flutter_blocx/src/core/widgets/blocx_stateless_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// A reusable submit/register button that reacts to a form [state].
 ///
@@ -15,7 +13,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// - Customize per-type styles using the provided `*Style` parameters.
 /// - Override `buildOtherButton` in a subclass to provide a custom button.
 ///   The base `other` implementation returns a [SizedBox.shrink] by design.
-class FormRegisterButton<F extends BaseFormEntity<F, E>, P, E extends Enum> extends BlocxStatelessWidget {
+class BlocxFormRegisterButton<F extends BaseFormEntity<F, E>, E extends Enum> extends BlocxStatelessWidget {
   /// Current form state (used to detect submitting).
   final BlocxFormState state;
 
@@ -54,7 +52,7 @@ class FormRegisterButton<F extends BaseFormEntity<F, E>, P, E extends Enum> exte
   final ButtonStyle? style;
   final VoidCallback? onPressed;
 
-  const FormRegisterButton({
+  const BlocxFormRegisterButton({
     super.key,
     required this.state,
     required this.buttonText,
@@ -77,7 +75,7 @@ class FormRegisterButton<F extends BaseFormEntity<F, E>, P, E extends Enum> exte
   bool get isCheckingFields => state.checkingUniqueFields.isNotEmpty;
   @override
   Widget build(BuildContext context) {
-    final disabled = isSubmittingForm || isCheckingFields || bloc(context).state.errors.isNotEmpty;
+    final disabled = isSubmittingForm || isCheckingFields || state.errors.isNotEmpty;
     final label = isSubmittingForm ? submitText : buttonText;
 
     switch (type) {
@@ -104,7 +102,7 @@ class FormRegisterButton<F extends BaseFormEntity<F, E>, P, E extends Enum> exte
   Widget buildElevatedButton(BuildContext context, {required String label, required bool disabled}) {
     return ElevatedButton(
       style: style ?? elevatedStyle,
-      onPressed: onPressed,
+      onPressed: disabled ? null : onPressed,
       child: _buildContent(context, label: label, disabled: disabled),
     );
   }
@@ -114,7 +112,7 @@ class FormRegisterButton<F extends BaseFormEntity<F, E>, P, E extends Enum> exte
   Widget buildFilledButton(BuildContext context, {required String label, required bool disabled}) {
     return FilledButton(
       style: style ?? filledStyle,
-      onPressed: onPressed,
+      onPressed: disabled ? null : onPressed,
       child: _buildContent(context, label: label, disabled: disabled),
     );
   }
@@ -124,7 +122,7 @@ class FormRegisterButton<F extends BaseFormEntity<F, E>, P, E extends Enum> exte
   Widget buildTextButton(BuildContext context, {required String label, required bool disabled}) {
     return TextButton(
       style: style ?? textStyle,
-      onPressed: onPressed,
+      onPressed: disabled ? null : onPressed,
       child: _buildContent(context, label: label, disabled: disabled),
     );
   }
@@ -134,13 +132,9 @@ class FormRegisterButton<F extends BaseFormEntity<F, E>, P, E extends Enum> exte
   Widget buildOutlinedButton(BuildContext context, {required String label, required bool disabled}) {
     return OutlinedButton(
       style: style ?? outlinedStyle,
-      onPressed: onPressed,
+      onPressed: disabled ? null : onPressed,
       child: _buildContent(context, label: label, disabled: disabled),
     );
-  }
-
-  BlocxFormBloc<F, P, E> bloc(BuildContext context) {
-    return BlocProvider.of<BlocxFormBloc<F, P, E>>(context);
   }
 
   /// Default implementation for custom/other style.
@@ -169,8 +163,14 @@ class FormRegisterButton<F extends BaseFormEntity<F, E>, P, E extends Enum> exte
       mainAxisSize: MainAxisSize.min,
       children: [
         if (isSubmittingForm || isCheckingFields)
-          SizedBox(width: 16, height: 16, child: Center(child: indicator)),
-        if (!isCheckingFields) ...[SizedBox(width: spacing), text],
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: Center(child: indicator),
+          ),
+        if (isSubmittingForm || isCheckingFields)
+          SizedBox(width: spacing),
+        text,
       ],
     );
   }
@@ -183,7 +183,7 @@ class FormRegisterButton<F extends BaseFormEntity<F, E>, P, E extends Enum> exte
   }
 }
 
-/// Available visual variants for [FormRegisterButton].
+/// Available visual variants for [BlocxFormRegisterButton].
 enum RegisterButtonType {
   elevated,
   filled,

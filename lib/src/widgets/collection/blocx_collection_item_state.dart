@@ -1,9 +1,21 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_core/list_bloc.dart'
+    show
+        BlocxListBloc,
+        ListStateExtensions,
+        BlocxListEventRemoveItem,
+        BlocxListEventSelectItem,
+        BlocxListEventDeselectItem,
+        BlocxListEventHighlightItem,
+        BlocxListEventClearHighlightedItem,
+        BlocxListEventToggleItemExpansion,
+        BlocxListEventUpdateItem,
+        BlocxListEventAddItem;
 import 'package:flutter_blocx/flutter_blocx.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-abstract class BlocxStatefulCollectionItem<T extends BaseEntity> extends StatefulWidget {
+abstract class BlocxStatefulCollectionItem<T extends BlocxBaseEntity> extends StatefulWidget {
   final T item;
   const BlocxStatefulCollectionItem({super.key, required this.item});
 }
@@ -16,7 +28,11 @@ abstract class BlocxStatefulCollectionItem<T extends BaseEntity> extends Statefu
 ///
 /// This provides the same convenience helpers as the stateless version,
 /// but without needing to pass `BuildContext` into each method.
-abstract class BlocxCollectionItemState<W extends BlocxStatefulCollectionItem<T>, T extends BaseEntity, P>
+abstract class BlocxCollectionItemState<
+  W extends BlocxStatefulCollectionItem<T>,
+  T extends BlocxBaseEntity,
+  P
+>
     extends State<W> {
   /// Provide the item this row represents.
   ///

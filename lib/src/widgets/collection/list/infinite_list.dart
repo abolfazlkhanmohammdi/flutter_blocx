@@ -1,4 +1,5 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_core/list_bloc.dart' show BlocxInfiniteListBloc, BlocxInfiniteListState, BlocxInfiniteListStateRefresh, BlocxInfiniteListEventVerticalDragUpdated, BlocxInfiniteListEventVerticalDragStarted, BlocxInfiniteListEventVerticalDragEnded, BlocxInfiniteListEventOnScroll;
 import 'package:flutter_blocx/src/widgets/collection/options/infinite_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -6,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-class InfiniteList<Entity extends BaseEntity> extends StatefulWidget {
+class InfiniteList<Entity extends BlocxBaseEntity> extends StatefulWidget {
   final InfiniteListOptions options;
 
   final List<Entity> items;
@@ -43,7 +44,7 @@ class InfiniteList<Entity extends BaseEntity> extends StatefulWidget {
   InfiniteListWidgetState<Entity> createState() => InfiniteListWidgetState<Entity>();
 }
 
-class InfiniteListWidgetState<Entity extends BaseEntity> extends State<InfiniteList<Entity>> {
+class InfiniteListWidgetState<Entity extends BlocxBaseEntity> extends State<InfiniteList<Entity>> {
   late final String uuid;
 
   // Only used if no external controller is provided for any internal checks.

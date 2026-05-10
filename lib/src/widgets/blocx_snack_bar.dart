@@ -1,6 +1,5 @@
 import 'package:blocx_core/blocx_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blocx/src/core/localizations/loc_provider.dart';
 
 class BlocxSnackBar extends StatelessWidget {
   final String message;

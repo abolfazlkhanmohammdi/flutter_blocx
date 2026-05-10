@@ -4,7 +4,7 @@ import 'package:blocx_core/blocx_core.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
 import 'package:example/src/screens/users/data/models/user.dart';
 
-class Note extends BaseEntity {
+class Note extends BlocxBaseEntity {
   final String uuid;
   final int tagId;
   final int? userId; // ← new: user id

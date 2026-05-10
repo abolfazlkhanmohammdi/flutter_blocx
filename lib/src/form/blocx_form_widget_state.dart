@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx/src/screen_manager/screen_manager_state.dart';
 
 abstract class BlocxFormWidgetState<
-  W extends FormWidget<P>,
+  W extends BlocxFormWidget<P>,
   F extends BaseFormEntity<F, E>,
   P,
   E extends Enum
@@ -16,6 +16,7 @@ abstract class BlocxFormWidgetState<
   late final BlocxFormBloc<F, P, E> bloc;
 
   final Map<E, TextEditingController> _controllersMap = {};
+  final Map<E, FocusNode> _focusNodes = {};
 
   @override
   void initState() {
@@ -113,6 +114,10 @@ abstract class BlocxFormWidgetState<
     for (var controller in _controllersMap.values) {
       controller.dispose();
     }
+    for (var node in _focusNodes.values) {
+      node.dispose();
+    }
+
     if (autoCloseBloc) {
       bloc.close();
     }
@@ -120,7 +125,7 @@ abstract class BlocxFormWidgetState<
 
   double get formVerticalSpacing => 16;
 
-  bool get isValid => bloc.state.errors.isEmpty;
+  bool get isValid => bloc.state.isValid;
 
   formWidget(BuildContext context, BlocxFormState<F, E> state);
 
@@ -167,4 +172,17 @@ abstract class BlocxFormWidgetState<
   void onFormUpdated(F formData) {}
 
   List<E> get keys;
+
+  FocusNode getFocusNode(E key) {
+    return _focusNodes.putIfAbsent(key, () => FocusNode());
+  }
+
+  void _requestFocusOnError(BlocxFormState<F, E> state) {
+    if (state.errors.isNotEmpty) {
+      final firstErrorKey = state.errors.keys.first;
+      _focusNodes[firstErrorKey]?.requestFocus();
+    }
+  }
+
+  BlocxFormState get state => bloc.state;
 }

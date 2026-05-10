@@ -1,4 +1,13 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_core/list_bloc.dart'
+    show
+        BlocxInfiniteListBloc,
+        BlocxInfiniteListState,
+        BlocxInfiniteListStateRefresh,
+        BlocxInfiniteListEventVerticalDragUpdated,
+        BlocxInfiniteListEventVerticalDragStarted,
+        BlocxInfiniteListEventVerticalDragEnded,
+        BlocxInfiniteListEventOnScroll;
 import 'package:flutter_blocx/src/widgets/collection/options/animated_infinite_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -7,7 +16,7 @@ import 'package:implicitly_animated_list/implicitly_animated_list.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-class AnimatedInfiniteList<Entity extends BaseEntity> extends StatefulWidget {
+class AnimatedInfiniteList<Entity extends BlocxBaseEntity> extends StatefulWidget {
   final AnimatedInfiniteListOptions options;
 
   final List<Entity> items;
@@ -51,7 +60,8 @@ class AnimatedInfiniteList<Entity extends BaseEntity> extends StatefulWidget {
   AnimatedBlocxInfiniteListState<Entity> createState() => AnimatedBlocxInfiniteListState<Entity>();
 }
 
-class AnimatedBlocxInfiniteListState<Entity extends BaseEntity> extends State<AnimatedInfiniteList<Entity>> {
+class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
+    extends State<AnimatedInfiniteList<Entity>> {
   late final String uuid;
   late final ScrollController scrollController = widget.scrollController ?? ScrollController();
 
@@ -252,7 +262,7 @@ class AnimatedBlocxInfiniteListState<Entity extends BaseEntity> extends State<An
       insertAnimation: widget.insertAnimation ?? _defaultAnimation,
       deleteAnimation: widget.deleteAnimation ?? _defaultAnimation,
       itemBuilder: (c, item) => _itemBuilder(c, item, state),
-      itemEquality: (BaseEntity f, BaseEntity s) => f.identifier == s.identifier,
+      itemEquality: (BlocxBaseEntity f, BlocxBaseEntity s) => f.identifier == s.identifier,
     );
   }
 

@@ -1,24 +1,21 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_core/list_bloc.dart'
+    show
+        BlocxInfiniteListBloc,
+        BlocxInfiniteListState,
+        BlocxInfiniteListStateRefresh,
+        BlocxInfiniteListEventVerticalDragUpdated,
+        BlocxInfiniteListEventVerticalDragStarted,
+        BlocxInfiniteListEventVerticalDragEnded,
+        BlocxInfiniteListEventOnScroll;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_blocx/list_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:implicitly_animated_list/implicitly_animated_list.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-Animation<double> _driveDefaultAnimation(Animation<double> parent) {
-  return CurvedAnimation(parent: parent, curve: Curves.easeInOutQuad).drive(Tween<double>(begin: 0, end: 1));
-}
-
-Widget _defaultAnimation(BuildContext context, Widget child, Animation<double> animation) {
-  return SizeTransition(
-    sizeFactor: _driveDefaultAnimation(animation),
-    child: FadeTransition(opacity: _driveDefaultAnimation(animation), child: child),
-  );
-}
-
-class SliverInfiniteList<Entity extends BaseEntity> extends StatefulWidget {
+class SliverInfiniteList<Entity extends BlocxBaseEntity> extends StatefulWidget {
   final SliverInfiniteListOptions options;
 
   final List<Entity> items;
@@ -66,7 +63,7 @@ class SliverInfiniteList<Entity extends BaseEntity> extends StatefulWidget {
   SliverBlocxInfiniteListState<Entity> createState() => SliverBlocxInfiniteListState<Entity>();
 }
 
-class SliverBlocxInfiniteListState<Entity extends BaseEntity> extends State<SliverInfiniteList<Entity>> {
+class SliverBlocxInfiniteListState<Entity extends BlocxBaseEntity> extends State<SliverInfiniteList<Entity>> {
   late final String uuid = 'SliverInfiniteList-${identityHashCode(this)}';
   late final ScrollController _internalController = ScrollController();
 

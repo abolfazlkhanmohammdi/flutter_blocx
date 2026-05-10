@@ -1,4 +1,13 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_core/list_bloc.dart'
+    show
+        BlocxInfiniteListEventVerticalDragUpdated,
+        BlocxInfiniteListEventVerticalDragEnded,
+        BlocxInfiniteListBloc,
+        BlocxInfiniteListState,
+        BlocxInfiniteListStateRefresh,
+        BlocxInfiniteListEventVerticalDragStarted,
+        BlocxInfiniteListEventOnScroll;
 import 'package:flutter_blocx/src/widgets/collection/options/sliver_infinite_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -6,7 +15,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-class SliverInfiniteGrid<Entity extends BaseEntity> extends StatefulWidget {
+class SliverInfiniteGrid<Entity extends BlocxBaseEntity> extends StatefulWidget {
   final SliverInfiniteGridOptions options;
   final List<Entity> items;
   final BlocxInfiniteListBloc bloc;
@@ -49,7 +58,7 @@ class SliverInfiniteGrid<Entity extends BaseEntity> extends StatefulWidget {
   SliverInfiniteGridState<Entity> createState() => SliverInfiniteGridState<Entity>();
 }
 
-class SliverInfiniteGridState<Entity extends BaseEntity> extends State<SliverInfiniteGrid<Entity>> {
+class SliverInfiniteGridState<Entity extends BlocxBaseEntity> extends State<SliverInfiniteGrid<Entity>> {
   late final String uuid;
   late final ScrollController _internalController = ScrollController();
 
