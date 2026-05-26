@@ -5,13 +5,12 @@ repository: https://github.com/abolfazlkhanmohammdi/flutter_blocx
 issue_tracker: https://github.com/abolfazlkhanmohammdi/flutter_blocx/issues
 topics: [bloc, architecture, lists, forms]
 environment:
-  sdk: ^3.8.1
+  sdk: ">=3.5.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  blocx_core:
-    path: ../blocx_core
+  blocx_core: 0.7.1
   flutter_bloc: ^9.1.1
   implicitly_animated_list: ^2.3.0
   visibility_detector: ^0.4.0+2
