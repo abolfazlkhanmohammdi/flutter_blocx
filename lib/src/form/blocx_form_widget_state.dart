@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blocx/form_widget.dart';
 import 'package:flutter_blocx/src/form/widgets/blocx_form_checkbox.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_blocx/src/screen_manager/screen_manager_state.dart';
+import 'package:flutter_blocx/src/screen_manager/blocx_screen_manager_state.dart';
 
 abstract class BlocxFormWidgetState<
   W extends BlocxFormWidget<P>,
@@ -12,7 +12,7 @@ abstract class BlocxFormWidgetState<
   P,
   E extends Enum
 >
-    extends ScreenManagerState<W> {
+    extends BlocxScreenManagerState<W> {
   late final BlocxFormBloc<F, P, E> bloc;
 
   final Map<E, TextEditingController> _controllersMap = {};

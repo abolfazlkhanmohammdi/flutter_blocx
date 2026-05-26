@@ -1,18 +1,18 @@
 import 'package:blocx_core/blocx_core.dart';
 import 'package:blocx_core/list_bloc.dart'
     show
-        BlocxListBloc,
+        BlocxCollectionBloc,
         ListStateExtensions,
-        BlocxListEventRemoveItem,
-        BlocxListEventSelectItem,
-        BlocxListEventDeselectItem,
-        BlocxListEventHighlightItem,
-        BlocxListEventClearHighlightedItem,
-        BlocxListEventToggleItemExpansion,
-        BlocxListEventUpdateItem,
-        BlocxListEventAddItem,
-        BlocxListEventDeselectMultipleItems,
-        BlocxListEventSelectMultipleItems;
+        BlocxCollectionEventRemoveItem,
+        BlocxCollectionEventSelectItem,
+        BlocxCollectionEventDeselectItem,
+        BlocxCollectionEventHighlightItem,
+        BlocxCollectionEventClearHighlightedItem,
+        BlocxCollectionEventToggleItemExpansion,
+        BlocxCollectionEventUpdateItem,
+        BlocxCollectionEventAddItem,
+        BlocxCollectionEventDeselectMultipleItems,
+        BlocxCollectionEventSelectMultipleItems;
 import 'package:flutter_blocx/flutter_blocx.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -47,9 +47,9 @@ abstract class BlocxCollectionItem<T extends BlocxBaseEntity, P> extends BlocxSt
   // ---------------------------------------------------------------------------
 
   @protected
-  BlocxListBloc<T, P> bloc(BuildContext context) => BlocProvider.of<BlocxListBloc<T, P>>(context);
+  BlocxCollectionBloc<T, P> bloc(BuildContext context) => BlocProvider.of<BlocxCollectionBloc<T, P>>(context);
 
-  BlocxListBloc<T, P> _blocOrThrow(BuildContext context) {
+  BlocxCollectionBloc<T, P> _blocOrThrow(BuildContext context) {
     try {
       return bloc(context);
     } catch (_) {
@@ -150,21 +150,21 @@ abstract class BlocxCollectionItem<T extends BlocxBaseEntity, P> extends BlocxSt
     if (confirmBeforeDelete) {
       confirmThenDelete(context);
     } else {
-      bloc(context).add(BlocxListEventRemoveItem<T>(item: item));
+      bloc(context).add(BlocxCollectionEventRemoveItem<T>(item: item));
     }
   }
 
   @protected
   void selectItem(BuildContext context) {
     _requireSelectable(context);
-    bloc(context).add(BlocxListEventSelectItem<T>(item: item));
+    bloc(context).add(BlocxCollectionEventSelectItem<T>(item: item));
   }
 
   @protected
   void deselectItem(BuildContext context) {
     _requireSelectable(context);
     // Use the exact event name your API defines (DeSelect vs Deselect).
-    bloc(context).add(BlocxListEventDeselectItem<T>(item: item));
+    bloc(context).add(BlocxCollectionEventDeselectItem<T>(item: item));
   }
 
   @protected
@@ -176,19 +176,19 @@ abstract class BlocxCollectionItem<T extends BlocxBaseEntity, P> extends BlocxSt
   @protected
   void highlightItem(BuildContext context) {
     _requireHighlightable(context);
-    bloc(context).add(BlocxListEventHighlightItem<T>(item: item));
+    bloc(context).add(BlocxCollectionEventHighlightItem<T>(item: item));
   }
 
   @protected
   void clearHighlightedItem(BuildContext context) {
     _requireHighlightable(context);
-    bloc(context).add(BlocxListEventClearHighlightedItem<T>(item: item));
+    bloc(context).add(BlocxCollectionEventClearHighlightedItem<T>(item: item));
   }
 
   @protected
   void toggleExpansion(BuildContext context) {
     _requireExpandable(context);
-    bloc(context).add(BlocxListEventToggleItemExpansion(item: item));
+    bloc(context).add(BlocxCollectionEventToggleItemExpansion(item: item));
   }
 
   bool get confirmBeforeDelete => true;
@@ -206,15 +206,15 @@ abstract class BlocxCollectionItem<T extends BlocxBaseEntity, P> extends BlocxSt
   }
 
   void onDeleteConfirmed(BuildContext context) {
-    bloc(context).add(BlocxListEventRemoveItem(item: item));
+    bloc(context).add(BlocxCollectionEventRemoveItem(item: item));
   }
 
   void updateItem(BuildContext context, T item) {
-    bloc(context).add(BlocxListEventUpdateItem(item: item));
+    bloc(context).add(BlocxCollectionEventUpdateItem(item: item));
   }
 
   void insertItem(BuildContext context, T item, {int index = 0}) {
-    bloc(context).add(BlocxListEventAddItem(item: item, index: index));
+    bloc(context).add(BlocxCollectionEventAddItem(item: item, index: index));
   }
 
   ConfirmActionOptions get confirmDeleteOptions => ConfirmActionOptions();
@@ -226,8 +226,8 @@ abstract class BlocxCollectionItem<T extends BlocxBaseEntity, P> extends BlocxSt
     var blocc = bloc(context);
     blocc.add(
       areAllSelected(context)
-          ? BlocxListEventDeselectMultipleItems(items: blocc.list)
-          : BlocxListEventSelectMultipleItems(items: blocc.list),
+          ? BlocxCollectionEventDeselectMultipleItems(items: blocc.list)
+          : BlocxCollectionEventSelectMultipleItems(items: blocc.list),
     );
   }
 
@@ -239,8 +239,8 @@ abstract class BlocxCollectionItem<T extends BlocxBaseEntity, P> extends BlocxSt
     var blocc = bloc(context);
     blocc.add(
       areAlreadySelected
-          ? BlocxListEventDeselectMultipleItems(items: selectionTargetItems)
-          : BlocxListEventSelectMultipleItems(items: selectionTargetItems),
+          ? BlocxCollectionEventDeselectMultipleItems(items: selectionTargetItems)
+          : BlocxCollectionEventSelectMultipleItems(items: selectionTargetItems),
     );
   }
 }

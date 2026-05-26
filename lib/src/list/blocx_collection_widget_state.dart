@@ -1,49 +1,32 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_core/list_bloc.dart'
-    show
-        BlocxListBloc,
-        BlocxListState,
-        BlocxListStateScrollToItem,
-        BlocxListStateSelectionChanged,
-        BlocxListStateLoading,
-        BlocxScrollableListBlocMixin,
-        SelectionChangedData,
-        BlocxListEventLoadInitialPage,
-        BlocxListEventSearch,
-        BlocxListEventRefreshData,
-        BlocxListEventLoadNextPage,
-        BlocxListEventScrollToItem,
-        BlocxListEventHighlightScrolledToItems,
-        BlocxListEventRemoveMultipleItems,
-        BlocxListEventDeselectMultipleItems,
-        BlocxListEventAddItem;
+import 'package:blocx_core/list_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx/list_widget.dart';
 import 'package:flutter_blocx/src/core/localizations/loc_provider.dart';
-import 'package:flutter_blocx/src/screen_manager/screen_manager_state.dart';
+import 'package:flutter_blocx/src/screen_manager/blocx_screen_manager_state.dart';
 import 'package:implicitly_animated_list/implicitly_animated_list.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends BlocxBaseEntity, P>
-    extends ScreenManagerState<W> {
-  late final BlocxListBloc<T, P> _bloc;
+abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T extends BlocxBaseEntity, P>
+    extends BlocxScreenManagerState<W> {
+  late final BlocxCollectionBloc<T, P> _bloc;
   ScrollController? scrollController;
   @override
   void initState() {
     _bloc = generateBloc;
     setScrollController();
     if (loadOnInit) {
-      _bloc.add(BlocxListEventLoadInitialPage<T, P>(payload: widget.payload));
+      _bloc.add(BlocxCollectionEventLoadInitialPage<T, P>(payload: widget.payload));
     }
     super.initState();
   }
 
   @override
   Widget mainWidget(BuildContext context, ScreenManagerCubitState state) {
-    return BlocProvider<BlocxListBloc<T, P>>.value(
+    return BlocProvider<BlocxCollectionBloc<T, P>>.value(
       value: _bloc,
-      child: BlocConsumer<BlocxListBloc<T, P>, BlocxListState<T>>(
+      child: BlocConsumer<BlocxCollectionBloc<T, P>, BlocxCollectionState<T>>(
         buildWhen: (_, s) => s.shouldRebuild,
         listenWhen: (_, s) => s.shouldListen,
         listener: _listListener,
@@ -52,7 +35,7 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Bl
     );
   }
 
-  Widget collectionWrapperBuilder(BuildContext context, BlocxListState<T> state) {
+  Widget collectionWrapperBuilder(BuildContext context, BlocxCollectionState<T> state) {
     final top = topWidget(context, state);
     final bottom = bottomWidget(context, state);
     final bool isLoadingOrSearching = isLoading || isSearching;
@@ -74,37 +57,37 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Bl
 
   double get topBottomAndListSpacing => 8.0;
 
-  Widget? topWidget(BuildContext context, BlocxListState<T> state) => null;
+  Widget? topWidget(BuildContext context, BlocxCollectionState<T> state) => null;
 
-  Widget? bottomWidget(BuildContext context, BlocxListState<T> state) => null;
+  Widget? bottomWidget(BuildContext context, BlocxCollectionState<T> state) => null;
 
-  Widget? sliverTopWidget(BuildContext context, BlocxListState<T> state) => null;
+  Widget? sliverTopWidget(BuildContext context, BlocxCollectionState<T> state) => null;
 
-  Widget? sliverBottomWidget(BuildContext context, BlocxListState<T> state) => null;
+  Widget? sliverBottomWidget(BuildContext context, BlocxCollectionState<T> state) => null;
 
   Widget itemBuilder(BuildContext context, T item);
 
-  void _listListener(BuildContext context, BlocxListState<T> state) {
-    if (state is BlocxListStateScrollToItem<T>) {
+  void _listListener(BuildContext context, BlocxCollectionState<T> state) {
+    if (state is BlocxCollectionStateScrollToItem<T>) {
       var sc = scrollController as AutoScrollController;
       sc.scrollToIndex(state.index, preferPosition: AutoScrollPosition.middle);
     }
     blocListener(context, state);
   }
 
-  void blocListener(BuildContext context, BlocxListState<T> state) {
-    if (state is BlocxListStateSelectionChanged<T>) {
+  void blocListener(BuildContext context, BlocxCollectionState<T> state) {
+    if (state is BlocxCollectionStateSelectionChanged<T>) {
       onSelectionChanged(context, state.selectionData);
     }
   }
 
-  bool get isLoading => _bloc.state is BlocxListStateLoading;
+  bool get isLoading => _bloc.state is BlocxCollectionStateLoading;
   bool get isSearching => _bloc.state.isSearching;
   void search(String text) {
-    _bloc.add(BlocxListEventSearch<T>(searchText: text));
+    _bloc.add(BlocxCollectionEventSearch<T>(searchText: text));
   }
 
-  Widget loadingWidget(BuildContext context, BlocxListState<T> state) {
+  Widget loadingWidget(BuildContext context, BlocxCollectionState<T> state) {
     return Column(
       spacing: 24,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -121,11 +104,11 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Bl
   }
 
   void refreshData() {
-    _bloc.add(BlocxListEventRefreshData<T>());
+    _bloc.add(BlocxCollectionEventRefreshData<T>());
   }
 
   void loadNextPage() {
-    _bloc.add(BlocxListEventLoadNextPage<T>());
+    _bloc.add(BlocxCollectionEventLoadNextPage<T>());
   }
 
   AnimatedChildBuilder? get deleteAnimation => null;
@@ -140,7 +123,7 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Bl
 
   String get searchingText => "Searching data, please wait";
 
-  Widget emptyWidget(BuildContext context, BlocxListState<T> state) {
+  Widget emptyWidget(BuildContext context, BlocxCollectionState<T> state) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -156,11 +139,11 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Bl
     if (!_bloc.isScrollable) {
       throw StateError(
         'scrollToIndex can only be used on a bloc that mixes in '
-        'ScrollableBlocxListBlocMixin<$T, $P>.',
+        'ScrollableBlocxCollectionBlocMixin<$T, $P>.',
       );
     }
-    final bloc = _bloc as BlocxScrollableListBlocMixin<T, P>;
-    bloc.add(BlocxListEventScrollToItem<T>(item: item, highlightItem: highlightItem));
+    final bloc = _bloc as BlocxCollectionBlocScrollableMixin<T, P>;
+    bloc.add(BlocxCollectionEventScrollToItem<T>(item: item, highlightItem: highlightItem));
   }
 
   ScrollController? get scrollControllerProvider => null;
@@ -184,7 +167,7 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Bl
     }
     if (_hasAutoScrolled && !sc.isAutoScrolling) {
       _hasAutoScrolled = false;
-      _bloc.add(BlocxListEventHighlightScrolledToItems());
+      _bloc.add(BlocxCollectionEventHighlightScrolledToItems());
     }
   }
 
@@ -193,11 +176,11 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Bl
   }
 
   deleteMultipleItems(List<T> items) {
-    _bloc.add(BlocxListEventRemoveMultipleItems<T>(items: items));
+    _bloc.add(BlocxCollectionEventRemoveMultipleItems<T>(items: items));
   }
 
   deselectMultipleItems(List<T> items) {
-    _bloc.add(BlocxListEventDeselectMultipleItems(items: items));
+    _bloc.add(BlocxCollectionEventDeselectMultipleItems(items: items));
   }
 
   CollectionWidgetStateType get _collectionDisplayType => settings.type;
@@ -211,10 +194,10 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Bl
 
   bool get loadOnInit => true;
 
-  BlocxListBloc<T, P> get generateBloc;
-  BlocxListBloc<T, P> get bloc => _bloc;
+  BlocxCollectionBloc<T, P> get generateBloc;
+  BlocxCollectionBloc<T, P> get bloc => _bloc;
 
-  Widget collectionWidget(BuildContext context, BlocxListState<T> state) {
+  Widget collectionWidget(BuildContext context, BlocxCollectionState<T> state) {
     final opts = _collectionOptions;
     opts.assertCorrectType(_collectionDisplayType);
 
@@ -321,7 +304,7 @@ abstract class CollectionWidgetState<W extends CollectionWidget<P>, T extends Bl
   }
 
   addToList(T item, {int index = 0}) {
-    _bloc.add(BlocxListEventAddItem(item: item, index: index));
+    _bloc.add(BlocxCollectionEventAddItem(item: item, index: index));
   }
 
   @override

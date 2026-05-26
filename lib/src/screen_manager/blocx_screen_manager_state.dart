@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx/src/widgets/blocx_snack_bar.dart';
 
-abstract class ScreenManagerState<T extends StatefulWidget> extends BlocXWidgetState<T> {
+abstract class BlocxScreenManagerState<T extends StatefulWidget> extends BlocXWidgetState<T> {
   late final ScreenManagerCubit _managerCubit;
   @override
   void initState() {

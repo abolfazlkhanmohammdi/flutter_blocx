@@ -1,16 +1,16 @@
 import 'package:blocx_core/blocx_core.dart';
 import 'package:blocx_core/list_bloc.dart'
     show
-        BlocxListBloc,
+        BlocxCollectionBloc,
         ListStateExtensions,
-        BlocxListEventRemoveItem,
-        BlocxListEventSelectItem,
-        BlocxListEventDeselectItem,
-        BlocxListEventHighlightItem,
-        BlocxListEventClearHighlightedItem,
-        BlocxListEventToggleItemExpansion,
-        BlocxListEventUpdateItem,
-        BlocxListEventAddItem;
+        BlocxCollectionEventRemoveItem,
+        BlocxCollectionEventSelectItem,
+        BlocxCollectionEventDeselectItem,
+        BlocxCollectionEventHighlightItem,
+        BlocxCollectionEventClearHighlightedItem,
+        BlocxCollectionEventToggleItemExpansion,
+        BlocxCollectionEventUpdateItem,
+        BlocxCollectionEventAddItem;
 import 'package:flutter_blocx/flutter_blocx.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -59,9 +59,9 @@ abstract class BlocxCollectionItemState<
   // ---------------------------------------------------------------------------
 
   @protected
-  BlocxListBloc<T, P> get bloc => BlocProvider.of<BlocxListBloc<T, P>>(context);
+  BlocxCollectionBloc<T, P> get bloc => BlocProvider.of<BlocxCollectionBloc<T, P>>(context);
 
-  BlocxListBloc<T, P> _blocOrThrow() {
+  BlocxCollectionBloc<T, P> _blocOrThrow() {
     try {
       return bloc;
     } catch (_) {
@@ -160,20 +160,20 @@ abstract class BlocxCollectionItemState<
     if (confirmBeforeDelete) {
       confirmThenDelete();
     } else {
-      bloc.add(BlocxListEventRemoveItem<T>(item: item));
+      bloc.add(BlocxCollectionEventRemoveItem<T>(item: item));
     }
   }
 
   @protected
   void selectItem() {
     _requireSelectable();
-    bloc.add(BlocxListEventSelectItem<T>(item: item));
+    bloc.add(BlocxCollectionEventSelectItem<T>(item: item));
   }
 
   @protected
   void deselectItem() {
     _requireSelectable();
-    bloc.add(BlocxListEventDeselectItem<T>(item: item));
+    bloc.add(BlocxCollectionEventDeselectItem<T>(item: item));
   }
 
   @protected
@@ -185,19 +185,19 @@ abstract class BlocxCollectionItemState<
   @protected
   void highlightItem() {
     _requireHighlightable();
-    bloc.add(BlocxListEventHighlightItem<T>(item: item));
+    bloc.add(BlocxCollectionEventHighlightItem<T>(item: item));
   }
 
   @protected
   void clearHighlightedItem() {
     _requireHighlightable();
-    bloc.add(BlocxListEventClearHighlightedItem<T>(item: item));
+    bloc.add(BlocxCollectionEventClearHighlightedItem<T>(item: item));
   }
 
   @protected
   void toggleExpansion() {
     _requireExpandable();
-    bloc.add(BlocxListEventToggleItemExpansion(item: item));
+    bloc.add(BlocxCollectionEventToggleItemExpansion(item: item));
   }
 
   bool get confirmBeforeDelete => true;
@@ -209,15 +209,15 @@ abstract class BlocxCollectionItemState<
       builder: (_) => ConfirmActionWidget(options: confirmDeleteOptions),
     );
     if (result != true) return;
-    bloc.add(BlocxListEventRemoveItem(item: item));
+    bloc.add(BlocxCollectionEventRemoveItem(item: item));
   }
 
   void updateItem(T newItem) {
-    bloc.add(BlocxListEventUpdateItem(item: newItem));
+    bloc.add(BlocxCollectionEventUpdateItem(item: newItem));
   }
 
   void insertItem(T newItem, {int index = 0}) {
-    bloc.add(BlocxListEventAddItem(item: newItem, index: index));
+    bloc.add(BlocxCollectionEventAddItem(item: newItem, index: index));
   }
 
   ConfirmActionOptions get confirmDeleteOptions => ConfirmActionOptions();
