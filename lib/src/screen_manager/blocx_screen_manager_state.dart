@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx/src/widgets/blocx_snack_bar.dart';
 
-abstract class BlocxScreenManagerState<T extends StatefulWidget> extends BlocXWidgetState<T> {
+abstract class BlocxScreenManagerState<T extends StatefulWidget>
+    extends BlocXWidgetState<T> {
   late final ScreenManagerCubit _managerCubit;
   @override
   void initState() {
@@ -30,7 +31,9 @@ abstract class BlocxScreenManagerState<T extends StatefulWidget> extends BlocXWi
     final body = state is ScreenManagerCubitStateDisplayErrorPage
         ? errorWidget(context, state)
         : mainWidget(context, state);
-    return wrapInScaffold ? decorateScaffold(scaffoldWidget(context, body)) : SafeArea(child: body);
+    return wrapInScaffold
+        ? decorateScaffold(scaffoldWidget(context, body))
+        : SafeArea(child: body);
   }
 
   Widget decorateScaffold(Widget scaffold) {
@@ -43,8 +46,10 @@ abstract class BlocxScreenManagerState<T extends StatefulWidget> extends BlocXWi
     }
   }
 
-  void displaySnackBar(BuildContext context, String message, String? title, BlocXSnackbarType snackbarType) {
-    BlocxSnackBar.show(context, message: message, type: snackbarType, title: title);
+  void displaySnackBar(BuildContext context, String message, String? title,
+      BlocXSnackbarType snackbarType) {
+    BlocxSnackBar.show(context,
+        message: message, type: snackbarType, title: title);
   }
 
   bool get wrapInScaffold => false;
@@ -52,7 +57,8 @@ abstract class BlocxScreenManagerState<T extends StatefulWidget> extends BlocXWi
   ScreenManagerCubit get managerCubit;
 
   @protected
-  Widget errorWidget(BuildContext context, ScreenManagerCubitStateDisplayErrorPage state) {
+  Widget errorWidget(
+      BuildContext context, ScreenManagerCubitStateDisplayErrorPage state) {
     return BlocxErrorWidget.fromState(state);
   }
 

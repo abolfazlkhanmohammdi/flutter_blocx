@@ -15,7 +15,8 @@ class ConfirmActionWidget extends StatefulWidget {
       isScrollControlled: isScrollControlled,
       useSafeArea: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (context) => ConfirmActionWidget(options: options),
     );
   }
@@ -29,7 +30,9 @@ class _ConfirmDeleteSheetState extends State<ConfirmActionWidget> {
   bool _isDeleting = false;
 
   bool get _canConfirm =>
-      !_isDeleting && (!widget.options.requireTyping || _typed.trim() == widget.options.deleteWord);
+      !_isDeleting &&
+      (!widget.options.requireTyping ||
+          _typed.trim() == widget.options.deleteWord);
 
   @override
   Widget build(BuildContext context) {
@@ -49,14 +52,18 @@ class _ConfirmDeleteSheetState extends State<ConfirmActionWidget> {
                 width: 48,
                 height: 48,
                 alignment: Alignment.center,
-                decoration: BoxDecoration(color: cs.errorContainer, borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(
+                    color: cs.errorContainer,
+                    borderRadius: BorderRadius.circular(12)),
                 child: Icon(options.icon, color: cs.onErrorContainer),
               ),
             ),
           )
         : Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: cs.errorContainer, borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(
+                color: cs.errorContainer,
+                borderRadius: BorderRadius.circular(12)),
             child: Icon(options.icon, color: cs.onErrorContainer),
           );
 
@@ -71,7 +78,9 @@ class _ConfirmDeleteSheetState extends State<ConfirmActionWidget> {
               width: 40,
               height: 4,
               margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(color: cs.outlineVariant, borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(
+                  color: cs.outlineVariant,
+                  borderRadius: BorderRadius.circular(2)),
             ),
           ),
           Row(
@@ -83,9 +92,13 @@ class _ConfirmDeleteSheetState extends State<ConfirmActionWidget> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(options.title, style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                    Text(options.title,
+                        style: textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w700)),
                     const SizedBox(height: 8),
-                    Text(options.question, style: textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
+                    Text(options.question,
+                        style: textTheme.bodyMedium
+                            ?.copyWith(color: cs.onSurfaceVariant)),
                   ],
                 ),
               ),
@@ -113,8 +126,8 @@ class _ConfirmDeleteSheetState extends State<ConfirmActionWidget> {
                     onPressed: _isDeleting
                         ? null
                         : () {
-                      Navigator.of(context).pop(false);
-                    },
+                            Navigator.of(context).pop(false);
+                          },
                     child: Text(options.cancelText),
                   ),
                 ),
@@ -127,23 +140,24 @@ class _ConfirmDeleteSheetState extends State<ConfirmActionWidget> {
                     ),
                     onPressed: _canConfirm
                         ? () async {
-                      setState(() => _isDeleting = true);
-                      try {
-                        Navigator.of(context).pop(true);
-                      } finally {
-                        if (mounted) setState(() => _isDeleting = false);
-                      }
-                    }
+                            setState(() => _isDeleting = true);
+                            try {
+                              Navigator.of(context).pop(true);
+                            } finally {
+                              if (mounted) setState(() => _isDeleting = false);
+                            }
+                          }
                         : null,
                     child: _isDeleting
                         ? SizedBox(
-                      height: 18,
-                      width: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(cs.onError),
-                      ),
-                    )
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(cs.onError),
+                            ),
+                          )
                         : Text(options.confirmText),
                   ),
                 ),

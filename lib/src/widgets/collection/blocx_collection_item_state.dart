@@ -15,7 +15,8 @@ import 'package:flutter_blocx/flutter_blocx.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-abstract class BlocxStatefulCollectionItem<T extends BlocxBaseEntity> extends StatefulWidget {
+abstract class BlocxStatefulCollectionItem<T extends BlocxBaseEntity>
+    extends StatefulWidget {
   final T item;
   const BlocxStatefulCollectionItem({super.key, required this.item});
 }
@@ -29,11 +30,9 @@ abstract class BlocxStatefulCollectionItem<T extends BlocxBaseEntity> extends St
 /// This provides the same convenience helpers as the stateless version,
 /// but without needing to pass `BuildContext` into each method.
 abstract class BlocxCollectionItemState<
-  W extends BlocxStatefulCollectionItem<T>,
-  T extends BlocxBaseEntity,
-  P
->
-    extends State<W> {
+    W extends BlocxStatefulCollectionItem<T>,
+    T extends BlocxBaseEntity,
+    P> extends State<W> {
   /// Provide the item this row represents.
   ///
   /// Default implementation tries to read `widget.item`. If your widget uses a
@@ -59,14 +58,16 @@ abstract class BlocxCollectionItemState<
   // ---------------------------------------------------------------------------
 
   @protected
-  BlocxCollectionBloc<T, P> get bloc => BlocProvider.of<BlocxCollectionBloc<T, P>>(context);
+  BlocxCollectionBloc<T, P> get bloc =>
+      BlocProvider.of<BlocxCollectionBloc<T, P>>(context);
 
   BlocxCollectionBloc<T, P> _blocOrThrow() {
     try {
       return bloc;
     } catch (_) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('BlocxCollectionItemState could not find ListBloc<$T, $P> in the widget tree.'),
+        ErrorSummary(
+            'BlocxCollectionItemState could not find ListBloc<$T, $P> in the widget tree.'),
         ErrorDescription(
           'Ensure you wrap your list screen (or a parent widget) with '
           'BlocProvider<ListBloc<$T, $P>>.',

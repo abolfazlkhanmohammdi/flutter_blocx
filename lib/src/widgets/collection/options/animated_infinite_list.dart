@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 
 class AnimatedInfiniteListOptions extends ListOptions {
   final bool animateAtStart;
-  final Duration? animationDuration; // reserved, not directly used by ImplicitlyAnimatedList
+  final Duration?
+      animationDuration; // reserved, not directly used by ImplicitlyAnimatedList
 
   const AnimatedInfiniteListOptions({
     super.scrollBehavior,
@@ -34,7 +35,7 @@ class AnimatedInfiniteListOptions extends ListOptions {
       animationDuration: animationDuration ?? this.animationDuration,
       loadMoreTriggerItemDistance:
           (bottomLoadingTriggerItemDistance ?? loadMoreTriggerItemDistance) ??
-          this.loadMoreTriggerItemDistance,
+              this.loadMoreTriggerItemDistance,
       scrollPhysics: scrollPhysics ?? this.scrollPhysics,
       shrinkWrap: shrinkWrap ?? this.shrinkWrap,
     );

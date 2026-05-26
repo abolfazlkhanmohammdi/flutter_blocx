@@ -7,7 +7,10 @@ class GetUsersUseCase extends PaginationUseCase<User, dynamic> {
 
   @override
   Future<UseCaseResult<Page<User>>> perform() async {
-    var result = await UserJsonRepository().getPaginated(offset: offset, limit: loadCount);
+    var result = await UserJsonRepository().getPaginated(
+      offset: offset,
+      limit: loadCount,
+    );
     if (!result.ok) {
       throw Exception("error fetching users");
     }

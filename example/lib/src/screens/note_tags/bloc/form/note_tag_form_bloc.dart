@@ -5,9 +5,16 @@ import 'package:example/src/screens/note_tags/bloc/use_cases/update_note_tag_for
 import 'package:example/src/screens/note_tags/data/models/note_tag_form_data.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag_form_payload.dart';
 
-class NoteTagFormBloc extends FormBloc<NoteTagFormData, NoteTagFormPayload, NoteTagFormKey>
-    with UniqueFieldValidatorMixin<NoteTagFormData, NoteTagFormPayload, NoteTagFormKey> {
-  NoteTagFormBloc() : super(ScreenManagerCubit(), NoteTagFormData(name: "", userId: -1));
+class NoteTagFormBloc
+    extends FormBloc<NoteTagFormData, NoteTagFormPayload, NoteTagFormKey>
+    with
+        UniqueFieldValidatorMixin<
+          NoteTagFormData,
+          NoteTagFormPayload,
+          NoteTagFormKey
+        > {
+  NoteTagFormBloc()
+    : super(ScreenManagerCubit(), NoteTagFormData(name: "", userId: -1));
 
   // @override
   // bool get isUpdate => payload!;
@@ -23,8 +30,9 @@ class NoteTagFormBloc extends FormBloc<NoteTagFormData, NoteTagFormPayload, Note
   @override
   bool get isUpdate => payload!.toBeEdited != null;
   @override
-  BaseUseCase get submitUseCase =>
-      isUpdate ? UpdateNoteTagUseCase(formData: formData) : RegisterNoteTagUseCase(formData: formData);
+  BaseUseCase get submitUseCase => isUpdate
+      ? UpdateNoteTagUseCase(formData: formData)
+      : RegisterNoteTagUseCase(formData: formData);
 
   @override
   NoteTagFormData updateFormData(NoteTagFormKey key, data) {

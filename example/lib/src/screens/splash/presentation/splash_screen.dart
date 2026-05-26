@@ -48,16 +48,31 @@ class _SplashScreenState extends BlocXWidgetState<SplashScreen> {
             child: Image.asset('assets/images/logo.png', fit: BoxFit.cover),
           ),
         ),
-        Text('Blocx Notes!', style: textTheme.displaySmall, textAlign: TextAlign.center),
-        Text("Now loading, please wait...", textAlign: TextAlign.center, style: textTheme.bodyLarge),
-        Center(child: SizedBox.square(dimension: 40, child: CircularProgressIndicator())),
+        Text(
+          'Blocx Notes!',
+          style: textTheme.displaySmall,
+          textAlign: TextAlign.center,
+        ),
+        Text(
+          "Now loading, please wait...",
+          textAlign: TextAlign.center,
+          style: textTheme.bodyLarge,
+        ),
+        Center(
+          child: SizedBox.square(
+            dimension: 40,
+            child: CircularProgressIndicator(),
+          ),
+        ),
       ],
     );
   }
 
   void blocListener(BuildContext context, SplashState state) {
     if (state is SplashStateDataLoaded) {
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => UsersScreen()));
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => UsersScreen()));
     }
   }
 }

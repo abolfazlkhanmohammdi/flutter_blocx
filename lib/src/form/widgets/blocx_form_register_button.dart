@@ -13,7 +13,8 @@ import 'package:flutter/material.dart';
 /// - Customize per-type styles using the provided `*Style` parameters.
 /// - Override `buildOtherButton` in a subclass to provide a custom button.
 ///   The base `other` implementation returns a [SizedBox.shrink] by design.
-class BlocxFormRegisterButton<F extends BaseFormEntity<F, E>, E extends Enum> extends BlocxStatelessWidget {
+class BlocxFormRegisterButton<F extends BaseFormEntity<F, E>, E extends Enum>
+    extends BlocxStatelessWidget {
   /// Current form state (used to detect submitting).
   final BlocxFormState state;
 
@@ -75,7 +76,8 @@ class BlocxFormRegisterButton<F extends BaseFormEntity<F, E>, E extends Enum> ex
   bool get isCheckingFields => state.checkingUniqueFields.isNotEmpty;
   @override
   Widget build(BuildContext context) {
-    final disabled = isSubmittingForm || isCheckingFields || state.errors.isNotEmpty;
+    final disabled =
+        isSubmittingForm || isCheckingFields || state.errors.isNotEmpty;
     final label = isSubmittingForm ? submitText : buttonText;
 
     switch (type) {
@@ -99,7 +101,8 @@ class BlocxFormRegisterButton<F extends BaseFormEntity<F, E>, E extends Enum> ex
 
   /// Builds an [ElevatedButton] variant.
   @protected
-  Widget buildElevatedButton(BuildContext context, {required String label, required bool disabled}) {
+  Widget buildElevatedButton(BuildContext context,
+      {required String label, required bool disabled}) {
     return ElevatedButton(
       style: style ?? elevatedStyle,
       onPressed: disabled ? null : onPressed,
@@ -109,7 +112,8 @@ class BlocxFormRegisterButton<F extends BaseFormEntity<F, E>, E extends Enum> ex
 
   /// Builds a [FilledButton] (Material 3) variant.
   @protected
-  Widget buildFilledButton(BuildContext context, {required String label, required bool disabled}) {
+  Widget buildFilledButton(BuildContext context,
+      {required String label, required bool disabled}) {
     return FilledButton(
       style: style ?? filledStyle,
       onPressed: disabled ? null : onPressed,
@@ -119,7 +123,8 @@ class BlocxFormRegisterButton<F extends BaseFormEntity<F, E>, E extends Enum> ex
 
   /// Builds a [TextButton] variant.
   @protected
-  Widget buildTextButton(BuildContext context, {required String label, required bool disabled}) {
+  Widget buildTextButton(BuildContext context,
+      {required String label, required bool disabled}) {
     return TextButton(
       style: style ?? textStyle,
       onPressed: disabled ? null : onPressed,
@@ -129,7 +134,8 @@ class BlocxFormRegisterButton<F extends BaseFormEntity<F, E>, E extends Enum> ex
 
   /// Builds an [OutlinedButton] variant.
   @protected
-  Widget buildOutlinedButton(BuildContext context, {required String label, required bool disabled}) {
+  Widget buildOutlinedButton(BuildContext context,
+      {required String label, required bool disabled}) {
     return OutlinedButton(
       style: style ?? outlinedStyle,
       onPressed: disabled ? null : onPressed,
@@ -143,7 +149,8 @@ class BlocxFormRegisterButton<F extends BaseFormEntity<F, E>, E extends Enum> ex
   /// method to provide their own look (e.g., a Neumorphic or glassmorphic
   /// button, or a Cupertino button).
   @protected
-  Widget buildOtherButton(BuildContext context, {required String label, required bool disabled}) {
+  Widget buildOtherButton(BuildContext context,
+      {required String label, required bool disabled}) {
     return const SizedBox.shrink();
   }
 
@@ -152,12 +159,14 @@ class BlocxFormRegisterButton<F extends BaseFormEntity<F, E>, E extends Enum> ex
   // ---------------------------------------------------------------------------
 
   /// Common inner content: optional spinner + label.
-  Widget _buildContent(BuildContext context, {required String label, required bool disabled}) {
+  Widget _buildContent(BuildContext context,
+      {required String label, required bool disabled}) {
     final text = Text(label, style: labelTextStyle);
 
     if (!disabled) return text;
 
-    final indicator = loadingIndicatorBuilder?.call(context) ?? _defaultLoadingIndicator(context);
+    final indicator = loadingIndicatorBuilder?.call(context) ??
+        _defaultLoadingIndicator(context);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -168,8 +177,7 @@ class BlocxFormRegisterButton<F extends BaseFormEntity<F, E>, E extends Enum> ex
             height: 16,
             child: Center(child: indicator),
           ),
-        if (isSubmittingForm || isCheckingFields)
-          SizedBox(width: spacing),
+        if (isSubmittingForm || isCheckingFields) SizedBox(width: spacing),
         text,
       ],
     );
@@ -178,7 +186,8 @@ class BlocxFormRegisterButton<F extends BaseFormEntity<F, E>, E extends Enum> ex
   Widget _defaultLoadingIndicator(BuildContext context) {
     return SizedBox.square(
       dimension: 16,
-      child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme(context).primary),
+      child: CircularProgressIndicator(
+          strokeWidth: 2, color: colorScheme(context).primary),
     );
   }
 }

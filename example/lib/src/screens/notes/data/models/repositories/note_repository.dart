@@ -28,7 +28,11 @@ class NotesJsonRepository extends FakeRepository {
       'uuid': uuid,
       'tagId': tagId,
       'title': title ?? faker.lorem.sentence(),
-      'content': content ?? faker.lorem.sentences(faker.randomGenerator.integer(4, min: 1)).join(' '),
+      'content':
+          content ??
+          faker.lorem
+              .sentences(faker.randomGenerator.integer(4, min: 1))
+              .join(' '),
       'isPinned': isPinned ?? faker.randomGenerator.boolean(),
       'isArchived': isArchived ?? false,
       'createdAt': (createdAt ?? now).toIso8601String(),
@@ -42,7 +46,10 @@ class NotesJsonRepository extends FakeRepository {
     }
   }
 
-  Future<ResponseWrapper<int>> seedForTags(List<int> tagIds, {int perTag = 10}) async {
+  Future<ResponseWrapper<int>> seedForTags(
+    List<int> tagIds, {
+    int perTag = 10,
+  }) async {
     final ids = <String>[];
     for (final tid in tagIds) {
       for (int i = 0; i < perTag; i++) {
@@ -79,8 +86,12 @@ class NotesJsonRepository extends FakeRepository {
     final tagList = tagsResp.data.cast<Json>();
     final userList = usersResp.data.cast<Json>();
 
-    final Map<int, Json> tagById = {for (final t in tagList) (t['id'] as num).toInt(): t};
-    final Map<int, Json> userById = {for (final u in userList) (u['id'] as num).toInt(): u};
+    final Map<int, Json> tagById = {
+      for (final t in tagList) (t['id'] as num).toInt(): t,
+    };
+    final Map<int, Json> userById = {
+      for (final u in userList) (u['id'] as num).toInt(): u,
+    };
 
     Iterable<Json> results = _notes;
 
@@ -98,11 +109,16 @@ class NotesJsonRepository extends FakeRepository {
       results = results.where((n) => (n['tagId'] as num?)?.toInt() == tagId);
     } else if (tagIds != null && tagIds.isNotEmpty) {
       final set = tagIds.toSet();
-      results = results.where((n) => set.contains((n['tagId'] as num?)?.toInt()));
+      results = results.where(
+        (n) => set.contains((n['tagId'] as num?)?.toInt()),
+      );
     }
 
     if (userId != null || (userIds != null && userIds.isNotEmpty)) {
-      final Set<int> allowedUsers = {if (userId != null) userId, if (userIds != null) ...userIds}.toSet();
+      final Set<int> allowedUsers = {
+        if (userId != null) userId,
+        if (userIds != null) ...userIds,
+      }.toSet();
 
       results = results.where((n) {
         final t = tagById[(n['tagId'] as num?)?.toInt() ?? -1];
@@ -122,8 +138,10 @@ class NotesJsonRepository extends FakeRepository {
 
         final uid = (tagJson?['userId'] as num?)?.toInt();
         final userJson = uid != null ? userById[uid] : null;
-        final displayName = (userJson?['displayName'] as String?)?.toLowerCase() ?? '';
-        final username = (userJson?['username'] as String?)?.toLowerCase() ?? '';
+        final displayName =
+            (userJson?['displayName'] as String?)?.toLowerCase() ?? '';
+        final username =
+            (userJson?['username'] as String?)?.toLowerCase() ?? '';
 
         return title.contains(q) ||
             content.contains(q) ||
@@ -133,8 +151,10 @@ class NotesJsonRepository extends FakeRepository {
       });
     }
 
-    if (isPinned != null) results = results.where((n) => n['isPinned'] == isPinned);
-    if (isArchived != null) results = results.where((n) => n['isArchived'] == isArchived);
+    if (isPinned != null)
+      results = results.where((n) => n['isPinned'] == isPinned);
+    if (isArchived != null)
+      results = results.where((n) => n['isArchived'] == isArchived);
 
     final list = results.toList();
     final safeOffset = offset.clamp(0, list.length);
@@ -264,8 +284,12 @@ class NotesJsonRepository extends FakeRepository {
     final tagList = tagsResp.data.cast<Json>();
     final userList = usersResp.data.cast<Json>();
 
-    final Map<int, Json> tagById = {for (final t in tagList) (t['id'] as num).toInt(): t};
-    final Map<int, Json> userById = {for (final u in userList) (u['id'] as num).toInt(): u};
+    final Map<int, Json> tagById = {
+      for (final t in tagList) (t['id'] as num).toInt(): t,
+    };
+    final Map<int, Json> userById = {
+      for (final u in userList) (u['id'] as num).toInt(): u,
+    };
 
     Iterable<Json> results = _notes;
 

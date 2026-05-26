@@ -9,7 +9,8 @@ class NoteTagFormData {
   NoteTagFormData copyWith({
     String? name,
     int? userId,
-    Object? tagId = _noValue, // sentinel so we can distinguish "not passed" vs "null"
+    Object? tagId =
+        _noValue, // sentinel so we can distinguish "not passed" vs "null"
   }) {
     return NoteTagFormData(
       name: name ?? this.name,

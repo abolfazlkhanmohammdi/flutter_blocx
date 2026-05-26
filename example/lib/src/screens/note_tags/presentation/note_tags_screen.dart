@@ -14,7 +14,8 @@ class NoteTagsScreen extends CollectionWidget<User> {
   State<NoteTagsScreen> createState() => _NoteTagsScreenState();
 }
 
-class _NoteTagsScreenState extends CollectionWidgetState<NoteTagsScreen, NoteTag, User>
+class _NoteTagsScreenState
+    extends CollectionWidgetState<NoteTagsScreen, NoteTag, User>
     with HideOnScrollFabMixin {
   _NoteTagsScreenState() : super(_bloc: NoteTagsBloc());
 
@@ -39,14 +40,24 @@ class _NoteTagsScreenState extends CollectionWidgetState<NoteTagsScreen, NoteTag
               tag: "user-${payload!.id}",
               child: Container(
                 margin: EdgeInsets.all(8),
-                child: CircleAvatar(foregroundImage: NetworkImage(payload!.avatarUrl!)),
+                child: CircleAvatar(
+                  foregroundImage: NetworkImage(payload!.avatarUrl!),
+                ),
               ),
             ),
-            Expanded(child: Text("Note tags for '${payload!.displayName}'", style: textTheme.bodyMedium)),
+            Expanded(
+              child: Text(
+                "Note tags for '${payload!.displayName}'",
+                style: textTheme.bodyMedium,
+              ),
+            ),
           ],
         ),
       ),
-      body: NotificationListener<UserScrollNotification>(onNotification: onScrollNotification, child: body),
+      body: NotificationListener<UserScrollNotification>(
+        onNotification: onScrollNotification,
+        child: body,
+      ),
       floatingActionButton: getFloatingActionButton(context),
     );
   }
@@ -55,7 +66,8 @@ class _NoteTagsScreenState extends CollectionWidgetState<NoteTagsScreen, NoteTag
   Future<void> onFabPressed(data) async {
     var result = await showModalBottomSheet<NoteTag>(
       context: context,
-      builder: (_) => NoteTagForm(payload: NoteTagFormPayload(userId: payload!.id)),
+      builder: (_) =>
+          NoteTagForm(payload: NoteTagFormPayload(userId: payload!.id)),
     );
     if (result == null) return;
     addToList(result);

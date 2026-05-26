@@ -70,7 +70,7 @@ class SliverInfiniteGridOptions extends GridOptions {
       scrollPhysics: scrollPhysics ?? this.scrollPhysics,
       loadMoreTriggerItemDistance:
           (bottomLoadingTriggerItemDistance ?? loadMoreTriggerItemDistance) ??
-          this.loadMoreTriggerItemDistance,
+              this.loadMoreTriggerItemDistance,
       crossAxisCount: crossAxisCount ?? this.crossAxisCount,
       childAspectRatio: childAspectRatio ?? this.childAspectRatio,
       mainAxisSpacing: mainAxisSpacing ?? this.mainAxisSpacing,
@@ -80,12 +80,15 @@ class SliverInfiniteGridOptions extends GridOptions {
       cacheExtent: cacheExtent ?? this.cacheExtent,
       anchor: anchor ?? this.anchor,
       clipBehavior: clipBehavior ?? this.clipBehavior,
-      keyboardDismissBehavior: keyboardDismissBehavior ?? this.keyboardDismissBehavior,
+      keyboardDismissBehavior:
+          keyboardDismissBehavior ?? this.keyboardDismissBehavior,
       gridPadding: gridPadding ?? this.gridPadding,
-      addAutomaticKeepAlives: addAutomaticKeepAlives ?? this.addAutomaticKeepAlives,
+      addAutomaticKeepAlives:
+          addAutomaticKeepAlives ?? this.addAutomaticKeepAlives,
       addRepaintBoundaries: addRepaintBoundaries ?? this.addRepaintBoundaries,
       addSemanticIndexes: addSemanticIndexes ?? this.addSemanticIndexes,
-      semanticIndexCallback: semanticIndexCallback ?? this.semanticIndexCallback,
+      semanticIndexCallback:
+          semanticIndexCallback ?? this.semanticIndexCallback,
       semanticIndexOffset: semanticIndexOffset ?? this.semanticIndexOffset,
     );
   }

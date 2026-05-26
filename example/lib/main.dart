@@ -19,7 +19,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       scrollBehavior: AppScrollBehavior(),
       title: 'Flutter Demo',
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
       home: SplashScreen(),
     );
   }
@@ -43,7 +45,8 @@ class ExampleLocalizations extends BlocXLocalizations {
       BlocXErrorCode.checkingUniqueValue => "Checking unique value",
       BlocXErrorCode.unknown => "Unknown error",
       BlocXErrorCode.valueNotAvailable => "This value is not available",
-      BlocXErrorCode.errorGettingInitialFormData => "Error getting initial form data",
+      BlocXErrorCode.errorGettingInitialFormData =>
+        "Error getting initial form data",
     };
   }
 }

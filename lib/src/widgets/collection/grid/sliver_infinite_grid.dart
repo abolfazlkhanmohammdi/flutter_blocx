@@ -15,7 +15,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-class SliverInfiniteGrid<Entity extends BlocxBaseEntity> extends StatefulWidget {
+class SliverInfiniteGrid<Entity extends BlocxBaseEntity>
+    extends StatefulWidget {
   final SliverInfiniteGridOptions options;
   final List<Entity> items;
   final BlocxInfiniteListBloc bloc;
@@ -25,7 +26,8 @@ class SliverInfiniteGrid<Entity extends BlocxBaseEntity> extends StatefulWidget 
 
   /// (Optional) Provide your own grid delegate builder.
   /// If null, a `SliverGridDelegateWithFixedCrossAxisCount` is made from [options].
-  final SliverGridDelegate Function(SliverInfiniteGridOptions options)? gridDelegateBuilder;
+  final SliverGridDelegate Function(SliverInfiniteGridOptions options)?
+      gridDelegateBuilder;
 
   /// Load-more / refresh / misc.
   final void Function()? loadBottomData;
@@ -36,8 +38,10 @@ class SliverInfiniteGrid<Entity extends BlocxBaseEntity> extends StatefulWidget 
   final ScrollController? scrollController;
 
   /// Optional UI overrides
-  final Widget? Function(BuildContext context, bool isLoadingMore)? loadMoreWidgetBuilder;
-  final Widget? Function(BuildContext context, double swipeRefreshHeight)? refreshWidgetBuilder;
+  final Widget? Function(BuildContext context, bool isLoadingMore)?
+      loadMoreWidgetBuilder;
+  final Widget? Function(BuildContext context, double swipeRefreshHeight)?
+      refreshWidgetBuilder;
 
   const SliverInfiniteGrid({
     super.key,
@@ -55,17 +59,20 @@ class SliverInfiniteGrid<Entity extends BlocxBaseEntity> extends StatefulWidget 
   });
 
   @override
-  SliverInfiniteGridState<Entity> createState() => SliverInfiniteGridState<Entity>();
+  SliverInfiniteGridState<Entity> createState() =>
+      SliverInfiniteGridState<Entity>();
 }
 
-class SliverInfiniteGridState<Entity extends BlocxBaseEntity> extends State<SliverInfiniteGrid<Entity>> {
+class SliverInfiniteGridState<Entity extends BlocxBaseEntity>
+    extends State<SliverInfiniteGrid<Entity>> {
   late final String uuid;
   late final ScrollController _internalController = ScrollController();
 
   BlocxInfiniteListBloc get bloc => widget.bloc;
   SliverInfiniteGridOptions get options => widget.options;
 
-  ScrollController get effectiveController => widget.scrollController ?? _internalController;
+  ScrollController get effectiveController =>
+      widget.scrollController ?? _internalController;
 
   @override
   void initState() {
@@ -91,14 +98,18 @@ class SliverInfiniteGridState<Entity extends BlocxBaseEntity> extends State<Sliv
           return NotificationListener<UserScrollNotification>(
             onNotification: onScroll,
             child: Listener(
-              onPointerDown: (d) =>
-                  bloc.add(BlocxInfiniteListEventVerticalDragStarted(globalY: d.position.dy)),
-              onPointerUp: (d) => bloc.add(BlocxInfiniteListEventVerticalDragEnded()),
+              onPointerDown: (d) => bloc.add(
+                  BlocxInfiniteListEventVerticalDragStarted(
+                      globalY: d.position.dy)),
+              onPointerUp: (d) =>
+                  bloc.add(BlocxInfiniteListEventVerticalDragEnded()),
               onPointerMove: maySwipe
-                  ? (d) => bloc.add(BlocxInfiniteListEventVerticalDragUpdated(globalY: d.position.dy))
+                  ? (d) => bloc.add(BlocxInfiniteListEventVerticalDragUpdated(
+                      globalY: d.position.dy))
                   : null,
               onPointerCancel: maySwipe
-                  ? (_) => bloc.add(BlocxInfiniteListEventVerticalDragUpdated(globalY: null))
+                  ? (_) => bloc.add(
+                      BlocxInfiniteListEventVerticalDragUpdated(globalY: null))
                   : null,
               child: _sliverGrid(context, state),
             ),
@@ -108,11 +119,14 @@ class SliverInfiniteGridState<Entity extends BlocxBaseEntity> extends State<Sliv
     );
   }
 
-  bool get _atTopByController => effectiveController.hasClients && effectiveController.position.pixels <= 0.0;
+  bool get _atTopByController =>
+      effectiveController.hasClients &&
+      effectiveController.position.pixels <= 0.0;
 
   bool get _atBottomByController =>
       effectiveController.hasClients &&
-      (effectiveController.position.pixels >= effectiveController.position.maxScrollExtent - 1.0);
+      (effectiveController.position.pixels >=
+          effectiveController.position.maxScrollExtent - 1.0);
 
   bool get _atRefreshEdge {
     return options.reverse
@@ -120,7 +134,10 @@ class SliverInfiniteGridState<Entity extends BlocxBaseEntity> extends State<Sliv
         : (bloc.state.isAtTop || _atTopByController);
   }
 
-  bool get maySwipe => _atRefreshEdge && !bloc.state.isRefreshing && widget.refreshOnSwipe != null;
+  bool get maySwipe =>
+      _atRefreshEdge &&
+      !bloc.state.isRefreshing &&
+      widget.refreshOnSwipe != null;
 
   void blocListener(BuildContext context, BlocxInfiniteListState state) {
     if (state is BlocxInfiniteListStateRefresh) {
@@ -163,8 +180,7 @@ class SliverInfiniteGridState<Entity extends BlocxBaseEntity> extends State<Sliv
   }
 
   Widget _sliverGrid(BuildContext context, BlocxInfiniteListState state) {
-    final delegate =
-        widget.gridDelegateBuilder?.call(options) ??
+    final delegate = widget.gridDelegateBuilder?.call(options) ??
         SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: options.crossAxisCount,
           mainAxisSpacing: options.mainAxisSpacing,
@@ -183,7 +199,8 @@ class SliverInfiniteGridState<Entity extends BlocxBaseEntity> extends State<Sliv
         addAutomaticKeepAlives: options.addAutomaticKeepAlives,
         addRepaintBoundaries: options.addRepaintBoundaries,
         addSemanticIndexes: options.addSemanticIndexes,
-        semanticIndexCallback: options.semanticIndexCallback ?? _defaultSemanticIndexCallback,
+        semanticIndexCallback:
+            options.semanticIndexCallback ?? _defaultSemanticIndexCallback,
         semanticIndexOffset: options.semanticIndexOffset,
       ),
     );
@@ -191,9 +208,11 @@ class SliverInfiniteGridState<Entity extends BlocxBaseEntity> extends State<Sliv
 
   int? _defaultSemanticIndexCallback(Widget _, int index) => index;
 
-  Widget _itemBuilder(BuildContext context, Entity data, int index, BlocxInfiniteListState state) {
+  Widget _itemBuilder(BuildContext context, Entity data, int index,
+      BlocxInfiniteListState state) {
     final isBottomTrigger =
-        index == (widget.items.length - options.loadMoreTriggerItemDistance) && !state.hasReachedEnd;
+        index == (widget.items.length - options.loadMoreTriggerItemDistance) &&
+            !state.hasReachedEnd;
 
     Widget child = widget.itemBuilder(context, data);
 
@@ -219,7 +238,8 @@ class SliverInfiniteGridState<Entity extends BlocxBaseEntity> extends State<Sliv
   }
 
   Widget loadMoreWidget(BuildContext context, BlocxInfiniteListState state) {
-    final external = widget.loadMoreWidgetBuilder?.call(context, state.isLoadingMore);
+    final external =
+        widget.loadMoreWidgetBuilder?.call(context, state.isLoadingMore);
     if (external != null) return external;
     final scheme = Theme.of(context).colorScheme;
     return AnimatedSize(
@@ -240,15 +260,20 @@ class SliverInfiniteGridState<Entity extends BlocxBaseEntity> extends State<Sliv
     );
   }
 
-  Widget swipeRefreshWidget(BuildContext context, BlocxInfiniteListState state) {
-    final external = widget.refreshWidgetBuilder?.call(context, state.swipeRefreshHeight);
+  Widget swipeRefreshWidget(
+      BuildContext context, BlocxInfiniteListState state) {
+    final external =
+        widget.refreshWidgetBuilder?.call(context, state.swipeRefreshHeight);
     if (external != null) return external;
     final primary = Theme.of(context).colorScheme.primary;
     return Container(
       color: primary,
       height: state.swipeRefreshHeight,
       child: const Center(
-        child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white)),
+        child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(color: Colors.white)),
       ),
     );
   }

@@ -32,7 +32,11 @@ class UsersBloc extends ListBloc<User, dynamic>
   }
 
   @override
-  SearchUseCase<User>? searchUseCase(String searchText, {int? loadCount, int? offset}) {
+  SearchUseCase<User>? searchUseCase(
+    String searchText, {
+    int? loadCount,
+    int? offset,
+  }) {
     return SearchUsersUseCase(
       searchText: searchText,
       loadCount: loadCount ?? this.loadCount,

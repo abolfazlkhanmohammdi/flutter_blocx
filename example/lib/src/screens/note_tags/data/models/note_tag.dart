@@ -59,23 +59,32 @@ class NoteTag extends BlocxBaseEntity {
     name: map['name'] as String? ?? '',
     colorArgb: map['colorArgb'] as int?,
     isArchived: map['isArchived'] as bool? ?? false,
-    createdAt: DateTime.tryParse(map['createdAt'] as String? ?? '') ?? DateTime.now(),
-    updatedAt: DateTime.tryParse(map['updatedAt'] as String? ?? '') ?? DateTime.now(),
+    createdAt:
+        DateTime.tryParse(map['createdAt'] as String? ?? '') ?? DateTime.now(),
+    updatedAt:
+        DateTime.tryParse(map['updatedAt'] as String? ?? '') ?? DateTime.now(),
   );
 
   String toJson() => jsonEncode(toMap());
-  factory NoteTag.fromJson(String source) => NoteTag.fromMap(jsonDecode(source) as Map<String, dynamic>);
+  factory NoteTag.fromJson(String source) =>
+      NoteTag.fromMap(jsonDecode(source) as Map<String, dynamic>);
 
   @override
-  String toString() => 'NoteTag(id:$id, userId:$userId, name:$name, archived:$isArchived)';
+  String toString() =>
+      'NoteTag(id:$id, userId:$userId, name:$name, archived:$isArchived)';
 
-  static int byName(NoteTag a, NoteTag b) => a.name.toLowerCase().compareTo(b.name.toLowerCase());
-  static int byUpdatedDesc(NoteTag a, NoteTag b) => b.updatedAt.compareTo(a.updatedAt);
+  static int byName(NoteTag a, NoteTag b) =>
+      a.name.toLowerCase().compareTo(b.name.toLowerCase());
+  static int byUpdatedDesc(NoteTag a, NoteTag b) =>
+      b.updatedAt.compareTo(a.updatedAt);
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is NoteTag && other.runtimeType == runtimeType && other.id == id && other.name == name);
+      (other is NoteTag &&
+          other.runtimeType == runtimeType &&
+          other.id == id &&
+          other.name == name);
 
   @override
   int get hashCode => Object.hash(runtimeType, id, name);

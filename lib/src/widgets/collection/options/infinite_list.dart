@@ -25,7 +25,7 @@ class InfiniteListOptions extends ListOptions {
       padding: padding ?? this.padding,
       loadMoreTriggerItemDistance:
           (bottomLoadingTriggerItemDistance ?? loadMoreTriggerItemDistance) ??
-          this.loadMoreTriggerItemDistance,
+              this.loadMoreTriggerItemDistance,
       scrollPhysics: scrollPhysics ?? this.scrollPhysics,
       shrinkWrap: shrinkWrap ?? this.shrinkWrap,
     );

@@ -7,12 +7,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx/src/screen_manager/blocx_screen_manager_state.dart';
 
 abstract class BlocxFormWidgetState<
-  W extends BlocxFormWidget<P>,
-  F extends BaseFormEntity<F, E>,
-  P,
-  E extends Enum
->
-    extends BlocxScreenManagerState<W> {
+    W extends BlocxFormWidget<P>,
+    F extends BaseFormEntity<F, E>,
+    P,
+    E extends Enum> extends BlocxScreenManagerState<W> {
   late final BlocxFormBloc<F, P, E> bloc;
 
   final Map<E, TextEditingController> _controllersMap = {};
@@ -135,7 +133,8 @@ abstract class BlocxFormWidgetState<
     for (E key in keys) {
       var controller = _getTextEditingControllerIfExists(key);
       if (controller == null) continue;
-      controller.text = formData.getFormattedValueByKey(key) ?? formData.getValueByKey(key);
+      controller.text =
+          formData.getFormattedValueByKey(key) ?? formData.getValueByKey(key);
     }
   }
 
@@ -160,7 +159,8 @@ abstract class BlocxFormWidgetState<
   }
 
   void setTimedErrorToField(E key, String message, {Duration? duration}) {
-    bloc.add(BlocxFormEventSetTimedErrorToField(message: message, key: key, duration: duration));
+    bloc.add(BlocxFormEventSetTimedErrorToField(
+        message: message, key: key, duration: duration));
   }
 
   void clearFieldError(E key, {String? message}) {

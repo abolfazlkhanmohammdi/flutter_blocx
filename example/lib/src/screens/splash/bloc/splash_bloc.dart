@@ -16,7 +16,9 @@ class SplashBloc extends BaseBloc<SplashEvent, SplashState> {
   }
 
   Future<void> init(SplashEventInit event, Emitter<SplashState> emit) async {
-    var userSeedResult = await UserJsonRepository().seed(count: random.nextInt(90) + 60);
+    var userSeedResult = await UserJsonRepository().seed(
+      count: random.nextInt(90) + 60,
+    );
     var noteTagsResult = await NoteTagJsonRepository().seedForUsers(
       userSeedResult.data,
       perUser: random.nextInt(4) + 20,

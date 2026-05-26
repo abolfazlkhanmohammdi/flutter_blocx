@@ -5,7 +5,8 @@ import 'package:flutter/rendering.dart';
 mixin HideOnScrollFabMixin<T> {
   final Duration _duration = Duration(milliseconds: 500);
 
-  StreamController<bool> scrollDirectionController = StreamController.broadcast();
+  StreamController<bool> scrollDirectionController =
+      StreamController.broadcast();
   bool onScrollNotification(UserScrollNotification notification) {
     ScrollDirection direction = notification.direction;
     if (direction == ScrollDirection.idle) return true;
@@ -14,14 +15,17 @@ mixin HideOnScrollFabMixin<T> {
     return false;
   }
 
-  Widget getFloatingActionButton(BuildContext context, {T? data, bool displayFab = true}) {
+  Widget getFloatingActionButton(BuildContext context,
+      {T? data, bool displayFab = true}) {
     return StreamBuilder(
       stream: scrollDirectionController.stream,
-      builder: (context, snapshot) => _builder(context, snapshot, data, displayFab),
+      builder: (context, snapshot) =>
+          _builder(context, snapshot, data, displayFab),
     );
   }
 
-  Widget _builder(BuildContext context, AsyncSnapshot<bool> snapshot, T? data, bool displayFab) {
+  Widget _builder(BuildContext context, AsyncSnapshot<bool> snapshot, T? data,
+      bool displayFab) {
     bool isScrollingUp = snapshot.hasData ? snapshot.data! : true;
     if (!displayFab) {
       return SizedBox(width: 0, height: 0);
@@ -39,7 +43,8 @@ mixin HideOnScrollFabMixin<T> {
                 onPressed: () => onFabPressed(data),
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                shape: RoundedSuperellipseBorder(borderRadius: BorderRadius.circular(120)),
+                shape: RoundedSuperellipseBorder(
+                    borderRadius: BorderRadius.circular(120)),
                 child: Icon(Icons.add),
               )
             : SizedBox(width: 0, height: 0),

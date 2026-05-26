@@ -27,9 +27,11 @@ class UserCard extends BlocxCollectionWidget<User, dynamic> {
       shape: RoundedSuperellipseBorder(borderRadius: BorderRadius.circular(12)),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () =>
-            Navigator.of(context).push(MaterialPageRoute(builder: (_) => NoteTagsScreen(payload: item))),
-        onLongPress: () => isSelected(context) ? deselectItem(context) : selectItem(context),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => NoteTagsScreen(payload: item)),
+        ),
+        onLongPress: () =>
+            isSelected(context) ? deselectItem(context) : selectItem(context),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -48,7 +50,11 @@ class UserCard extends BlocxCollectionWidget<User, dynamic> {
                       Center(
                         child: Hero(
                           tag: "user-${item.id}",
-                          child: _Avatar(url: item.avatarUrl, name: item.displayName, radius: radius),
+                          child: _Avatar(
+                            url: item.avatarUrl,
+                            name: item.displayName,
+                            radius: radius,
+                          ),
                         ),
                       ),
                       if (isSelected(context))
@@ -60,7 +66,11 @@ class UserCard extends BlocxCollectionWidget<User, dynamic> {
 
                           child: CircleAvatar(
                             backgroundColor: cs.secondary.withAlpha(160),
-                            child: Icon(Icons.check_circle, size: 24, color: cs.primary),
+                            child: Icon(
+                              Icons.check_circle,
+                              size: 24,
+                              color: cs.primary,
+                            ),
                           ),
                         ),
                     ],
@@ -104,17 +114,26 @@ class UserCard extends BlocxCollectionWidget<User, dynamic> {
                       icon: isBeingRemoved(context)
                           ? SizedBox.square(
                               dimension: 16,
-                              child: CircularProgressIndicator(color: Colors.red),
+                              child: CircularProgressIndicator(
+                                color: Colors.red,
+                              ),
                             )
                           : const Icon(Icons.delete),
                       label: Text(
                         isBeingRemoved(context) ? "Deleting" : 'Delete',
                         style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          color: isBeingRemoved(context) ? Colors.red : Colors.white,
+                          color: isBeingRemoved(context)
+                              ? Colors.red
+                              : Colors.white,
                         ),
                       ),
-                      style: FilledButton.styleFrom(backgroundColor: cs.error, foregroundColor: cs.onError),
-                      onPressed: isBeingRemoved(context) ? null : () => removeItem(context),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: cs.error,
+                        foregroundColor: cs.onError,
+                      ),
+                      onPressed: isBeingRemoved(context)
+                          ? null
+                          : () => removeItem(context),
                     ),
                   if (canHighlight)
                     FilledButton.icon(
@@ -161,7 +180,12 @@ class _Avatar extends StatelessWidget {
       backgroundColor: bg,
       foregroundColor: fg,
       backgroundImage: hasUrl ? NetworkImage(url!) : null,
-      child: hasUrl ? null : Text(_initials(name), style: const TextStyle(fontWeight: FontWeight.w600)),
+      child: hasUrl
+          ? null
+          : Text(
+              _initials(name),
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
     );
   }
 
@@ -170,9 +194,11 @@ class _Avatar extends StatelessWidget {
     if (parts.isEmpty) return '?';
     if (parts.length == 1) {
       final t = parts.first;
-      return (t.isNotEmpty ? t.characters.take(2).toString() : '?').toUpperCase();
+      return (t.isNotEmpty ? t.characters.take(2).toString() : '?')
+          .toUpperCase();
     }
-    return (parts.first.characters.first + parts.last.characters.first).toUpperCase();
+    return (parts.first.characters.first + parts.last.characters.first)
+        .toUpperCase();
   }
 }
 
@@ -189,7 +215,10 @@ class _StatusPill extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(999)),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -199,7 +228,10 @@ class _StatusPill extends StatelessWidget {
             decoration: BoxDecoration(color: fg, shape: BoxShape.circle),
           ),
           const SizedBox(width: 6),
-          Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: fg)),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: fg),
+          ),
         ],
       ),
     );

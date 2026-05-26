@@ -2,9 +2,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_blocx/flutter_blocx.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:blocx_core/form_bloc.dart' show BaseFormEntity, BlocxFormEventUpdateData, BlocxFormBloc;
+import 'package:blocx_core/form_bloc.dart'
+    show BaseFormEntity, BlocxFormEventUpdateData, BlocxFormBloc;
 
-class BlocXFormTextField<F extends BaseFormEntity<F, E>, P, E extends Enum> extends StatefulWidget {
+class BlocXFormTextField<F extends BaseFormEntity<F, E>, P, E extends Enum>
+    extends StatefulWidget {
   /// The enum key that identifies this field in your form.
   final E formKey;
 
@@ -30,14 +32,16 @@ class BlocXFormTextField<F extends BaseFormEntity<F, E>, P, E extends Enum> exte
   });
 
   @override
-  State<BlocXFormTextField<F, P, E>> createState() => BlocXFormTextFieldState<F, P, E>();
+  State<BlocXFormTextField<F, P, E>> createState() =>
+      BlocXFormTextFieldState<F, P, E>();
 }
 
 class BlocXFormTextFieldState<F extends BaseFormEntity<F, E>, P, E extends Enum>
     extends BlocXWidgetState<BlocXFormTextField<F, P, E>> {
   TextEditingController? _internalController;
   bool get _ownsController => widget.controller == null;
-  TextEditingController get _controller => widget.controller ?? _internalController!;
+  TextEditingController get _controller =>
+      widget.controller ?? _internalController!;
 
   @override
   void initState() {
@@ -69,7 +73,8 @@ class BlocXFormTextFieldState<F extends BaseFormEntity<F, E>, P, E extends Enum>
       enabled: o.enabled,
       maxLength: o.maxLength,
       keyboardType: o.keyboardType,
-      textDirection: o.textDirection ?? (isRtl(_controller.text) ? TextDirection.rtl : TextDirection.ltr),
+      textDirection: o.textDirection ??
+          (isRtl(_controller.text) ? TextDirection.rtl : TextDirection.ltr),
       textCapitalization: o.textCapitalization,
       textInputAction: o.textInputAction,
       textAlign: o.textAlign,
@@ -88,13 +93,15 @@ class BlocXFormTextFieldState<F extends BaseFormEntity<F, E>, P, E extends Enum>
 
   bool isRtl(String text) {
     // Regular expression to check for RTL characters (e.g., Arabic, Hebrew)
-    final rtlPattern = RegExp(r'[\u0590-\u08FF\u200F\u202B\u202E\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]');
+    final rtlPattern = RegExp(
+        r'[\u0590-\u08FF\u200F\u202B\u202E\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]');
     // If any character in the string matches the RTL pattern, return true
     return rtlPattern.hasMatch(text);
   }
 
   /// Access the nearest [BlocxFormBloc] in the tree.
-  BlocxFormBloc<F, P, E> get bloc => BlocProvider.of<BlocxFormBloc<F, P, E>>(context);
+  BlocxFormBloc<F, P, E> get bloc =>
+      BlocProvider.of<BlocxFormBloc<F, P, E>>(context);
 
   /// Build the resolved [InputDecoration] based on the [TextFieldType].
   InputDecoration _buildDecoration(BuildContext context) {
@@ -131,7 +138,8 @@ class BlocXFormTextFieldState<F extends BaseFormEntity<F, E>, P, E extends Enum>
           //   borderSide: theme.inputDecorationTheme.enabledBorder?.borderSide,
           // ),
           isDense: true,
-          contentPadding: o.contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          contentPadding: o.contentPadding ??
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         );
 
       case TextFieldType.underlined:
@@ -156,7 +164,8 @@ class BlocXFormTextFieldState<F extends BaseFormEntity<F, E>, P, E extends Enum>
           //   borderSide: theme.inputDecorationTheme.enabledBorder?.borderSide,
           // ),
           isDense: true,
-          contentPadding: o.contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          contentPadding: o.contentPadding ??
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         );
 
       case TextFieldType.filled:
@@ -179,7 +188,8 @@ class BlocXFormTextFieldState<F extends BaseFormEntity<F, E>, P, E extends Enum>
           // errorBorder: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none),
           // disabledBorder: OutlineInputBorder(borderRadius: radius, borderSide: BorderSide.none),
           isDense: true,
-          contentPadding: o.contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          contentPadding: o.contentPadding ??
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         );
     }
   }
@@ -192,12 +202,14 @@ class BlocXFormTextFieldState<F extends BaseFormEntity<F, E>, P, E extends Enum>
     super.dispose();
   }
 
-  bool get isCheckingUniqueField => bloc.state.checkingUniqueFields.contains(widget.formKey);
+  bool get isCheckingUniqueField =>
+      bloc.state.checkingUniqueFields.contains(widget.formKey);
   Widget? getSuffix(BlocXTextFieldOptions o) {
     if (isCheckingUniqueField) {
       return SizedBox.square(
         dimension: 8,
-        child: CircularProgressIndicator(color: colorScheme.primary, padding: EdgeInsets.all(8)),
+        child: CircularProgressIndicator(
+            color: colorScheme.primary, padding: EdgeInsets.all(8)),
       );
     }
     if (o.suffix != null) return o.suffix;
@@ -212,7 +224,8 @@ class BlocXFormTextFieldState<F extends BaseFormEntity<F, E>, P, E extends Enum>
                 ? null
                 : () {
                     _controller.clear();
-                    bloc.add(BlocxFormEventUpdateData(data: '', key: widget.formKey));
+                    bloc.add(BlocxFormEventUpdateData(
+                        data: '', key: widget.formKey));
                     setState(() {});
                   },
           )
@@ -222,7 +235,8 @@ class BlocXFormTextFieldState<F extends BaseFormEntity<F, E>, P, E extends Enum>
   }
 
   String? getErrorText(BlocXTextFieldOptions options) {
-    int errorIndex = bloc.state.errors.keys.toList().indexWhere((e) => e == widget.formKey);
+    int errorIndex =
+        bloc.state.errors.keys.toList().indexWhere((e) => e == widget.formKey);
     if (errorIndex >= 0) {
       return bloc.state.errors.values.toList()[errorIndex].first;
     }
@@ -324,7 +338,6 @@ class BlocXTextFieldOptions {
     this.fillColor,
     this.borderRadius,
     this.contentPadding,
-
     this.enabled = true,
   });
 }

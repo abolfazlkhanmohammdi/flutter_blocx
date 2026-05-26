@@ -69,7 +69,10 @@ class NoteTagJsonRepository extends FakeRepository implements BaseEntity {
     }
   }
 
-  Future<ResponseWrapper<int>> seedForUsers(List<int> userIds, {int perUser = 5}) async {
+  Future<ResponseWrapper<int>> seedForUsers(
+    List<int> userIds, {
+    int perUser = 5,
+  }) async {
     final ids = <int>[];
     for (final uid in userIds) {
       for (int i = 0; i < perUser; i++) {
@@ -105,7 +108,9 @@ class NoteTagJsonRepository extends FakeRepository implements BaseEntity {
 
     if (query != null && query.trim().isNotEmpty) {
       final q = query.toLowerCase();
-      results = results.where((t) => (t['name'] as String).toLowerCase().contains(q));
+      results = results.where(
+        (t) => (t['name'] as String).toLowerCase().contains(q),
+      );
     }
 
     final list = results.toList();
@@ -127,7 +132,9 @@ class NoteTagJsonRepository extends FakeRepository implements BaseEntity {
     return ResponseWrapper(ok: true, data: <Json>[_tags[idx]]);
   }
 
-  Future<ResponseWrapper<Json>> create({required NoteTagFormData formData}) async {
+  Future<ResponseWrapper<Json>> create({
+    required NoteTagFormData formData,
+  }) async {
     await randomWaitFuture;
     final t = _newTagJson(userId: formData.userId, nameOverride: formData.name);
     _tags.insert(0, t);

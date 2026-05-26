@@ -40,12 +40,14 @@ class SliverInfiniteListOptions extends ListOptions {
       padding: padding ?? this.padding,
       loadMoreTriggerItemDistance:
           (bottomLoadingTriggerItemDistance ?? loadMoreTriggerItemDistance) ??
-          this.loadMoreTriggerItemDistance,
+              this.loadMoreTriggerItemDistance,
       scrollPhysics: scrollPhysics ?? this.scrollPhysics,
-      addAutomaticKeepAlives: addAutomaticKeepAlives ?? this.addAutomaticKeepAlives,
+      addAutomaticKeepAlives:
+          addAutomaticKeepAlives ?? this.addAutomaticKeepAlives,
       addRepaintBoundaries: addRepaintBoundaries ?? this.addRepaintBoundaries,
       addSemanticIndexes: addSemanticIndexes ?? this.addSemanticIndexes,
-      semanticIndexCallback: semanticIndexCallback ?? this.semanticIndexCallback,
+      semanticIndexCallback:
+          semanticIndexCallback ?? this.semanticIndexCallback,
       semanticIndexOffset: semanticIndexOffset ?? this.semanticIndexOffset,
     );
   }

@@ -12,7 +12,8 @@ class UsersScreen extends CollectionWidget<dynamic> {
   State<UsersScreen> createState() => _UsersScreenState();
 }
 
-class _UsersScreenState extends CollectionWidgetState<UsersScreen, User, dynamic> {
+class _UsersScreenState
+    extends CollectionWidgetState<UsersScreen, User, dynamic> {
   TextEditingController searchController = TextEditingController();
 
   _UsersScreenState() : super(bloc: UsersBloc());
@@ -44,7 +45,10 @@ class _UsersScreenState extends CollectionWidgetState<UsersScreen, User, dynamic
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text("Users", style: theme.appBarTheme.titleTextStyle),
-            Text("Select a user to see their note tags", style: textTheme.bodyMedium),
+            Text(
+              "Select a user to see their note tags",
+              style: textTheme.bodyMedium,
+            ),
           ],
         ),
       ),
@@ -55,6 +59,8 @@ class _UsersScreenState extends CollectionWidgetState<UsersScreen, User, dynamic
   @override
   CollectionInput get settings => CollectionInput(
     type: CollectionWidgetStateType.grid,
-    options: InfiniteGridOptions.defaultOptions().copyWith(childAspectRatio: 0.75),
+    options: InfiniteGridOptions.defaultOptions().copyWith(
+      childAspectRatio: 0.75,
+    ),
   );
 }

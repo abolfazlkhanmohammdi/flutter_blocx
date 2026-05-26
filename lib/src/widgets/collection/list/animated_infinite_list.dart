@@ -16,14 +16,16 @@ import 'package:implicitly_animated_list/implicitly_animated_list.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-class AnimatedInfiniteList<Entity extends BlocxBaseEntity> extends StatefulWidget {
+class AnimatedInfiniteList<Entity extends BlocxBaseEntity>
+    extends StatefulWidget {
   final AnimatedInfiniteListOptions options;
 
   final List<Entity> items;
   final BlocxInfiniteListBloc bloc;
 
   final Widget Function(BuildContext context, Entity item) itemBuilder;
-  final Widget Function(BuildContext context, int index)? separatorBuilder; // ignored here
+  final Widget Function(BuildContext context, int index)?
+      separatorBuilder; // ignored here
 
   final AnimatedChildBuilder? deleteAnimation;
   final AnimatedChildBuilder? insertAnimation;
@@ -33,8 +35,10 @@ class AnimatedInfiniteList<Entity extends BlocxBaseEntity> extends StatefulWidge
   final void Function()? refreshOnSwipe;
 
   final ScrollController? scrollController;
-  final Widget? Function(BuildContext context, bool isLoadingMore)? loadMoreWidgetBuilder;
-  final Widget? Function(BuildContext context, double swipeRefreshHeight)? refreshWidgetBuilder;
+  final Widget? Function(BuildContext context, bool isLoadingMore)?
+      loadMoreWidgetBuilder;
+  final Widget? Function(BuildContext context, double swipeRefreshHeight)?
+      refreshWidgetBuilder;
 
   final bool isRefreshable;
 
@@ -57,13 +61,15 @@ class AnimatedInfiniteList<Entity extends BlocxBaseEntity> extends StatefulWidge
   });
 
   @override
-  AnimatedBlocxInfiniteListState<Entity> createState() => AnimatedBlocxInfiniteListState<Entity>();
+  AnimatedBlocxInfiniteListState<Entity> createState() =>
+      AnimatedBlocxInfiniteListState<Entity>();
 }
 
 class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
     extends State<AnimatedInfiniteList<Entity>> {
   late final String uuid;
-  late final ScrollController scrollController = widget.scrollController ?? ScrollController();
+  late final ScrollController scrollController =
+      widget.scrollController ?? ScrollController();
 
   BlocxInfiniteListBloc get bloc => widget.bloc;
   AnimatedInfiniteListOptions get options => widget.options;
@@ -95,9 +101,13 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              options.reverse ? loadMoreWidget(context, state) : swipeRefreshWidget(context, state),
+              options.reverse
+                  ? loadMoreWidget(context, state)
+                  : swipeRefreshWidget(context, state),
               core,
-              options.reverse ? swipeRefreshWidget(context, state) : loadMoreWidget(context, state),
+              options.reverse
+                  ? swipeRefreshWidget(context, state)
+                  : loadMoreWidget(context, state),
             ],
           );
         },
@@ -105,23 +115,28 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
     );
   }
 
-  Widget putInExpandedIfNotShrunk(BuildContext context, BlocxInfiniteListState state, Widget child) {
+  Widget putInExpandedIfNotShrunk(
+      BuildContext context, BlocxInfiniteListState state, Widget child) {
     if (options.shrinkWrap) return child;
     return Expanded(child: child);
   }
 
-  Widget maybeSetupRefresh(BlocxInfiniteListState state, {required Widget child}) {
+  Widget maybeSetupRefresh(BlocxInfiniteListState state,
+      {required Widget child}) {
     if (!widget.isRefreshable) return child;
     return NotificationListener<UserScrollNotification>(
       onNotification: onScroll,
       child: Listener(
-        onPointerDown: (d) => bloc.add(BlocxInfiniteListEventVerticalDragStarted(globalY: d.position.dy)),
+        onPointerDown: (d) => bloc.add(
+            BlocxInfiniteListEventVerticalDragStarted(globalY: d.position.dy)),
         onPointerUp: (d) => bloc.add(BlocxInfiniteListEventVerticalDragEnded()),
         onPointerMove: maySwipe
-            ? (d) => bloc.add(BlocxInfiniteListEventVerticalDragUpdated(globalY: d.position.dy))
+            ? (d) => bloc.add(BlocxInfiniteListEventVerticalDragUpdated(
+                globalY: d.position.dy))
             : null,
         onPointerCancel: maySwipe
-            ? (_) => bloc.add(BlocxInfiniteListEventVerticalDragUpdated(globalY: null))
+            ? (_) => bloc
+                .add(BlocxInfiniteListEventVerticalDragUpdated(globalY: null))
             : null,
         child: child,
       ),
@@ -129,11 +144,13 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
   }
 
   bool get _atTopByController =>
-      widget.scrollController?.hasClients == true && widget.scrollController!.position.pixels <= 0.0;
+      widget.scrollController?.hasClients == true &&
+      widget.scrollController!.position.pixels <= 0.0;
 
   bool get _atBottomByController =>
       widget.scrollController?.hasClients == true &&
-      (widget.scrollController!.position.pixels >= widget.scrollController!.position.maxScrollExtent - 1.0);
+      (widget.scrollController!.position.pixels >=
+          widget.scrollController!.position.maxScrollExtent - 1.0);
 
   bool get _atRefreshEdge {
     return options.reverse
@@ -141,7 +158,10 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
         : (bloc.state.isAtTop || _atTopByController);
   }
 
-  bool get maySwipe => _atRefreshEdge && !bloc.state.isRefreshing && widget.refreshOnSwipe != null;
+  bool get maySwipe =>
+      _atRefreshEdge &&
+      !bloc.state.isRefreshing &&
+      widget.refreshOnSwipe != null;
 
   void onVisibilityChanged(VisibilityInfo c, BlocxInfiniteListState state) {
     if (c.visibleFraction < 0.5 ||
@@ -178,7 +198,8 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
   }
 
   Widget loadMoreWidget(BuildContext context, BlocxInfiniteListState state) {
-    final external = widget.loadMoreWidgetBuilder?.call(context, state.isLoadingMore);
+    final external =
+        widget.loadMoreWidgetBuilder?.call(context, state.isLoadingMore);
     if (external != null) return external;
     final scheme = Theme.of(context).colorScheme;
     return AnimatedSize(
@@ -199,16 +220,22 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
     );
   }
 
-  Widget swipeRefreshWidget(BuildContext context, BlocxInfiniteListState state) {
-    if (!widget.isRefreshable || state.swipeRefreshHeight == 0) return SizedBox.square(dimension: 0);
-    final external = widget.refreshWidgetBuilder?.call(context, state.swipeRefreshHeight);
+  Widget swipeRefreshWidget(
+      BuildContext context, BlocxInfiniteListState state) {
+    if (!widget.isRefreshable || state.swipeRefreshHeight == 0)
+      return SizedBox.square(dimension: 0);
+    final external =
+        widget.refreshWidgetBuilder?.call(context, state.swipeRefreshHeight);
     if (external != null) return external;
     final primary = Theme.of(context).colorScheme.primary;
     return Container(
       color: primary,
       height: state.swipeRefreshHeight,
       child: const Center(
-        child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white)),
+        child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(color: Colors.white)),
       ),
     );
   }
@@ -228,10 +255,12 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
     );
   }
 
-  Widget _itemBuilder(BuildContext context, Entity data, BlocxInfiniteListState state) {
+  Widget _itemBuilder(
+      BuildContext context, Entity data, BlocxInfiniteListState state) {
     final index = widget.items.indexOf(data);
     final isBottomLoadingTrigger =
-        index == (widget.items.length - options.loadMoreTriggerItemDistance) && !state.hasReachedEnd;
+        index == (widget.items.length - options.loadMoreTriggerItemDistance) &&
+            !state.hasReachedEnd;
 
     Widget itemWidget = widget.itemBuilder(context, data);
 
@@ -262,14 +291,17 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
       insertAnimation: widget.insertAnimation ?? _defaultAnimation,
       deleteAnimation: widget.deleteAnimation ?? _defaultAnimation,
       itemBuilder: (c, item) => _itemBuilder(c, item, state),
-      itemEquality: (BlocxBaseEntity f, BlocxBaseEntity s) => f.identifier == s.identifier,
+      itemEquality: (BlocxBaseEntity f, BlocxBaseEntity s) =>
+          f.identifier == s.identifier,
     );
   }
 
-  Widget _defaultAnimation(BuildContext context, Widget child, Animation<double> animation) {
+  Widget _defaultAnimation(
+      BuildContext context, Widget child, Animation<double> animation) {
     return SizeTransition(
       sizeFactor: _driveDefaultAnimation(animation),
-      child: FadeTransition(opacity: _driveDefaultAnimation(animation), child: child),
+      child: FadeTransition(
+          opacity: _driveDefaultAnimation(animation), child: child),
     );
   }
 

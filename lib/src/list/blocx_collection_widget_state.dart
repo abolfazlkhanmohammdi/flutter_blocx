@@ -8,8 +8,8 @@ import 'package:flutter_blocx/src/screen_manager/blocx_screen_manager_state.dart
 import 'package:implicitly_animated_list/implicitly_animated_list.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T extends BlocxBaseEntity, P>
-    extends BlocxScreenManagerState<W> {
+abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>,
+    T extends BlocxBaseEntity, P> extends BlocxScreenManagerState<W> {
   late final BlocxCollectionBloc<T, P> _bloc;
   ScrollController? scrollController;
   @override
@@ -17,7 +17,8 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
     _bloc = generateBloc;
     setScrollController();
     if (loadOnInit) {
-      _bloc.add(BlocxCollectionEventLoadInitialPage<T, P>(payload: widget.payload));
+      _bloc.add(
+          BlocxCollectionEventLoadInitialPage<T, P>(payload: widget.payload));
     }
     super.initState();
   }
@@ -35,13 +36,16 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
     );
   }
 
-  Widget collectionWrapperBuilder(BuildContext context, BlocxCollectionState<T> state) {
+  Widget collectionWrapperBuilder(
+      BuildContext context, BlocxCollectionState<T> state) {
     final top = topWidget(context, state);
     final bottom = bottomWidget(context, state);
     final bool isLoadingOrSearching = isLoading || isSearching;
     final bool isEmpty = !isLoading && state.list.isEmpty;
     final Widget coreBox = (isLoadingOrSearching || isEmpty)
-        ? (isLoadingOrSearching ? loadingWidget(context, state) : emptyWidget(context, state))
+        ? (isLoadingOrSearching
+            ? loadingWidget(context, state)
+            : emptyWidget(context, state))
         : collectionWidget(context, state); // must return a regular Widget*
 
     final children = <Widget>[
@@ -52,18 +56,25 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
       if (bottom != null) bottom,
     ];
 
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: children);
+    return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch, children: children);
   }
 
   double get topBottomAndListSpacing => 8.0;
 
-  Widget? topWidget(BuildContext context, BlocxCollectionState<T> state) => null;
+  Widget? topWidget(BuildContext context, BlocxCollectionState<T> state) =>
+      null;
 
-  Widget? bottomWidget(BuildContext context, BlocxCollectionState<T> state) => null;
+  Widget? bottomWidget(BuildContext context, BlocxCollectionState<T> state) =>
+      null;
 
-  Widget? sliverTopWidget(BuildContext context, BlocxCollectionState<T> state) => null;
+  Widget? sliverTopWidget(
+          BuildContext context, BlocxCollectionState<T> state) =>
+      null;
 
-  Widget? sliverBottomWidget(BuildContext context, BlocxCollectionState<T> state) => null;
+  Widget? sliverBottomWidget(
+          BuildContext context, BlocxCollectionState<T> state) =>
+      null;
 
   Widget itemBuilder(BuildContext context, T item);
 
@@ -96,7 +107,8 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
         CircularProgressIndicator(),
         Text(
           state.isSearching ? searchingText : loc.loadingText,
-          style: textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary),
+          style:
+              textTheme.bodyLarge?.copyWith(color: theme.colorScheme.primary),
         ),
         Row(),
       ],
@@ -128,9 +140,11 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Icon(Icons.data_object_rounded, size: 80, color: theme.colorScheme.primary),
+        Icon(Icons.data_object_rounded,
+            size: 80, color: theme.colorScheme.primary),
         SizedBox(height: 8),
-        Text(loc.emptyListText, style: textTheme.titleMedium, textAlign: TextAlign.center),
+        Text(loc.emptyListText,
+            style: textTheme.titleMedium, textAlign: TextAlign.center),
       ],
     );
   }
@@ -143,19 +157,21 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
       );
     }
     final bloc = _bloc as BlocxCollectionBlocScrollableMixin<T, P>;
-    bloc.add(BlocxCollectionEventScrollToItem<T>(item: item, highlightItem: highlightItem));
+    bloc.add(BlocxCollectionEventScrollToItem<T>(
+        item: item, highlightItem: highlightItem));
   }
 
   ScrollController? get scrollControllerProvider => null;
   void setScrollController() {
-    scrollController ??=
-        scrollControllerProvider ?? (_bloc.isScrollable ? AutoScrollController() : ScrollController());
+    scrollController ??= scrollControllerProvider ??
+        (_bloc.isScrollable ? AutoScrollController() : ScrollController());
     if (scrollController is AutoScrollController) {
       (scrollController as AutoScrollController).addListener(_onScroll);
     }
   }
 
-  Widget? refreshWidgetBuilder(BuildContext context, double swipeRefreshHeight) {
+  Widget? refreshWidgetBuilder(
+      BuildContext context, double swipeRefreshHeight) {
     return null;
   }
 
@@ -186,9 +202,9 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
   CollectionWidgetStateType get _collectionDisplayType => settings.type;
   CollectionOptions get _collectionOptions => settings.options;
   CollectionSettings get settings => CollectionSettings(
-    type: CollectionWidgetStateType.animatedList,
-    options: AnimatedInfiniteListOptions(),
-  );
+        type: CollectionWidgetStateType.animatedList,
+        options: AnimatedInfiniteListOptions(),
+      );
 
   bool get autoDisposeBloc => true;
 
@@ -316,7 +332,8 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
   @override
   ScreenManagerCubit get managerCubit => _bloc.screenManagerCubit;
 
-  void onSelectionChanged(BuildContext context, SelectionChangedData<T> selectionData) {}
+  void onSelectionChanged(
+      BuildContext context, SelectionChangedData<T> selectionData) {}
 }
 
 enum CollectionWidgetStateType {

@@ -26,7 +26,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// Provides convenience methods to dispatch common list events (remove / select / deselect /
 /// highlight / clear highlight). Each method checks that the bloc supports the required
 /// capability mixin before dispatching; otherwise it throws a descriptive error.
-abstract class BlocxCollectionItem<T extends BlocxBaseEntity, P> extends BlocxStatelessWidget {
+abstract class BlocxCollectionItem<T extends BlocxBaseEntity, P>
+    extends BlocxStatelessWidget {
   final T item;
 
   const BlocxCollectionItem({required this.item, super.key});
@@ -47,14 +48,16 @@ abstract class BlocxCollectionItem<T extends BlocxBaseEntity, P> extends BlocxSt
   // ---------------------------------------------------------------------------
 
   @protected
-  BlocxCollectionBloc<T, P> bloc(BuildContext context) => BlocProvider.of<BlocxCollectionBloc<T, P>>(context);
+  BlocxCollectionBloc<T, P> bloc(BuildContext context) =>
+      BlocProvider.of<BlocxCollectionBloc<T, P>>(context);
 
   BlocxCollectionBloc<T, P> _blocOrThrow(BuildContext context) {
     try {
       return bloc(context);
     } catch (_) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('BlocxListItem could not find ListBloc<$T, $P> in the widget tree.'),
+        ErrorSummary(
+            'BlocxListItem could not find ListBloc<$T, $P> in the widget tree.'),
         ErrorDescription(
           'Ensure you wrap your list screen (or a parent widget) with '
           'BlocProvider<ListBloc<$T, $P>>.',
@@ -127,13 +130,16 @@ abstract class BlocxCollectionItem<T extends BlocxBaseEntity, P> extends BlocxSt
   bool isSelected(BuildContext context) => bloc(context).state.isSelected(item);
 
   /// True when this item's id is present in `state.highlightedItemIds`.
-  bool isHighlighted(BuildContext context) => bloc(context).state.isHighlighted(item);
+  bool isHighlighted(BuildContext context) =>
+      bloc(context).state.isHighlighted(item);
 
   /// True when this item's id is present in `state.beingRemovedItemIds`.
-  bool isBeingRemoved(BuildContext context) => bloc(context).state.isBeingRemoved(item);
+  bool isBeingRemoved(BuildContext context) =>
+      bloc(context).state.isBeingRemoved(item);
 
   /// True when this item's id is present in `state.beingSelectedItemIds`.
-  bool isBeingSelected(BuildContext context) => bloc(context).state.isBeingSelected(item);
+  bool isBeingSelected(BuildContext context) =>
+      bloc(context).state.isBeingSelected(item);
 
   /// True when this item's id is present in `state.expandedItemIds`.
   bool isExpanded(BuildContext context) => bloc(context).state.isExpanded(item);
@@ -239,8 +245,10 @@ abstract class BlocxCollectionItem<T extends BlocxBaseEntity, P> extends BlocxSt
     var blocc = bloc(context);
     blocc.add(
       areAlreadySelected
-          ? BlocxCollectionEventDeselectMultipleItems(items: selectionTargetItems)
-          : BlocxCollectionEventSelectMultipleItems(items: selectionTargetItems),
+          ? BlocxCollectionEventDeselectMultipleItems(
+              items: selectionTargetItems)
+          : BlocxCollectionEventSelectMultipleItems(
+              items: selectionTargetItems),
     );
   }
 }

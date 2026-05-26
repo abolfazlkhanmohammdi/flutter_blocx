@@ -26,21 +26,40 @@ class NotesBloc extends ListBloc<Note, (NoteTag, User)>
 
   @override
   PaginationUseCase<Note, (NoteTag, User)>? get loadInitialPageUseCase =>
-      GetNotesUseCase(user: payload?.$2, noteTag: payload?.$1, loadCount: loadCount, offset: 0);
+      GetNotesUseCase(
+        user: payload?.$2,
+        noteTag: payload?.$1,
+        loadCount: loadCount,
+        offset: 0,
+      );
   @override
   PaginationUseCase<Note, (NoteTag, User)>? get loadNextPageUseCase =>
-      GetNotesUseCase(user: payload?.$2, noteTag: payload?.$1, loadCount: loadCount, offset: offset);
+      GetNotesUseCase(
+        user: payload?.$2,
+        noteTag: payload?.$1,
+        loadCount: loadCount,
+        offset: offset,
+      );
 
   @override
   PaginationUseCase<Note, (NoteTag, User)>? get refreshPageUseCase =>
-      GetNotesUseCase(user: payload?.$2, noteTag: payload?.$1, loadCount: list.length, offset: 0);
+      GetNotesUseCase(
+        user: payload?.$2,
+        noteTag: payload?.$1,
+        loadCount: list.length,
+        offset: 0,
+      );
   @override
   BaseUseCase<bool>? deleteItemUseCase(Note item) {
     return DeleteNoteUseCase(note: item);
   }
 
   @override
-  SearchUseCase<Note>? searchUseCase(String searchText, {int? loadCount, int? offset}) {
+  SearchUseCase<Note>? searchUseCase(
+    String searchText, {
+    int? loadCount,
+    int? offset,
+  }) {
     return SearchNotesUseCase(
       searchText: searchText,
       loadCount: loadCount ?? this.loadCount,

@@ -10,7 +10,9 @@ class RegisterNoteTagUseCase extends BaseUseCase<NoteTag> {
 
   @override
   Future<UseCaseResult<NoteTag>> perform() async {
-    var registerResult = await NoteTagJsonRepository().create(formData: formData);
+    var registerResult = await NoteTagJsonRepository().create(
+      formData: formData,
+    );
     if (!registerResult.ok) {
       return UseCaseResult.failure(StateError("Failed to register note tag"));
     }

@@ -14,11 +14,20 @@ class NoteTagForm extends FormWidget<NoteTagFormPayload> {
 }
 
 class _NoteTagFormState
-    extends FormWidgetState<NoteTagForm, NoteTagFormData, NoteTagFormPayload, NoteTagFormKey> {
+    extends
+        FormWidgetState<
+          NoteTagForm,
+          NoteTagFormData,
+          NoteTagFormPayload,
+          NoteTagFormKey
+        > {
   _NoteTagFormState() : super(_bloc: NoteTagFormBloc());
 
   @override
-  formWidget(BuildContext context, FormBlocState<NoteTagFormData, NoteTagFormKey> state) {
+  formWidget(
+    BuildContext context,
+    FormBlocState<NoteTagFormData, NoteTagFormKey> state,
+  ) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -26,7 +35,9 @@ class _NoteTagFormState
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            isUpdate ? "Edit note tag ${payload!.toBeEdited!.name}" : "Create a new Note Tag",
+            isUpdate
+                ? "Edit note tag ${payload!.toBeEdited!.name}"
+                : "Create a new Note Tag",
             style: textTheme.titleMedium?.copyWith(color: colorScheme.primary),
           ),
           textField(
@@ -51,7 +62,9 @@ class _NoteTagFormState
   }
 
   @override
-  void onFormSubmitted(FormStateFormSubmitted<NoteTagFormData, NoteTagFormKey> state) {
+  void onFormSubmitted(
+    FormStateFormSubmitted<NoteTagFormData, NoteTagFormKey> state,
+  ) {
     Navigator.of(context).pop(state.submittedData);
   }
 

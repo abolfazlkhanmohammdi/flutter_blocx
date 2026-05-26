@@ -19,7 +19,13 @@ class SearchNotesUseCase extends SearchUseCase<Note> {
   });
   @override
   Future<UseCaseResult<Page<Note>>> perform() async {
-    var result = await NotesJsonRepository().searchNotes(searchText, loadCount, offset, user, tag);
+    var result = await NotesJsonRepository().searchNotes(
+      searchText,
+      loadCount,
+      offset,
+      user,
+      tag,
+    );
     if (!result.ok) {
       throw HttpException("Could not search notes. Please try again later.");
     }

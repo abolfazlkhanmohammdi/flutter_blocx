@@ -79,7 +79,9 @@ class Note extends BlocxBaseEntity {
     // Read ids directly; fall back to nested maps if present
     final int parsedTagId =
         (map['tagId'] as num?)?.toInt() ??
-        (map['noteTag'] is Map ? (map['noteTag']['id'] as num?)?.toInt() : null) ??
+        (map['noteTag'] is Map
+            ? (map['noteTag']['id'] as num?)?.toInt()
+            : null) ??
         -1;
 
     final int? parsedUserId =
@@ -102,18 +104,24 @@ class Note extends BlocxBaseEntity {
       content: map['content'] as String?,
       isPinned: map['isPinned'] as bool? ?? false,
       isArchived: map['isArchived'] as bool? ?? false,
-      createdAt: DateTime.tryParse(map['createdAt'] as String? ?? '') ?? DateTime.now(),
-      updatedAt: DateTime.tryParse(map['updatedAt'] as String? ?? '') ?? DateTime.now(),
+      createdAt:
+          DateTime.tryParse(map['createdAt'] as String? ?? '') ??
+          DateTime.now(),
+      updatedAt:
+          DateTime.tryParse(map['updatedAt'] as String? ?? '') ??
+          DateTime.now(),
       user: u,
       noteTag: t,
     );
   }
 
   String toJson() => jsonEncode(toMap());
-  factory Note.fromJson(String source) => Note.fromMap(jsonDecode(source) as Map<String, dynamic>);
+  factory Note.fromJson(String source) =>
+      Note.fromMap(jsonDecode(source) as Map<String, dynamic>);
 
   @override
-  String toString() => 'Note(uuid:$uuid, tagId:$tagId, userId:$userId, title:"$title")';
+  String toString() =>
+      'Note(uuid:$uuid, tagId:$tagId, userId:$userId, title:"$title")';
 
   @override
   bool operator ==(Object other) => other is Note && other.uuid == uuid;
@@ -121,8 +129,10 @@ class Note extends BlocxBaseEntity {
   @override
   int get hashCode => uuid.hashCode;
 
-  static int byUpdatedDesc(Note a, Note b) => b.updatedAt.compareTo(a.updatedAt);
-  static int byTitle(Note a, Note b) => a.title.toLowerCase().compareTo(b.title.toLowerCase());
+  static int byUpdatedDesc(Note a, Note b) =>
+      b.updatedAt.compareTo(a.updatedAt);
+  static int byTitle(Note a, Note b) =>
+      a.title.toLowerCase().compareTo(b.title.toLowerCase());
 
   @override
   String get identifier => uuid;

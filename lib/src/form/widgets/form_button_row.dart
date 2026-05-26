@@ -1,4 +1,5 @@
-import 'package:blocx_core/form_bloc.dart' show BaseFormEntity, BlocxFormState, BlocxFormStateSubmittingForm;
+import 'package:blocx_core/form_bloc.dart'
+    show BaseFormEntity, BlocxFormState, BlocxFormStateSubmittingForm;
 import 'package:flutter_blocx/src/core/widgets/blocx_stateless_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -14,7 +15,8 @@ import 'blocx_form_register_button.dart';
 /// - The secondary button can be styled; by default it's an [OutlinedButton].
 /// - Optionally disable the pop button while the form is submitting.
 /// - Optional pre-pop callback (e.g., for analytics or side-effects).
-class FormButtonRow<F extends BaseFormEntity<F, E>, E extends Enum> extends BlocxStatelessWidget {
+class FormButtonRow<F extends BaseFormEntity<F, E>, E extends Enum>
+    extends BlocxStatelessWidget {
   /// Current form state used by [BlocxFormRegisterButton].
   final BlocxFormState formState;
 
@@ -120,10 +122,10 @@ class FormButtonRow<F extends BaseFormEntity<F, E>, E extends Enum> extends Bloc
       onPressed: disabled
           ? null
           : onSecondButtonPressed ??
-                () async {
-                  // Try to pop if possible (no-op if we're at the root).
-                  await Navigator.of(context).maybePop();
-                },
+              () async {
+                // Try to pop if possible (no-op if we're at the root).
+                await Navigator.of(context).maybePop();
+              },
       child: Text(secondButtonText),
     );
   }

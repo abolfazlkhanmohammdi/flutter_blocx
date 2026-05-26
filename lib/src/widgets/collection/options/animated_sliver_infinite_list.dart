@@ -42,7 +42,7 @@ class AnimatedSliverInfiniteListOptions extends ListOptions {
       scrollPhysics: scrollPhysics ?? this.scrollPhysics,
       loadMoreTriggerItemDistance:
           (bottomLoadingTriggerItemDistance ?? loadMoreTriggerItemDistance) ??
-          this.loadMoreTriggerItemDistance,
+              this.loadMoreTriggerItemDistance,
       initialAnimation: initialAnimation ?? this.initialAnimation,
       insertDuration: insertDuration ?? this.insertDuration,
       deleteDuration: deleteDuration ?? this.deleteDuration,

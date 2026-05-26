@@ -19,11 +19,19 @@ class NoteTagsBloc extends ListBloc<NoteTag, User>
 
   @override
   PaginationUseCase<NoteTag, User>? get loadInitialPageUseCase =>
-      GetUserNoteTagsUseCase(loadCount: loadCount, offset: offset, user: payload!);
+      GetUserNoteTagsUseCase(
+        loadCount: loadCount,
+        offset: offset,
+        user: payload!,
+      );
 
   @override
   PaginationUseCase<NoteTag, User>? get loadNextPageUseCase =>
-      GetUserNoteTagsUseCase(loadCount: loadCount, offset: offset, user: payload!);
+      GetUserNoteTagsUseCase(
+        loadCount: loadCount,
+        offset: offset,
+        user: payload!,
+      );
 
   @override
   BaseUseCase<bool>? deleteItemUseCase(NoteTag item) {
@@ -35,6 +43,8 @@ class NoteTagsBloc extends ListBloc<NoteTag, User>
       GetUserNoteTagsUseCase(loadCount: list.length, offset: 0, user: payload!);
 
   int sortByUpdateDate(NoteTag f, NoteTag s) {
-    return s.updatedAt.millisecondsSinceEpoch.compareTo(f.updatedAt.millisecondsSinceEpoch);
+    return s.updatedAt.millisecondsSinceEpoch.compareTo(
+      f.updatedAt.millisecondsSinceEpoch,
+    );
   }
 }
