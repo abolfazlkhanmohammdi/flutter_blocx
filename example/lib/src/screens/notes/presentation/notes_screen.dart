@@ -1,5 +1,7 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_core/list_bloc.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
+import 'package:example/src/screens/notes/bloc/notes_bloc.dart';
 import 'package:example/src/screens/notes/data/models/note.dart';
 import 'package:example/src/screens/notes/presentation/widgets/note_card.dart';
 import 'package:example/src/screens/notes/presentation/widgets/number_nudge.dart';
@@ -7,15 +9,14 @@ import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blocx/list_widget.dart';
 
-class NotesScreen extends CollectionWidget<(NoteTag, User)> {
+class NotesScreen extends BlocxCollectionWidget<(NoteTag, User)> {
   const NotesScreen({super.key, super.payload});
 
   @override
   State<NotesScreen> createState() => _NotesScreenState();
 }
 
-class _NotesScreenState
-    extends CollectionWidgetState<NotesScreen, Note, (NoteTag, User)> {
+class _NotesScreenState extends BlocxCollectionWidgetState<NotesScreen, Note, (NoteTag, User)> {
   late final TextEditingController searchController;
 
   @override
@@ -53,13 +54,11 @@ class _NotesScreenState
   }
 
   @override
-  Widget? topWidget(BuildContext context, ListState<Note> state) {
+  Widget? topWidget(BuildContext context, BlocxCollectionState<Note> state) {
     return Card(
       margin: EdgeInsets.zero,
       color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(bottom: Radius.circular(16))),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: BlocxSearchField<Note, (NoteTag, User)>(
@@ -71,15 +70,13 @@ class _NotesScreenState
   }
 
   @override
-  Widget? bottomWidget(BuildContext context, ListState<Note> state) {
+  Widget? bottomWidget(BuildContext context, BlocxCollectionState<Note> state) {
     return AnimatedSize(
       duration: Duration(milliseconds: 200),
       child: Card(
         margin: EdgeInsets.zero,
         color: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
           child: Column(
@@ -89,8 +86,7 @@ class _NotesScreenState
                 min: 0,
                 max: state.list.length - 1,
                 buttonLabel: "Scroll to this item",
-                onSubmit: (index) =>
-                    scrollToItem(state.list[index], highlightItem: true),
+                onSubmit: (index) => scrollToItem(state.list[index], highlightItem: true),
               ),
               AnimatedContainer(
                 width: MediaQuery.sizeOf(context).width,
@@ -99,24 +95,16 @@ class _NotesScreenState
                   children: [
                     if (state.selectedCount > 0) ...[
                       Expanded(
-                        child: Text(
-                          "${state.selectedCount} items are selected",
-                          textAlign: TextAlign.center,
-                        ),
+                        child: Text("${state.selectedCount} items are selected", textAlign: TextAlign.center),
                       ),
                       IconButton(
-                        onPressed: () =>
-                            deleteMultipleItems(state.selectedItems),
+                        onPressed: () => deleteMultipleItems(state.selectedItems),
                         icon: state.beingRemovedItemIds.isNotEmpty
-                            ? SizedBox.square(
-                                dimension: 16,
-                                child: CircularProgressIndicator(),
-                              )
+                            ? SizedBox.square(dimension: 16, child: CircularProgressIndicator())
                             : Icon(Icons.delete, color: Colors.red),
                       ),
                       IconButton(
-                        onPressed: () =>
-                            deselectMultipleItems(state.selectedItems),
+                        onPressed: () => deselectMultipleItems(state.selectedItems),
                         icon: Icon(Icons.deselect, color: colorScheme.primary),
                       ),
                     ],
@@ -126,13 +114,9 @@ class _NotesScreenState
               if (payload != null) ...[
                 SizedBox(height: 16),
                 FilledButton(
-                  style: FilledButton.styleFrom(
-                    shape: RoundedRectangleBorder(),
-                    padding: EdgeInsets.all(24),
-                  ),
-                  onPressed: () => Navigator.of(
-                    context,
-                  ).push(MaterialPageRoute(builder: (_) => NotesScreen())),
+                  style: FilledButton.styleFrom(shape: RoundedRectangleBorder(), padding: EdgeInsets.all(24)),
+                  onPressed: () =>
+                      Navigator.of(context).push(MaterialPageRoute(builder: (_) => NotesScreen())),
                   child: Text("show all notes"),
                 ),
               ],
@@ -153,4 +137,7 @@ class _NotesScreenState
       style: Theme.of(context).textTheme.bodyMedium,
     );
   }
+
+  @override
+  BlocxCollectionBloc<Note, (NoteTag, User)> get generateBloc => NotesBloc();
 }

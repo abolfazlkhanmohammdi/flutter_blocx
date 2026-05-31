@@ -5,7 +5,7 @@ import 'package:example/src/screens/note_tags/data/models/note_tag_form_data.dar
 
 typedef Json = Map<String, dynamic>;
 
-class NoteTagJsonRepository extends FakeRepository implements BaseEntity {
+class NoteTagJsonRepository extends FakeRepository implements BlocxBaseEntity {
   NoteTagJsonRepository._();
   static final NoteTagJsonRepository _instance = NoteTagJsonRepository._();
   factory NoteTagJsonRepository() => _instance;

@@ -1,3 +1,4 @@
+import 'package:blocx_core/list_bloc.dart';
 import 'package:flutter_blocx/list_widget.dart';
 import 'package:example/src/screens/note_tags/bloc/note_tags_bloc.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
@@ -7,18 +8,15 @@ import 'package:example/src/screens/note_tags/presentation/widgets/note_tag_card
 import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:flutter/material.dart';
 
-class NoteTagsScreen extends CollectionWidget<User> {
+class NoteTagsScreen extends BlocxCollectionWidget<User> {
   const NoteTagsScreen({super.key, required super.payload});
 
   @override
   State<NoteTagsScreen> createState() => _NoteTagsScreenState();
 }
 
-class _NoteTagsScreenState
-    extends CollectionWidgetState<NoteTagsScreen, NoteTag, User>
+class _NoteTagsScreenState extends BlocxCollectionWidgetState<NoteTagsScreen, NoteTag, User>
     with HideOnScrollFabMixin {
-  _NoteTagsScreenState() : super(_bloc: NoteTagsBloc());
-
   @override
   Widget itemBuilder(BuildContext context, NoteTag item) {
     return NoteTagCard(item: item, user: payload!, key: ValueKey(item));
@@ -40,24 +38,14 @@ class _NoteTagsScreenState
               tag: "user-${payload!.id}",
               child: Container(
                 margin: EdgeInsets.all(8),
-                child: CircleAvatar(
-                  foregroundImage: NetworkImage(payload!.avatarUrl!),
-                ),
+                child: CircleAvatar(foregroundImage: NetworkImage(payload!.avatarUrl!)),
               ),
             ),
-            Expanded(
-              child: Text(
-                "Note tags for '${payload!.displayName}'",
-                style: textTheme.bodyMedium,
-              ),
-            ),
+            Expanded(child: Text("Note tags for '${payload!.displayName}'", style: textTheme.bodyMedium)),
           ],
         ),
       ),
-      body: NotificationListener<UserScrollNotification>(
-        onNotification: onScrollNotification,
-        child: body,
-      ),
+      body: NotificationListener<UserScrollNotification>(onNotification: onScrollNotification, child: body),
       floatingActionButton: getFloatingActionButton(context),
     );
   }
@@ -66,16 +54,18 @@ class _NoteTagsScreenState
   Future<void> onFabPressed(data) async {
     var result = await showModalBottomSheet<NoteTag>(
       context: context,
-      builder: (_) =>
-          NoteTagForm(payload: NoteTagFormPayload(userId: payload!.id)),
+      builder: (_) => NoteTagForm(payload: NoteTagFormPayload(userId: payload!.id)),
     );
     if (result == null) return;
     addToList(result);
   }
 
   @override
-  CollectionInput get settings => CollectionInput(
+  CollectionSettings get settings => CollectionSettings(
     type: CollectionWidgetStateType.animatedList,
-    options: AnimatedInfiniteListOptions.defaultOptions(),
+    options: AnimatedInfiniteListOptions(),
   );
+
+  @override
+  BlocxCollectionBloc<NoteTag, User> get generateBloc => NoteTagsBloc();
 }

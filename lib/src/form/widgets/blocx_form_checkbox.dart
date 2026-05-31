@@ -1,22 +1,18 @@
-import 'package:blocx_core/form_bloc.dart'
-    show BaseFormEntity, BlocxFormEventUpdateData, BlocxFormBloc;
+import 'package:blocx_core/form_bloc.dart' show BlocxBaseFormEntity, BlocxFormEventUpdateData, BlocxFormBloc;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// A stateless, platform-adaptive checkbox.
 /// All non-function configuration is provided via [options].
-class BlocxFormCheckbox<F extends BaseFormEntity<F, E>, P, E extends Enum>
-    extends StatelessWidget {
+class BlocxFormCheckbox<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum> extends StatelessWidget {
   /// Non-function props live here (value, labels, styles, etc.).
   final BlocxCheckboxOptions options;
   final E formKey;
-  const BlocxFormCheckbox(
-      {super.key, required this.options, required this.formKey});
+  const BlocxFormCheckbox({super.key, required this.options, required this.formKey});
 
   @override
   Widget build(BuildContext context) {
-    final child =
-        options.hasText ? _buildListTile(context) : _buildCompact(context);
+    final child = options.hasText ? _buildListTile(context) : _buildCompact(context);
 
     return Padding(
       padding: options.padding ?? EdgeInsets.zero,
@@ -34,14 +30,9 @@ class BlocxFormCheckbox<F extends BaseFormEntity<F, E>, P, E extends Enum>
   Widget _buildListTile(BuildContext context) {
     return CheckboxListTile.adaptive(
       value: options.isChecked,
-      onChanged: (value) => bloc(context)
-          .add(BlocxFormEventUpdateData(data: value, key: formKey)),
-      title: options.label != null
-          ? Text(options.label!, style: options.labelStyle)
-          : null,
-      subtitle: options.subtitle != null
-          ? Text(options.subtitle!, style: options.subtitleStyle)
-          : null,
+      onChanged: (value) => bloc(context).add(BlocxFormEventUpdateData(data: value, key: formKey)),
+      title: options.label != null ? Text(options.label!, style: options.labelStyle) : null,
+      subtitle: options.subtitle != null ? Text(options.subtitle!, style: options.subtitleStyle) : null,
       controlAffinity: options.controlAffinity,
       contentPadding: options.contentPadding,
       dense: options.dense,
@@ -57,8 +48,7 @@ class BlocxFormCheckbox<F extends BaseFormEntity<F, E>, P, E extends Enum>
   Widget _buildCompact(BuildContext context) {
     return Checkbox.adaptive(
       value: options.isChecked,
-      onChanged: (value) => bloc(context)
-          .add(BlocxFormEventUpdateData(data: value, key: formKey)),
+      onChanged: (value) => bloc(context).add(BlocxFormEventUpdateData(data: value, key: formKey)),
       visualDensity: options.visualDensity,
       activeColor: options.activeColor,
       checkColor: options.checkColor,
@@ -67,8 +57,7 @@ class BlocxFormCheckbox<F extends BaseFormEntity<F, E>, P, E extends Enum>
     );
   }
 
-  BlocxFormBloc<F, P, E> bloc(BuildContext context) =>
-      BlocProvider.of<BlocxFormBloc<F, P, E>>(context);
+  BlocxFormBloc<F, P, E> bloc(BuildContext context) => BlocProvider.of<BlocxFormBloc<F, P, E>>(context);
 }
 
 /// Options bag for [BlocxFormCheckbox].
@@ -115,9 +104,7 @@ class BlocxCheckboxOptions {
     this.autofocus = false,
   });
 
-  bool get hasText =>
-      (label != null && label!.isNotEmpty) ||
-      (subtitle != null && subtitle!.isNotEmpty);
+  bool get hasText => (label != null && label!.isNotEmpty) || (subtitle != null && subtitle!.isNotEmpty);
 
   BlocxCheckboxOptions copyWith({
     bool? isChecked,

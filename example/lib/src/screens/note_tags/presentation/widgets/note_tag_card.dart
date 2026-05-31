@@ -6,7 +6,7 @@ import 'package:example/src/screens/notes/presentation/notes_screen.dart';
 import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:flutter/material.dart';
 
-class NoteTagCard extends BlocxCollectionWidget<NoteTag, User> {
+class NoteTagCard extends BlocxCollectionItem<NoteTag, User> {
   final User user;
   const NoteTagCard({super.key, required this.user, required super.item});
 
@@ -14,7 +14,7 @@ class NoteTagCard extends BlocxCollectionWidget<NoteTag, User> {
   Widget buildContent(BuildContext context, NoteTag item) {
     final cs = Theme.of(context).colorScheme;
     final t = Theme.of(context).textTheme;
-    final canDelete = _bloc(context).isDeletable;
+    final canDelete = bloc(context).isDeletable;
     final color = Color(item.colorArgb ?? cs.primary.value);
 
     return Card(

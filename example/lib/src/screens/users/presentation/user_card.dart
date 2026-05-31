@@ -4,7 +4,7 @@ import 'package:example/src/screens/note_tags/presentation/note_tags_screen.dart
 import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:flutter/material.dart';
 
-class UserCard extends BlocxCollectionWidget<User, dynamic> {
+class UserCard extends BlocxCollectionItem<User, dynamic> {
   const UserCard({super.key, required super.item, this.onEdit});
 
   final VoidCallback? onEdit;
@@ -27,11 +27,9 @@ class UserCard extends BlocxCollectionWidget<User, dynamic> {
       shape: RoundedSuperellipseBorder(borderRadius: BorderRadius.circular(12)),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => NoteTagsScreen(payload: item)),
-        ),
-        onLongPress: () =>
-            isSelected(context) ? deselectItem(context) : selectItem(context),
+        onTap: () =>
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => NoteTagsScreen(payload: item))),
+        onLongPress: () => isSelected(context) ? deselectItem(context) : selectItem(context),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -50,11 +48,7 @@ class UserCard extends BlocxCollectionWidget<User, dynamic> {
                       Center(
                         child: Hero(
                           tag: "user-${item.id}",
-                          child: _Avatar(
-                            url: item.avatarUrl,
-                            name: item.displayName,
-                            radius: radius,
-                          ),
+                          child: _Avatar(url: item.avatarUrl, name: item.displayName, radius: radius),
                         ),
                       ),
                       if (isSelected(context))
@@ -66,11 +60,7 @@ class UserCard extends BlocxCollectionWidget<User, dynamic> {
 
                           child: CircleAvatar(
                             backgroundColor: cs.secondary.withAlpha(160),
-                            child: Icon(
-                              Icons.check_circle,
-                              size: 24,
-                              color: cs.primary,
-                            ),
+                            child: Icon(Icons.check_circle, size: 24, color: cs.primary),
                           ),
                         ),
                     ],
@@ -114,26 +104,17 @@ class UserCard extends BlocxCollectionWidget<User, dynamic> {
                       icon: isBeingRemoved(context)
                           ? SizedBox.square(
                               dimension: 16,
-                              child: CircularProgressIndicator(
-                                color: Colors.red,
-                              ),
+                              child: CircularProgressIndicator(color: Colors.red),
                             )
                           : const Icon(Icons.delete),
                       label: Text(
                         isBeingRemoved(context) ? "Deleting" : 'Delete',
                         style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          color: isBeingRemoved(context)
-                              ? Colors.red
-                              : Colors.white,
+                          color: isBeingRemoved(context) ? Colors.red : Colors.white,
                         ),
                       ),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: cs.error,
-                        foregroundColor: cs.onError,
-                      ),
-                      onPressed: isBeingRemoved(context)
-                          ? null
-                          : () => removeItem(context),
+                      style: FilledButton.styleFrom(backgroundColor: cs.error, foregroundColor: cs.onError),
+                      onPressed: isBeingRemoved(context) ? null : () => removeItem(context),
                     ),
                   if (canHighlight)
                     FilledButton.icon(
@@ -175,31 +156,58 @@ class _Avatar extends StatelessWidget {
     final fg = Theme.of(context).colorScheme.onSecondaryContainer;
     final hasUrl = (url ?? '').isNotEmpty;
 
+    return _AvatarWithErrorHandling(url: hasUrl ? url! : null, name: name, radius: radius, bg: bg, fg: fg);
+  }
+}
+
+// Needed because error state requires setState, which needs a StatefulWidget
+class _AvatarWithErrorHandling extends StatefulWidget {
+  const _AvatarWithErrorHandling({
+    required this.url,
+    required this.name,
+    required this.radius,
+    required this.bg,
+    required this.fg,
+  });
+
+  final String? url;
+  final String name;
+  final double radius;
+  final Color bg;
+  final Color fg;
+
+  @override
+  State<_AvatarWithErrorHandling> createState() => _AvatarWithErrorHandlingState();
+}
+
+class _AvatarWithErrorHandlingState extends State<_AvatarWithErrorHandling> {
+  bool _imageError = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final showImage = widget.url != null && !_imageError;
+
     return CircleAvatar(
-      radius: radius,
-      backgroundColor: bg,
-      foregroundColor: fg,
-      backgroundImage: hasUrl ? NetworkImage(url!) : null,
-      child: hasUrl
+      radius: widget.radius,
+      backgroundColor: widget.bg,
+      foregroundColor: widget.fg,
+      backgroundImage: showImage ? NetworkImage(widget.url!) : null,
+      onBackgroundImageError: showImage ? (_, __) => setState(() => _imageError = true) : null,
+      child: showImage
           ? null
-          : Text(
-              _initials(name),
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
+          : Text(_initials(widget.name), style: const TextStyle(fontWeight: FontWeight.w600)),
     );
   }
+}
 
-  String _initials(String s) {
-    final parts = s.trim().split(RegExp(r'\s+'));
-    if (parts.isEmpty) return '?';
-    if (parts.length == 1) {
-      final t = parts.first;
-      return (t.isNotEmpty ? t.characters.take(2).toString() : '?')
-          .toUpperCase();
-    }
-    return (parts.first.characters.first + parts.last.characters.first)
-        .toUpperCase();
+String _initials(String s) {
+  final parts = s.trim().split(RegExp(r'\s+'));
+  if (parts.isEmpty) return '?';
+  if (parts.length == 1) {
+    final t = parts.first;
+    return (t.isNotEmpty ? t.characters.take(2).toString() : '?').toUpperCase();
   }
+  return (parts.first.characters.first + parts.last.characters.first).toUpperCase();
 }
 
 class _StatusPill extends StatelessWidget {
@@ -215,10 +223,7 @@ class _StatusPill extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(999),
-      ),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(999)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -228,10 +233,7 @@ class _StatusPill extends StatelessWidget {
             decoration: BoxDecoration(color: fg, shape: BoxShape.circle),
           ),
           const SizedBox(width: 6),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: fg),
-          ),
+          Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: fg)),
         ],
       ),
     );

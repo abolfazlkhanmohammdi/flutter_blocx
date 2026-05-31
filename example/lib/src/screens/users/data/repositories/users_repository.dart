@@ -4,7 +4,7 @@ import 'package:example/src/core/data/response_wrapper.dart';
 
 typedef Json = Map<String, dynamic>;
 
-class UserJsonRepository extends FakeRepository implements BaseEntity {
+class UserJsonRepository extends FakeRepository implements BlocxBaseEntity {
   UserJsonRepository._();
   static final UserJsonRepository _instance = UserJsonRepository._();
   factory UserJsonRepository() => _instance;
@@ -84,10 +84,7 @@ class UserJsonRepository extends FakeRepository implements BaseEntity {
     return const ResponseWrapper(ok: true, data: <Json>[]);
   }
 
-  Future<ResponseWrapper<Json>> getPaginated({
-    required int offset,
-    int limit = 20,
-  }) async {
+  Future<ResponseWrapper<Json>> getPaginated({required int offset, int limit = 20}) async {
     await randomWaitFuture;
     _ensureAtLeast(offset + limit);
 
@@ -194,11 +191,7 @@ class UserJsonRepository extends FakeRepository implements BaseEntity {
     return ResponseWrapper(ok: true, data: <Json>[updated]);
   }
 
-  Future<ResponseWrapper<Json>> searchUsers(
-    String searchText,
-    int offset,
-    int loadCount,
-  ) async {
+  Future<ResponseWrapper<Json>> searchUsers(String searchText, int offset, int loadCount) async {
     await randomWaitFuture;
     final lowerCaseSearchText = searchText.toLowerCase();
     final filtered = _users.where((u) {
@@ -209,9 +202,6 @@ class UserJsonRepository extends FakeRepository implements BaseEntity {
     }).toList();
     offset = offset.clamp(0, filtered.length);
     final end = (offset + loadCount).clamp(0, filtered.length);
-    return ResponseWrapper(
-      ok: true,
-      data: filtered.sublist(offset, end).toList(),
-    );
+    return ResponseWrapper(ok: true, data: filtered.sublist(offset, end).toList());
   }
 }

@@ -5,7 +5,7 @@ import 'package:example/src/screens/notes/data/models/note.dart';
 import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:flutter/material.dart';
 
-class NoteCard extends BlocxCollectionWidget<Note, (NoteTag, User)> {
+class NoteCard extends BlocxCollectionItem<Note, (NoteTag, User)> {
   const NoteCard({super.key, required super.item, this.onEdit, this.onOpen});
 
   final VoidCallback? onEdit;
@@ -15,9 +15,7 @@ class NoteCard extends BlocxCollectionWidget<Note, (NoteTag, User)> {
   Widget buildContent(BuildContext context, Note item) {
     final cs = Theme.of(context).colorScheme;
     final t = Theme.of(context).textTheme;
-    final tagColor = item.noteTag?.colorArgb != null
-        ? Color(item.noteTag!.colorArgb!)
-        : cs.primary;
+    final tagColor = item.noteTag?.colorArgb != null ? Color(item.noteTag!.colorArgb!) : cs.primary;
     final userName = item.user?.displayName ?? '';
     final avatarUrl = item.user?.avatarUrl ?? '';
     final tagName = item.noteTag?.name ?? '';
@@ -32,29 +30,19 @@ class NoteCard extends BlocxCollectionWidget<Note, (NoteTag, User)> {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => toggleExpansion(context),
-        onLongPress: () => isHighlighted(context)
-            ? clearHighlightedItem(context)
-            : highlightItem(context),
+        onLongPress: () => isHighlighted(context) ? clearHighlightedItem(context) : highlightItem(context),
         borderRadius: BorderRadius.circular(12),
         child: Column(
           children: [
             ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               leading: _Avatar(
                 titleFallback: item.title,
                 name: userName.isNotEmpty ? userName : null,
                 url: avatarUrl.isNotEmpty ? avatarUrl : null,
                 tint: tagColor,
               ),
-              title: Text(
-                item.title,
-                style: t.titleSmall,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+              title: Text(item.title, style: t.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -80,16 +68,11 @@ class NoteCard extends BlocxCollectionWidget<Note, (NoteTag, User)> {
                             Text(userName, style: t.labelSmall),
                           ],
                         ),
-                      if (userName.isNotEmpty && tagName.isNotEmpty)
-                        Text('•', style: t.labelSmall),
-                      if (tagName.isNotEmpty)
-                        _TagChip(name: tagName, color: tagColor),
+                      if (userName.isNotEmpty && tagName.isNotEmpty) Text('•', style: t.labelSmall),
+                      if (tagName.isNotEmpty) _TagChip(name: tagName, color: tagColor),
                       Opacity(
                         opacity: 0.8,
-                        child: Text(
-                          'Updated ${_fmtShort(item.updatedAt)}',
-                          style: t.labelSmall,
-                        ),
+                        child: Text('Updated ${_fmtShort(item.updatedAt)}', style: t.labelSmall),
                       ),
                     ],
                   ),
@@ -112,9 +95,7 @@ class NoteCard extends BlocxCollectionWidget<Note, (NoteTag, User)> {
             ),
             AnimatedSize(
               duration: Duration(milliseconds: 300),
-              child: isExpanded(context)
-                  ? noteActionRow(context)
-                  : SizedBox.shrink(),
+              child: isExpanded(context) ? noteActionRow(context) : SizedBox.shrink(),
             ),
           ],
         ),
@@ -142,14 +123,10 @@ class NoteCard extends BlocxCollectionWidget<Note, (NoteTag, User)> {
           _ActionBtn(
             isInProgress: isHighlighted(context),
             tooltip: highlighted ? 'Highlighted' : 'Highlight',
-            icon: highlighted
-                ? Icons.highlight_off
-                : Icons.highlight_alt_outlined,
+            icon: highlighted ? Icons.highlight_off : Icons.highlight_alt_outlined,
             label: highlighted ? 'Highlighted' : 'Highlight',
             onPressed: () {
-              highlighted
-                  ? clearHighlightedItem(context)
-                  : highlightItem(context);
+              highlighted ? clearHighlightedItem(context) : highlightItem(context);
             },
           ),
           _ActionBtn(
@@ -211,15 +188,10 @@ class _ActionBtn extends BlocxStatelessWidget {
       icon: isInProgress
           ? SizedBox.square(
               dimension: 16,
-              child: CircularProgressIndicator(
-                color: colorScheme(context).onPrimary,
-              ),
+              child: CircularProgressIndicator(color: colorScheme(context).onPrimary),
             )
           : Icon(icon, size: 18),
-      label: Text(
-        label,
-        style: textTheme(context).bodyMedium?.copyWith(color: Colors.white),
-      ),
+      label: Text(label, style: textTheme(context).bodyMedium?.copyWith(color: Colors.white)),
       style: OutlinedButton.styleFrom(
         backgroundColor: backgroundColor,
         foregroundColor: foregroundColor,
@@ -235,13 +207,8 @@ class _ActionBtn extends BlocxStatelessWidget {
   }
 }
 
-class _Avatar extends StatelessWidget {
-  const _Avatar({
-    required this.titleFallback,
-    this.name,
-    this.url,
-    required this.tint,
-  });
+class _Avatar extends StatefulWidget {
+  const _Avatar({required this.titleFallback, this.name, this.url, required this.tint});
 
   final String titleFallback;
   final String? name;
@@ -249,20 +216,24 @@ class _Avatar extends StatelessWidget {
   final Color tint;
 
   @override
+  State<_Avatar> createState() => _AvatarState();
+}
+
+class _AvatarState extends State<_Avatar> {
+  bool _imageError = false;
+
+  @override
   Widget build(BuildContext context) {
-    final hasUrl = (url ?? '').isNotEmpty;
-    final label = (name ?? titleFallback).trim();
+    final showImage = (widget.url ?? '').isNotEmpty && !_imageError;
+    final label = (widget.name ?? widget.titleFallback).trim();
+
     return CircleAvatar(
       radius: 22,
-      backgroundColor: tint.withAlpha(50),
+      backgroundColor: widget.tint.withAlpha(50),
       foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-      backgroundImage: hasUrl ? NetworkImage(url!) : null,
-      child: hasUrl
-          ? null
-          : Text(
-              _initials(label),
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
+      backgroundImage: showImage ? NetworkImage(widget.url!) : null,
+      onBackgroundImageError: showImage ? (_, __) => setState(() => _imageError = true) : null,
+      child: showImage ? null : Text(_initials(label), style: const TextStyle(fontWeight: FontWeight.w600)),
     );
   }
 
@@ -301,11 +272,7 @@ class _TagChip extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Expanded(
-            child: Text(
-              name,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelSmall,
-            ),
+            child: Text(name, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.labelSmall),
           ),
         ],
       ),

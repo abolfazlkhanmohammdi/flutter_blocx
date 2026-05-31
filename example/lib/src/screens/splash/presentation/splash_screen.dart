@@ -37,42 +37,33 @@ class _SplashScreenState extends BlocXWidgetState<SplashScreen> {
   }
 
   Widget blocBuilder(BuildContext context, SplashState state) {
-    return Column(
-      spacing: 16,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Center(
-          child: SizedBox.square(
-            dimension: width / 2,
-            child: Image.asset('assets/images/logo.png', fit: BoxFit.cover),
-          ),
+    return SingleChildScrollView(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: height), // fills screen height
+        child: Column(
+          spacing: 16,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Center(
+              child: SizedBox.square(
+                dimension: width / 2,
+                child: Image.asset('assets/images/logo.png', fit: BoxFit.cover),
+              ),
+            ),
+            Text('Blocx Notes!', style: textTheme.displaySmall, textAlign: TextAlign.center),
+            Text("Now loading, please wait...", textAlign: TextAlign.center, style: textTheme.bodyLarge),
+            Center(child: SizedBox.square(dimension: 40, child: CircularProgressIndicator())),
+          ],
         ),
-        Text(
-          'Blocx Notes!',
-          style: textTheme.displaySmall,
-          textAlign: TextAlign.center,
-        ),
-        Text(
-          "Now loading, please wait...",
-          textAlign: TextAlign.center,
-          style: textTheme.bodyLarge,
-        ),
-        Center(
-          child: SizedBox.square(
-            dimension: 40,
-            child: CircularProgressIndicator(),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
   void blocListener(BuildContext context, SplashState state) {
     if (state is SplashStateDataLoaded) {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => UsersScreen()));
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => UsersScreen()));
     }
   }
 }
