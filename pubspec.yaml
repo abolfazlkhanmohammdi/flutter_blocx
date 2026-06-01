@@ -1,6 +1,6 @@
 name: flutter_blocx
 description: Ui widgets to work with blocx_core.
-version: 0.8.0
+version: 0.8.2
 repository: https://github.com/abolfazlkhanmohammdi/flutter_blocx
 issue_tracker: https://github.com/abolfazlkhanmohammdi/flutter_blocx/issues
 topics: [bloc, architecture, lists, forms]

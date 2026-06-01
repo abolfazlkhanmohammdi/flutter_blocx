@@ -12,8 +12,8 @@ export 'src/core/mixins/hide_on_scroll_fab_mixin.dart';
 //options
 export 'src/widgets/collection/options/animated_infinite_list.dart';
 export 'src/widgets/collection/options/animated_sliver_infinite_list.dart';
-export 'src/widgets/collection/options/infinite_grid.dart';
-export 'src/widgets/collection/options/infinite_list.dart';
+export 'src/widgets/collection/options/infinite_grid_options.dart';
+export 'src/widgets/collection/options/infinite_list_options.dart';
 export 'src/widgets/collection/options/sliver_infinite_grid.dart';
 export 'src/widgets/collection/options/sliver_infinite_list.dart';
 export 'src/widgets/collection/collection_options.dart';

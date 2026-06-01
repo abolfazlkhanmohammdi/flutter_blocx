@@ -8,7 +8,7 @@ import 'package:blocx_core/list_bloc.dart'
         BlocxInfiniteListEventVerticalDragStarted,
         BlocxInfiniteListEventVerticalDragEnded,
         BlocxInfiniteListEventOnScroll;
-import 'package:flutter_blocx/src/widgets/collection/options/infinite_grid.dart';
+import 'package:flutter_blocx/src/widgets/collection/options/infinite_grid_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,8 +33,7 @@ class InfiniteGrid<Entity extends BlocxBaseEntity> extends StatefulWidget {
 
   /// Grid-specific builder for a custom SliverGridDelegate.
   /// If null, a default delegate is created from [options].
-  final SliverGridDelegate Function(InfiniteGridOptions options)?
-      gridDelegateBuilder;
+  final SliverGridDelegate Function(InfiniteGridOptions options)? gridDelegateBuilder;
 
   final BlocxInfiniteListBloc bloc;
   final void Function()? loadBottomData;
@@ -42,10 +41,8 @@ class InfiniteGrid<Entity extends BlocxBaseEntity> extends StatefulWidget {
   final void Function()? refreshOnSwipe;
   final List<Entity> items;
   final ScrollController? scrollController;
-  final Widget? Function(BuildContext context, bool isLoadingMore)?
-      loadMoreWidgetBuilder;
-  final Widget? Function(BuildContext context, double swipeRefreshHeight)?
-      refreshWidgetBuilder;
+  final Widget? Function(BuildContext context, bool isLoadingMore)? loadMoreWidgetBuilder;
+  final Widget? Function(BuildContext context, double swipeRefreshHeight)? refreshWidgetBuilder;
 
   const InfiniteGrid({
     super.key,
@@ -66,8 +63,7 @@ class InfiniteGrid<Entity extends BlocxBaseEntity> extends StatefulWidget {
   InfiniteGridState<Entity> createState() => InfiniteGridState<Entity>();
 }
 
-class InfiniteGridState<Entity extends BlocxBaseEntity>
-    extends State<InfiniteGrid<Entity>> {
+class InfiniteGridState<Entity extends BlocxBaseEntity> extends State<InfiniteGrid<Entity>> {
   late final String uuid;
 
   @override
@@ -91,35 +87,25 @@ class InfiniteGridState<Entity extends BlocxBaseEntity>
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              options.reverse
-                  ? loadMoreWidget(context, state)
-                  : swipeRefreshWidget(context, state),
+              options.reverse ? loadMoreWidget(context, state) : swipeRefreshWidget(context, state),
               Expanded(
                 child: NotificationListener<UserScrollNotification>(
                   onNotification: onScroll,
                   child: Listener(
-                    onPointerDown: (d) => bloc.add(
-                        BlocxInfiniteListEventVerticalDragStarted(
-                            globalY: d.position.dy)),
-                    onPointerUp: (d) =>
-                        bloc.add(BlocxInfiniteListEventVerticalDragEnded()),
+                    onPointerDown: (d) =>
+                        bloc.add(BlocxInfiniteListEventVerticalDragStarted(globalY: d.position.dy)),
+                    onPointerUp: (d) => bloc.add(BlocxInfiniteListEventVerticalDragEnded()),
                     onPointerMove: maySwipe
-                        ? (d) => bloc.add(
-                            BlocxInfiniteListEventVerticalDragUpdated(
-                                globalY: d.position.dy))
+                        ? (d) => bloc.add(BlocxInfiniteListEventVerticalDragUpdated(globalY: d.position.dy))
                         : null,
                     onPointerCancel: maySwipe
-                        ? (_) => bloc.add(
-                            BlocxInfiniteListEventVerticalDragUpdated(
-                                globalY: null))
+                        ? (_) => bloc.add(BlocxInfiniteListEventVerticalDragUpdated(globalY: null))
                         : null,
                     child: gridWidget(context, state),
                   ),
                 ),
               ),
-              options.reverse
-                  ? swipeRefreshWidget(context, state)
-                  : loadMoreWidget(context, state),
+              options.reverse ? swipeRefreshWidget(context, state) : loadMoreWidget(context, state),
             ],
           );
         },
@@ -129,10 +115,7 @@ class InfiniteGridState<Entity extends BlocxBaseEntity>
 
   bool get maySwipe {
     final s = bloc.state;
-    return s.isAtTop &&
-        s.isScrollingUp &&
-        !s.isRefreshing &&
-        widget.refreshOnSwipe != null;
+    return s.isAtTop && s.isScrollingUp && !s.isRefreshing && widget.refreshOnSwipe != null;
   }
 
   void blocListener(BuildContext context, BlocxInfiniteListState state) {
@@ -143,11 +126,9 @@ class InfiniteGridState<Entity extends BlocxBaseEntity>
 
   bool onScroll(UserScrollNotification notification) {
     final isIdle = notification.direction == ScrollDirection.idle;
-    final isScrollingUp =
-        !isIdle && notification.direction == ScrollDirection.forward;
+    final isScrollingUp = !isIdle && notification.direction == ScrollDirection.forward;
     final isAtTop = notification.metrics.pixels < 40;
-    final isAtBottom =
-        notification.metrics.pixels == notification.metrics.maxScrollExtent;
+    final isAtBottom = notification.metrics.pixels == notification.metrics.maxScrollExtent;
     bloc.add(
       BlocxInfiniteListEventOnScroll(
         isAtTop: isAtTop,
@@ -180,11 +161,9 @@ class InfiniteGridState<Entity extends BlocxBaseEntity>
     );
   }
 
-  Widget _itemBuilder(BuildContext context, Entity data, int index,
-      BlocxInfiniteListState state) {
+  Widget _itemBuilder(BuildContext context, Entity data, int index, BlocxInfiniteListState state) {
     final isBottomTrigger =
-        index == (widget.items.length - options.loadMoreTriggerItemDistance) &&
-            !state.hasReachedEnd;
+        index == (widget.items.length - options.loadMoreTriggerItemDistance) && !state.hasReachedEnd;
 
     Widget child = widget.itemBuilder(context, data);
 
@@ -221,8 +200,7 @@ class InfiniteGridState<Entity extends BlocxBaseEntity>
   }
 
   Widget loadMoreWidget(BuildContext context, BlocxInfiniteListState state) {
-    final external =
-        widget.loadMoreWidgetBuilder?.call(context, state.isLoadingMore);
+    final external = widget.loadMoreWidgetBuilder?.call(context, state.isLoadingMore);
     if (external != null) return external;
     final scheme = Theme.of(context).colorScheme;
     return AnimatedSize(
@@ -243,20 +221,15 @@ class InfiniteGridState<Entity extends BlocxBaseEntity>
     );
   }
 
-  Widget swipeRefreshWidget(
-      BuildContext context, BlocxInfiniteListState state) {
-    final external =
-        widget.refreshWidgetBuilder?.call(context, state.swipeRefreshHeight);
+  Widget swipeRefreshWidget(BuildContext context, BlocxInfiniteListState state) {
+    final external = widget.refreshWidgetBuilder?.call(context, state.swipeRefreshHeight);
     if (external != null) return external;
     final primary = Theme.of(context).colorScheme.primary;
     return Container(
       color: primary,
       height: state.swipeRefreshHeight,
       child: const Center(
-        child: SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(color: Colors.white)),
+        child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white)),
       ),
     );
   }
