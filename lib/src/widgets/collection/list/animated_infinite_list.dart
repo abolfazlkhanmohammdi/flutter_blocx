@@ -222,8 +222,9 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
 
   Widget swipeRefreshWidget(
       BuildContext context, BlocxInfiniteListState state) {
-    if (!widget.isRefreshable || state.swipeRefreshHeight == 0)
+    if (!widget.isRefreshable || state.swipeRefreshHeight == 0) {
       return SizedBox.square(dimension: 0);
+    }
     final external =
         widget.refreshWidgetBuilder?.call(context, state.swipeRefreshHeight);
     if (external != null) return external;

@@ -1,5 +1,4 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
 
 class UseCaseResult<T> extends BlocxUseCaseResult<T> {
   final T? _data;

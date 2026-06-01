@@ -15,7 +15,7 @@ class NoteTagCard extends BlocxCollectionItem<NoteTag, User> {
     final cs = Theme.of(context).colorScheme;
     final t = Theme.of(context).textTheme;
     final canDelete = bloc(context).isDeletable;
-    final color = Color(item.colorArgb ?? cs.primary.value);
+    final color = Color(item.colorArgb ?? cs.primary.toARGB32());
 
     return Card(
       color: isHighlighted(context) || isSelected(context)

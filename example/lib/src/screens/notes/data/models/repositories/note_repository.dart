@@ -151,10 +151,12 @@ class NotesJsonRepository extends FakeRepository {
       });
     }
 
-    if (isPinned != null)
+    if (isPinned != null) {
       results = results.where((n) => n['isPinned'] == isPinned);
-    if (isArchived != null)
+    }
+    if (isArchived != null) {
       results = results.where((n) => n['isArchived'] == isArchived);
+    }
 
     final list = results.toList();
     final safeOffset = offset.clamp(0, list.length);

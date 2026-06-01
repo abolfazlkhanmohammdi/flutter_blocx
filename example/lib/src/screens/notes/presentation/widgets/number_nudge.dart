@@ -51,9 +51,9 @@ class _NumberNudgeState extends State<NumberNudge> {
     // clamp
     final max = widget.max;
     int clamped = v;
-    if (max != null)
+    if (max != null) {
       clamped = clamped.clamp(widget.min, max);
-    else if (clamped < widget.min)
+    } else if (clamped < widget.min)
       clamped = widget.min;
 
     // only update if changed
@@ -99,9 +99,9 @@ class _NumberNudgeState extends State<NumberNudge> {
   }) {
     return _AutoFlipTooltip(
       message: message,
-      child: child,
       estimatedPopupHeight: estimatedPopupHeight,
       verticalOffset: verticalOffset,
+      child: child,
     );
   }
 
@@ -165,7 +165,7 @@ class _NumberNudgeState extends State<NumberNudge> {
             decoration: InputDecoration(
               isDense: true,
               filled: true,
-              fillColor: cs.surfaceContainerHighest.withOpacity(0.08),
+              fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.08),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 10,
                 vertical: 10,

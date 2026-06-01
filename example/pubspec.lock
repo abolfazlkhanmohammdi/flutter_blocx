@@ -53,10 +53,10 @@ packages:
     dependency: "direct main"
     description:
       name: blocx_core
-      sha256: c6be61e897b25b81e289a74b36e9ccf65ea33403c123e77535684de92566687d
+      sha256: "2524d75e7ae91dd34bbc9eed88d6bcdcd2aa2e95cd12f997413922556daed787"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.1"
+    version: "0.8.2"
   boolean_selector:
     dependency: transitive
     description:
@@ -250,10 +250,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_blocx
-      sha256: "7e05eb82f18a5ceef509bd4408c4e08d65e7585688c004ef57ef2940a31b745a"
+      sha256: "4a508064cbc95a80dce60577f78294b10a4dfe3428f054baf9688ee9d867f59b"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.1"
+    version: "0.8.2"
   flutter_lints:
     dependency: "direct dev"
     description:
