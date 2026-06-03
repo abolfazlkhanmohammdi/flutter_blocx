@@ -1,57 +1,27 @@
 import 'package:blocx_core/blocx_core.dart';
 import 'package:blocx_core/form_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx/form_widget.dart';
 import 'package:flutter_blocx/src/form/widgets/blocx_form_checkbox.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx/src/screen_manager/blocx_screen_manager_state.dart';
 
 /// Base state class for screens that host a [BlocxFormBloc].
 ///
-/// Extends [BlocxScreenManagerState] so all screen-manager side-effects
-/// (snackBars, error pages, pop) are handled automatically.
+/// Extends [BlocxScreenManagerState] so all screen-manager side effects,
+/// such as snackbars, error pages, and pop events, are handled automatically.
 ///
-/// ## Minimal implementation
-///
-/// 1. Create a [BlocxFormWidget] subclass that carries the payload [P].
-/// 2. Extend [BlocxFormWidgetState] with the matching type parameters.
-/// 3. Implement [generateBloc] to instantiate the bloc.
-/// 4. Implement [formWidget] to build the form UI from the current state.
-/// 5. Implement [keys] to list every field enum value that has a
-///    [TextEditingController] (used for [applyInitialDataToForm]).
-///
-/// ```dart
-/// class LoginScreenState
-///     extends BlocxFormWidgetState<LoginScreen, LoginForm, void, LoginField> {
-///   @override
-///   BlocxFormBloc<LoginForm, void, LoginField> generateBloc() => LoginBloc();
-///
-///   @override
-///   Widget formWidget(BuildContext context, BlocxFormState<LoginForm, LoginField> state) {
-///     return Column(children: [
-///       textField(LoginField.email),
-///       textField(LoginField.password),
-///       BlocxFormRegisterButton(state: state, buttonText: 'Login', submitText: 'Logging in…', onPressed: submit),
-///     ]);
-///   }
-///
-///   @override
-///   List<LoginField> get keys => LoginField.values;
-/// }
-/// ```
-///
-/// ## Type parameters
+/// Type parameters:
 ///
 /// - [W]: The [BlocxFormWidget] subclass this state belongs to.
-/// - [F]: The immutable form entity. Must extend [BlocxBaseFormEntity].
-/// - [P]: The optional payload type for edit/update forms. Use `void` for
-///   create-only forms.
-/// - [E]: The field enum type.
+/// - [F]: The immutable form entity type.
+/// - [P]: The optional payload type for edit/update forms.
+/// - [E]: The form field enum type.
 abstract class BlocxFormWidgetState<W extends BlocxFormWidget<P>, F extends BlocxBaseFormEntity<F, E>, P,
     E extends Enum> extends BlocxScreenManagerState<W> {
   /// The form bloc that drives this screen.
   ///
-  /// Initialised in [initState] via [generateBloc].
+  /// Initialised in [initState] by [generateBloc].
   late final BlocxFormBloc<F, P, E> bloc;
 
   final Map<E, TextEditingController> _controllersMap = {};
@@ -71,33 +41,28 @@ abstract class BlocxFormWidgetState<W extends BlocxFormWidget<P>, F extends Bloc
 
   @override
   Widget mainWidget(BuildContext context, ScreenManagerCubitState state) {
-    return BlocProvider.value(
+    return BlocProvider<BlocxFormBloc<F, P, E>>.value(
       value: bloc,
       child: BlocConsumer<BlocxFormBloc<F, P, E>, BlocxFormState<F, E>>(
         builder: _blocBuilder,
-        buildWhen: (_, c) => c.shouldRebuild,
+        buildWhen: (_, current) => current.shouldRebuild,
         listener: blocListener,
-        listenWhen: (_, c) => c.shouldListen,
+        listenWhen: (_, current) => current.shouldListen,
       ),
     );
   }
 
   /// Reacts to listen-only form states.
   ///
-  /// Handles:
-  /// - [BlocxFormStateApplyInitialDataToForm]: hydrates text controllers via
-  ///   [applyInitialDataToForm].
-  /// - [BlocxFormStateFormSubmitted]: calls [onFormSubmitted].
-  /// - [BlocxFormStateFormUpdated]: calls [onFormUpdated].
-  ///
-  /// Override and call `super` to add additional listener logic.
+  /// Override this method to add screen-specific side effects, but call
+  /// `super.blocListener(context, state)` to preserve built-in behaviour.
   @mustCallSuper
   void blocListener(BuildContext context, BlocxFormState<F, E> state) {
-    if (state is BlocxFormStateApplyInitialDataToForm) {
+    if (state is BlocxFormStateApplyInitialDataToForm<F, E>) {
       applyInitialDataToForm(state.formData);
     } else if (state is BlocxFormStateFormSubmitted<F, E>) {
       onFormSubmitted(state);
-    } else if (state is BlocxFormStateFormUpdated) {
+    } else if (state is BlocxFormStateFormUpdated<F, E>) {
       onFormUpdated(state.formData);
     }
   }
@@ -106,32 +71,26 @@ abstract class BlocxFormWidgetState<W extends BlocxFormWidget<P>, F extends Bloc
     return formWidget(context, state);
   }
 
-  /// Builds a [BlocXFormTextField] pre-wired to [key].
+  /// Builds a [BlocXFormTextField] connected to [key].
   ///
-  /// The controller is managed by this state — do not create one manually.
-  /// Pass [options] to customise appearance and behaviour, [validator] for
-  /// native [TextFormField] validation, and [type] to switch between
-  /// filled/outlined/underlined styles.
+  /// The returned text field uses a managed [TextEditingController].
   BlocXFormTextField<F, P, E> textField(
     E key, {
     BlocXTextFieldOptions? options,
-    FormFieldValidator? validator,
+    FormFieldValidator<String>? validator,
     TextFieldType? type,
   }) {
     return BlocXFormTextField<F, P, E>(
-      key: ValueKey(key),
+      key: ValueKey<E>(key),
       formKey: key,
-      textFieldOptions: options ?? BlocXTextFieldOptions(),
+      textFieldOptions: options ?? const BlocXTextFieldOptions(),
       controller: getTextEditingController(key),
       validator: validator,
       textFieldType: type ?? TextFieldType.filled,
     );
   }
 
-  /// Builds a [BlocXFormDropdown] pre-wired to [key].
-  ///
-  /// Pass [items] as the list of [DropdownMenuItem]s and [options] to
-  /// customise the decoration.
+  /// Builds a [BlocXFormDropdown] connected to [key].
   BlocXFormDropdown<F, P, E, T> dropdown<T>(
     E key, {
     BlocXDropdownOptions? options,
@@ -140,14 +99,11 @@ abstract class BlocxFormWidgetState<W extends BlocxFormWidget<P>, F extends Bloc
     return BlocXFormDropdown<F, P, E, T>(
       formKey: key,
       items: items,
-      options: options ?? BlocXDropdownOptions(),
+      options: options ?? const BlocXDropdownOptions(),
     );
   }
 
-  /// Builds a [BlocxFormCheckbox] pre-wired to [key].
-  ///
-  /// Pass [isChecked] to set the initial checked state. Use [options] for
-  /// label text, styling, and layout.
+  /// Builds a [BlocxFormCheckbox] connected to [key].
   BlocxFormCheckbox<F, P, E> checkbox({
     required E key,
     required bool isChecked,
@@ -159,9 +115,9 @@ abstract class BlocxFormWidgetState<W extends BlocxFormWidget<P>, F extends Bloc
     );
   }
 
-  /// Returns the [TextEditingController] for [key], creating one if needed.
+  /// Returns the managed [TextEditingController] for [key].
   ///
-  /// Controllers are disposed automatically in [dispose].
+  /// Creates the controller if it does not already exist.
   TextEditingController getTextEditingController(E key) {
     return _controllersMap.putIfAbsent(key, TextEditingController.new);
   }
@@ -172,127 +128,118 @@ abstract class BlocxFormWidgetState<W extends BlocxFormWidget<P>, F extends Bloc
 
   @override
   void dispose() {
-    super.dispose();
-    for (var controller in _controllersMap.values) {
+    for (final controller in _controllersMap.values) {
       controller.dispose();
     }
-    for (var node in _focusNodes.values) {
+    _controllersMap.clear();
+
+    for (final node in _focusNodes.values) {
       node.dispose();
     }
-    if (autoCloseBloc) bloc.close();
+    _focusNodes.clear();
+
+    if (autoCloseBloc) {
+      bloc.close();
+    }
+
+    super.dispose();
   }
 
-  /// Vertical spacing between form fields. Defaults to `16`.
+  /// Vertical spacing between form fields.
   double get formVerticalSpacing => 16;
 
-  /// Whether the current form state passes all validation rules.
+  /// Whether the current form state has no validation errors.
   bool get isValid => bloc.state.isValid;
 
   /// Builds the form UI from the current [state].
-  ///
-  /// This is the primary build method — replace the bloc builder output with
-  /// your column of fields, buttons, and other widgets.
-  formWidget(BuildContext context, BlocxFormState<F, E> state);
+  Widget formWidget(BuildContext context, BlocxFormState<F, E> state);
 
-  /// Whether this screen is in update/edit mode (payload is non-null).
+  /// Whether this screen is in update/edit mode.
   bool get isUpdate => widget.payload != null;
 
-  /// Hydrates [TextEditingController]s from [formData] after init.
+  /// Hydrates managed text controllers from [formData].
   ///
   /// Called automatically when [BlocxFormStateApplyInitialDataToForm] is
-  /// emitted. Uses [getFormattedValueByKey] with fallback to [getValueByKey]
-  /// for each key in [keys].
+  /// emitted.
   void applyInitialDataToForm(F formData) {
-    for (E key in keys) {
+    for (final key in keys) {
       final controller = _getTextEditingControllerIfExists(key);
       if (controller == null) continue;
-      controller.text = formData.getFormattedValueByKey(key) ?? formData.getValueByKey(key);
+
+      final value = formData.getFormattedValueByKey(key) ?? formData.getValueByKey(key);
+
+      controller.text = value?.toString() ?? '';
     }
   }
 
   /// Called when [BlocxFormStateFormSubmitted] is emitted.
-  ///
-  /// Override to navigate away, show a success banner, or trigger analytics.
   void onFormSubmitted(BlocxFormStateFormSubmitted<F, E> state) {}
 
-  /// Dispatches [BlocxFormEventSubmit] to the bloc.
-  ///
-  /// Wire this to your submit button's `onPressed`.
+  /// Dispatches [BlocxFormEventSubmit].
   void submit() {
     bloc.add(BlocxFormEventSubmit());
   }
 
-  /// The current widget payload, if any.
+  /// The current widget payload.
   P? get payload => widget.payload;
 
-  /// Dispatches a field update event for [key] with [data].
-  ///
-  /// Use this when a field widget cannot use the built-in helpers
-  /// ([textField], [dropdown], [checkbox]) and needs to report changes
-  /// manually.
+  /// Dispatches a manual field update for [key].
   void changeListener(dynamic data, E key) {
-    bloc.add(BlocxFormEventUpdateData(data: data, key: key));
+    bloc.add(BlocxFormEventUpdateData<E>(data: data, key: key));
   }
 
   @override
   ScreenManagerCubit get managerCubit => bloc.screenManagerCubit;
 
-  /// The auto-validate mode passed to form fields. Defaults to
-  /// [AutovalidateMode.onUserInteraction].
+  /// The default [AutovalidateMode] for native form fields.
   AutovalidateMode get autovalidateMode => AutovalidateMode.onUserInteraction;
 
-  /// Manually sets a validation error on [key] with [message].
-  ///
-  /// Useful for server-side errors returned after submission.
+  /// Adds a persistent error to [key].
   void setErrorToField(E key, String message) {
-    bloc.add(BlocxFormEventSetErrorToField(message: message, key: key));
+    bloc.add(BlocxFormEventSetErrorToField<E>(message: message, key: key));
   }
 
-  /// Sets a timed validation error on [key] that auto-clears after [duration].
+  /// Adds a timed error to [key].
   void setTimedErrorToField(E key, String message, {Duration? duration}) {
-    bloc.add(BlocxFormEventSetTimedErrorToField(message: message, key: key, duration: duration));
+    bloc.add(
+      BlocxFormEventSetTimedErrorToField<E>(
+        message: message,
+        key: key,
+        duration: duration,
+      ),
+    );
   }
 
-  /// Clears the error for [key].
+  /// Clears errors for [key].
   ///
-  /// Pass [message] to clear only a specific error string; omit it to clear
-  /// all errors for the field.
+  /// Pass [message] to clear only one specific error.
   void clearFieldError(E key, {String? message}) {
-    bloc.add(BlocxFormEventClearFieldError(key: key, message: message));
+    bloc.add(BlocxFormEventClearFieldError<E>(key: key, message: message));
   }
 
-  /// Whether [bloc] is closed when this state is disposed. Defaults to `true`.
-  ///
-  /// Set to `false` when the bloc outlives this widget (e.g. it is provided
-  /// by an ancestor [BlocProvider]).
+  /// Whether [bloc] is closed when this state is disposed.
   bool get autoCloseBloc => true;
 
   /// Called when [BlocxFormStateFormUpdated] is emitted.
-  ///
-  /// Override to react to every field change (e.g. update a character counter
-  /// or enable/disable other UI elements).
   void onFormUpdated(F formData) {}
 
-  /// The list of field enum values that have managed [TextEditingController]s.
-  ///
-  /// Used by [applyInitialDataToForm] to hydrate controllers on init.
-  /// Return all values whose fields are created via [textField].
+  /// The list of field keys controlled by managed text controllers.
   List<E> get keys;
 
-  /// Returns the [FocusNode] for [key], creating one if needed.
+  /// Returns the managed [FocusNode] for [key].
   ///
-  /// Focus nodes are disposed automatically in [dispose].
+  /// Creates the focus node if it does not already exist.
   FocusNode getFocusNode(E key) {
     return _focusNodes.putIfAbsent(key, FocusNode.new);
   }
 
   void _requestFocusOnError(BlocxFormState<F, E> state) {
-    if (state.errors.isNotEmpty) {
-      final firstErrorKey = state.errors.keys.first;
-      _focusNodes[firstErrorKey]?.requestFocus();
-    }
+    if (state.errors.isEmpty) return;
+
+    final firstErrorKey = state.errors.keys.first;
+    _focusNodes[firstErrorKey]?.requestFocus();
   }
 
   /// The current form state.
-  BlocxFormState get state => bloc.state;
+  BlocxFormState<F, E> get state => bloc.state;
 }

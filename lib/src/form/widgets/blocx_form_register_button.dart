@@ -1,47 +1,30 @@
 import 'package:blocx_core/form_bloc.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_blocx/form_widget.dart';
 import 'package:flutter_blocx/src/core/widgets/blocx_stateless_widget.dart';
-import 'package:flutter/material.dart';
 
 /// A reusable submit button that reacts to the current [BlocxFormState].
 ///
-/// Automatically handles three visual states:
-/// - **Idle** — shows [buttonText] and calls [onPressed] (or the ancestor
-///   form's `submit`) when tapped.
-/// - **Submitting** — disables the button, swaps the label to [submitText],
-///   and shows a loading indicator.
-/// - **Checking unique fields** — disables the button and shows a loading
-///   indicator while async field validation is in progress.
-/// - **Has errors** — disables the button until all form errors are resolved.
+/// Automatically handles these visual states:
 ///
-/// ## Visual variants
-/// Choose a Material style via [type]. Each variant can be individually
-/// styled via its corresponding `*Style` parameter, or with the unified
-/// [style] shorthand (takes precedence).
+/// - idle: shows [buttonText] and submits when tapped.
+/// - submitting: disables the button, shows [submitText], and displays loading.
+/// - checking unique fields: disables the button and displays loading.
+/// - fetching required field info: disables the button and displays loading.
 ///
-/// ## Custom variants
-/// Extend this class and override [buildOtherButton] to provide a fully
-/// custom look (e.g. glassmorphic, neumorphic, or Cupertino-style buttons)
-/// while retaining all the built-in state management.
+/// Validation errors do not disable the button by default. This is intentional:
+/// the form bloc must be the final authority that validates and blocks invalid
+/// submission. This prevents [FormValidationMode.onSubmit] forms from getting
+/// stuck after the first failed submit.
 ///
-/// ## Example
-/// ```dart
-/// BlocxFormRegisterButton(
-///   state: state,
-///   buttonText: 'Sign Up',
-///   submitText: 'Signing up...',
-///   onPressed: null, // uses the ancestor form's submit by default
-/// )
-/// ```
-///
-/// See also:
-/// - [BlocxFormWidget], which provides the ancestor form state.
-/// - [RegisterButtonType], for the available visual variants.
+/// Set [disableWhenInvalid] to `true` if you explicitly want the button disabled
+/// when [BlocxFormState.errors] is not empty.
 class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
     extends BlocxStatelessWidget {
-  /// The current form state, used to determine whether the button should be
-  /// disabled and which label to display.
-  final BlocxFormState state;
+  /// The current form state.
+  ///
+  /// Used to determine button loading, disabled state, and label text.
+  final BlocxFormState<F, E> state;
 
   /// The visual variant of the button.
   ///
@@ -88,14 +71,21 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P, E extends 
   final double spacing;
 
   /// A unified [ButtonStyle] that takes precedence over all per-type style
-  /// parameters ([elevatedStyle], [filledStyle], [textStyle], [outlinedStyle]).
+  /// parameters.
   final ButtonStyle? style;
 
   /// Called when the button is tapped while idle.
   ///
-  /// If null, the button will call `submit` on the nearest ancestor
-  /// [BlocxFormWidgetState] instead.
+  /// If null, the button calls `submit` on the nearest ancestor
+  /// [BlocxFormWidgetState].
   final VoidCallback? onPressed;
+
+  /// Whether validation errors should disable the button.
+  ///
+  /// Defaults to `false` so [FormValidationMode.onSubmit] forms do not get stuck
+  /// after validation errors are shown. Invalid submission is still blocked by
+  /// [BlocxFormBloc.isFormSubmittable].
+  final bool disableWhenInvalid;
 
   /// Creates a [BlocxFormRegisterButton].
   const BlocxFormRegisterButton({
@@ -113,28 +103,47 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P, E extends 
     this.loadingIndicatorBuilder,
     this.spacing = 8.0,
     this.style,
+    this.disableWhenInvalid = false,
   });
 
   /// Whether the form is currently submitting.
-  bool get isSubmittingForm => state is BlocxFormStateSubmittingForm;
+  bool get isSubmittingForm => state is BlocxFormStateSubmittingForm<F, E>;
 
-  /// Whether any fields are currently being validated asynchronously.
-  bool get isCheckingFields => state.checkingUniqueFields.isNotEmpty;
+  /// Whether any unique-field checks are currently running.
+  bool get isCheckingUniqueFields => state.checkingUniqueFields.isNotEmpty;
+
+  /// Whether any required field info is currently being fetched.
+  bool get isFetchingFieldInfo => state.fieldsFetchingInfo.isNotEmpty;
+
+  /// Whether the state currently contains validation errors.
+  bool get hasValidationErrors => state.errors.isNotEmpty;
+
+  /// Whether the button should show a loading indicator.
+  bool get isBusy => isSubmittingForm || isCheckingUniqueFields || isFetchingFieldInfo;
+
+  /// Whether the button should be disabled.
+  bool get isDisabled {
+    return isBusy || (disableWhenInvalid && hasValidationErrors);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final disabled = isSubmittingForm || isCheckingFields || state.errors.isNotEmpty;
+    final disabled = isDisabled;
     final label = isSubmittingForm ? submitText : buttonText;
 
     switch (type) {
       case RegisterButtonType.elevated:
         return buildElevatedButton(context, label: label, disabled: disabled);
+
       case RegisterButtonType.filled:
         return buildFilledButton(context, label: label, disabled: disabled);
+
       case RegisterButtonType.text:
         return buildTextButton(context, label: label, disabled: disabled);
+
       case RegisterButtonType.outlined:
         return buildOutlinedButton(context, label: label, disabled: disabled);
+
       case RegisterButtonType.other:
         return buildOtherButton(context, label: label, disabled: disabled);
     }
@@ -144,42 +153,63 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P, E extends 
   ///
   /// Override in a subclass for deeper control over the elevated style.
   @protected
-  Widget buildElevatedButton(BuildContext context, {required String label, required bool disabled}) {
+  Widget buildElevatedButton(
+    BuildContext context, {
+    required String label,
+    required bool disabled,
+  }) {
     return ElevatedButton(
       style: style ?? elevatedStyle,
       onPressed: disabled ? null : onPressed ?? getState(context).submit,
-      child: _buildContent(context, label: label, disabled: disabled),
+      child: _buildContent(context, label: label),
     );
   }
 
-  /// Builds a [FilledButton] (Material 3) variant.
+  /// Builds a [FilledButton] variant.
   ///
   /// Override in a subclass for deeper control over the filled style.
   @protected
-  Widget buildFilledButton(BuildContext context, {required String label, required bool disabled}) {
+  Widget buildFilledButton(
+    BuildContext context, {
+    required String label,
+    required bool disabled,
+  }) {
     return FilledButton(
       style: style ?? filledStyle,
       onPressed: disabled ? null : onPressed ?? getState(context).submit,
-      child: _buildContent(context, label: label, disabled: disabled),
+      child: _buildContent(context, label: label),
     );
   }
 
-  /// Retrieves the nearest ancestor [BlocxFormWidgetState] from the widget tree.
+  /// Retrieves the nearest ancestor [BlocxFormWidgetState].
   ///
   /// Used internally to call `submit` when [onPressed] is null.
-  /// Throws if no ancestor state is found.
-  BlocxFormWidgetState<BlocxFormWidget<P>, F, P, E> getState(BuildContext context) =>
-      context.findAncestorStateOfType<BlocxFormWidgetState<BlocxFormWidget<P>, F, P, E>>()!;
+  BlocxFormWidgetState<BlocxFormWidget<P>, F, P, E> getState(BuildContext context) {
+    final state = context.findAncestorStateOfType<BlocxFormWidgetState<BlocxFormWidget<P>, F, P, E>>();
+
+    if (state == null) {
+      throw FlutterError(
+        'BlocxFormRegisterButton could not find a matching '
+        'BlocxFormWidgetState<BlocxFormWidget<$P>, $F, $P, $E> ancestor.',
+      );
+    }
+
+    return state;
+  }
 
   /// Builds a [TextButton] variant.
   ///
   /// Override in a subclass for deeper control over the text style.
   @protected
-  Widget buildTextButton(BuildContext context, {required String label, required bool disabled}) {
+  Widget buildTextButton(
+    BuildContext context, {
+    required String label,
+    required bool disabled,
+  }) {
     return TextButton(
       style: style ?? textStyle,
       onPressed: disabled ? null : onPressed ?? getState(context).submit,
-      child: _buildContent(context, label: label, disabled: disabled),
+      child: _buildContent(context, label: label),
     );
   }
 
@@ -187,80 +217,76 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P, E extends 
   ///
   /// Override in a subclass for deeper control over the outlined style.
   @protected
-  Widget buildOutlinedButton(BuildContext context, {required String label, required bool disabled}) {
+  Widget buildOutlinedButton(
+    BuildContext context, {
+    required String label,
+    required bool disabled,
+  }) {
     return OutlinedButton(
       style: style ?? outlinedStyle,
       onPressed: disabled ? null : onPressed ?? getState(context).submit,
-      child: _buildContent(context, label: label, disabled: disabled),
+      child: _buildContent(context, label: label),
     );
   }
 
   /// Builds a fully custom button variant.
   ///
   /// The default implementation returns a [SizedBox.shrink]. Override this in
-  /// a subclass to provide a custom design (e.g. glassmorphic, neumorphic, or
-  /// Cupertino-style) while retaining all built-in state management.
-  ///
-  /// Example:
-  /// ```dart
-  /// @override
-  /// Widget buildOtherButton(BuildContext context, {required String label, required bool disabled}) {
-  ///   return GlassmorphicButton(
-  ///     label: label,
-  ///     onPressed: disabled ? null : onPressed ?? getState(context).submit,
-  ///   );
-  /// }
-  /// ```
+  /// a subclass to provide a custom design while retaining state management.
   @protected
-  Widget buildOtherButton(BuildContext context, {required String label, required bool disabled}) {
+  Widget buildOtherButton(
+    BuildContext context, {
+    required String label,
+    required bool disabled,
+  }) {
     return const SizedBox.shrink();
   }
 
-  /// Builds the shared inner content: an optional spinner followed by the label.
+  /// Builds the shared inner content.
   ///
-  /// The spinner is only shown when [isSubmittingForm] or [isCheckingFields]
-  /// is true. The label is always shown.
-  Widget _buildContent(BuildContext context, {required String label, required bool disabled}) {
+  /// The loading indicator is only shown while [isBusy] is true.
+  Widget _buildContent(
+    BuildContext context, {
+    required String label,
+  }) {
     final text = Text(label, style: labelTextStyle);
 
-    if (!disabled) return text;
+    if (!isBusy) return text;
 
     final indicator = loadingIndicatorBuilder?.call(context) ?? _defaultLoadingIndicator(context);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (isSubmittingForm || isCheckingFields)
-          SizedBox(
-            width: 16,
-            height: 16,
-            child: Center(child: indicator),
-          ),
-        if (isSubmittingForm || isCheckingFields) SizedBox(width: spacing),
+        SizedBox(
+          width: 16,
+          height: 16,
+          child: Center(child: indicator),
+        ),
+        SizedBox(width: spacing),
         text,
       ],
     );
   }
 
-  /// The default loading indicator: a 16×16 [CircularProgressIndicator] with
-  /// a stroke width of 2, colored with the current theme's primary color.
+  /// Builds the default loading indicator.
   Widget _defaultLoadingIndicator(BuildContext context) {
     return SizedBox.square(
       dimension: 16,
-      child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme(context).primary),
+      child: CircularProgressIndicator(
+        strokeWidth: 2,
+        color: colorScheme(context).primary,
+      ),
     );
   }
 }
 
 /// The available visual variants for [BlocxFormRegisterButton].
-///
-/// Each variant maps to a standard Material button type, except [other] which
-/// is intended for fully custom designs via [BlocxFormRegisterButton.buildOtherButton].
 enum RegisterButtonType {
   /// Renders an [ElevatedButton].
   elevated,
 
-  /// Renders a [FilledButton] (Material 3).
+  /// Renders a [FilledButton].
   filled,
 
   /// Renders a [TextButton].
@@ -270,9 +296,5 @@ enum RegisterButtonType {
   outlined,
 
   /// Renders a custom button via [BlocxFormRegisterButton.buildOtherButton].
-  ///
-  /// The default implementation returns a [SizedBox.shrink]. Extend
-  /// [BlocxFormRegisterButton] and override `buildOtherButton` to provide
-  /// your own design.
   other,
 }
