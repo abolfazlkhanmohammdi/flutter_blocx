@@ -1,24 +1,22 @@
-import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_core/list_bloc.dart';
 import 'package:flutter_blocx/list_widget.dart';
 import 'package:example/src/screens/users/bloc/users_bloc.dart';
 import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:example/src/screens/users/presentation/user_card.dart';
 import 'package:flutter/material.dart';
 
-class UsersScreen extends CollectionWidget<dynamic> {
+class UsersScreen extends BlocxCollectionWidget<dynamic> {
   const UsersScreen({super.key});
 
   @override
   State<UsersScreen> createState() => _UsersScreenState();
 }
 
-class _UsersScreenState extends CollectionWidgetState<UsersScreen, User, dynamic> {
+class _UsersScreenState extends BlocxCollectionWidgetState<UsersScreen, User, dynamic> {
   TextEditingController searchController = TextEditingController();
 
-  _UsersScreenState() : super(bloc: UsersBloc());
-
   @override
-  Widget? topWidget(BuildContext context, ListState<User> state) {
+  Widget? topWidget(BuildContext context, BlocxCollectionState<User> state) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: BlocxSearchField<User, dynamic>(
@@ -53,8 +51,11 @@ class _UsersScreenState extends CollectionWidgetState<UsersScreen, User, dynamic
   }
 
   @override
-  CollectionInput get settings => CollectionInput(
+  CollectionSettings get settings => CollectionSettings(
     type: CollectionWidgetStateType.grid,
-    options: InfiniteGridOptions.defaultOptions().copyWith(childAspectRatio: 0.75),
+    options: InfiniteGridOptions(crossAxisCount: 2).copyWith(childAspectRatio: 0.75),
   );
+
+  @override
+  BlocxCollectionBloc<User, dynamic> get generateBloc => UsersBloc();
 }

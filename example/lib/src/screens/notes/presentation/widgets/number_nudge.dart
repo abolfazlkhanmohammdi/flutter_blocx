@@ -51,9 +51,9 @@ class _NumberNudgeState extends State<NumberNudge> {
     // clamp
     final max = widget.max;
     int clamped = v;
-    if (max != null)
+    if (max != null) {
       clamped = clamped.clamp(widget.min, max);
-    else if (clamped < widget.min)
+    } else if (clamped < widget.min)
       clamped = widget.min;
 
     // only update if changed
@@ -70,7 +70,10 @@ class _NumberNudgeState extends State<NumberNudge> {
 
   void _startRepeat(int delta) {
     _repeatTimer?.cancel();
-    _repeatTimer = Timer.periodic(const Duration(milliseconds: 80), (_) => _bump(delta));
+    _repeatTimer = Timer.periodic(
+      const Duration(milliseconds: 80),
+      (_) => _bump(delta),
+    );
   }
 
   void _stopRepeat() {
@@ -96,20 +99,28 @@ class _NumberNudgeState extends State<NumberNudge> {
   }) {
     return _AutoFlipTooltip(
       message: message,
-      child: child,
       estimatedPopupHeight: estimatedPopupHeight,
       verticalOffset: verticalOffset,
+      child: child,
     );
   }
 
   Widget _stepChip(String label, int delta) {
     return _autoFlipTooltip(
       message: delta > 0 ? 'Increase by $delta' : 'Decrease by ${delta.abs()}',
-      child: FilledButton(style: _chipStyleTonal(context), onPressed: () => _bump(delta), child: Text(label)),
+      child: FilledButton(
+        style: _chipStyleTonal(context),
+        onPressed: () => _bump(delta),
+        child: Text(label),
+      ),
     );
   }
 
-  Widget _repeatIcon({required IconData icon, required String tooltip, required int delta}) {
+  Widget _repeatIcon({
+    required IconData icon,
+    required String tooltip,
+    required int delta,
+  }) {
     final button = IconButton(
       icon: Icon(icon),
       onPressed: () => _bump(delta),
@@ -148,15 +159,30 @@ class _NumberNudgeState extends State<NumberNudge> {
           child: TextField(
             controller: _ctrl,
             keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'-?\d+'))],
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'-?\d+')),
+            ],
             decoration: InputDecoration(
               isDense: true,
               filled: true,
-              fillColor: cs.surfaceContainerHighest.withOpacity(0.08),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-              border: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-              prefixIcon: _repeatIcon(icon: Icons.remove_rounded, tooltip: '-1 (hold to repeat)', delta: -1),
-              suffixIcon: _repeatIcon(icon: Icons.add_rounded, tooltip: '+1 (hold to repeat)', delta: 1),
+              fillColor: cs.surfaceContainerHighest.withValues(alpha: 0.08),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 10,
+              ),
+              border: const OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+              ),
+              prefixIcon: _repeatIcon(
+                icon: Icons.remove_rounded,
+                tooltip: '-1 (hold to repeat)',
+                delta: -1,
+              ),
+              suffixIcon: _repeatIcon(
+                icon: Icons.add_rounded,
+                tooltip: '+1 (hold to repeat)',
+                delta: 1,
+              ),
             ),
             onChanged: (s) {
               final v = int.tryParse(s);
@@ -173,7 +199,10 @@ class _NumberNudgeState extends State<NumberNudge> {
           onPressed: () => widget.onSubmit?.call(_value),
           icon: const Icon(Icons.check_rounded),
           label: Text(widget.buttonLabel),
-          style: FilledButton.styleFrom(minimumSize: const Size(80, 40), shape: const StadiumBorder()),
+          style: FilledButton.styleFrom(
+            minimumSize: const Size(80, 40),
+            shape: const StadiumBorder(),
+          ),
         ),
       ],
     );
@@ -213,7 +242,8 @@ class _AutoFlipTooltipState extends State<_AutoFlipTooltip> {
     final spaceAbove = top;
     final spaceBelow = screenH - bottom;
 
-    final preferBelow = spaceBelow >= widget.estimatedPopupHeight || spaceBelow >= spaceAbove;
+    final preferBelow =
+        spaceBelow >= widget.estimatedPopupHeight || spaceBelow >= spaceAbove;
     if (preferBelow != _preferBelow) {
       setState(() => _preferBelow = preferBelow);
     }

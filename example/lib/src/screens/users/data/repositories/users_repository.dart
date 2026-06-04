@@ -4,7 +4,7 @@ import 'package:example/src/core/data/response_wrapper.dart';
 
 typedef Json = Map<String, dynamic>;
 
-class UserJsonRepository extends FakeRepository implements BaseEntity {
+class UserJsonRepository extends FakeRepository implements BlocxBaseEntity {
   UserJsonRepository._();
   static final UserJsonRepository _instance = UserJsonRepository._();
   factory UserJsonRepository() => _instance;

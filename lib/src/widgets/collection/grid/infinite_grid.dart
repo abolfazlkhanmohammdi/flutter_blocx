@@ -1,5 +1,14 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:flutter_blocx/src/widgets/collection/options/infinite_grid.dart';
+import 'package:blocx_core/list_bloc.dart'
+    show
+        BlocxInfiniteListBloc,
+        BlocxInfiniteListState,
+        BlocxInfiniteListStateRefresh,
+        BlocxInfiniteListEventVerticalDragUpdated,
+        BlocxInfiniteListEventVerticalDragStarted,
+        BlocxInfiniteListEventVerticalDragEnded,
+        BlocxInfiniteListEventOnScroll;
+import 'package:flutter_blocx/src/widgets/collection/options/infinite_grid_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,7 +18,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 /// InfiniteGrid
 /// -------------
 /// A grid-based equivalent of your InfiniteList with the same interaction model:
-/// - Uses the provided `InfiniteListBloc` for scroll/refresh/load-more signals
+/// - Uses the provided `BlocxInfiniteListBloc` for scroll/refresh/load-more signals
 /// - Triggers `loadBottomData` when the user nears the end
 /// - Optional swipe-to-refresh (custom, like your list)
 /// - Supports `AutoScrollController` via `AutoScrollTag`
@@ -18,7 +27,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 /// - Uses `GridView.builder` with a configurable grid delegate
 /// - No third-party animated grid. For simple entry effects, wrap your
 ///   `itemBuilder` content in an `AnimatedSwitcher`/`FadeTransition` yourself.
-class InfiniteGrid<Entity extends BaseEntity> extends StatefulWidget {
+class InfiniteGrid<Entity extends BlocxBaseEntity> extends StatefulWidget {
   final InfiniteGridOptions options;
   final Widget Function(BuildContext context, Entity item) itemBuilder;
 
@@ -26,7 +35,7 @@ class InfiniteGrid<Entity extends BaseEntity> extends StatefulWidget {
   /// If null, a default delegate is created from [options].
   final SliverGridDelegate Function(InfiniteGridOptions options)? gridDelegateBuilder;
 
-  final InfiniteListBloc bloc;
+  final BlocxInfiniteListBloc bloc;
   final void Function()? loadBottomData;
   final void Function()? loadTopData; // kept for API parity; not used directly
   final void Function()? refreshOnSwipe;
@@ -54,7 +63,7 @@ class InfiniteGrid<Entity extends BaseEntity> extends StatefulWidget {
   InfiniteGridState<Entity> createState() => InfiniteGridState<Entity>();
 }
 
-class InfiniteGridState<Entity extends BaseEntity> extends State<InfiniteGrid<Entity>> {
+class InfiniteGridState<Entity extends BlocxBaseEntity> extends State<InfiniteGrid<Entity>> {
   late final String uuid;
 
   @override
@@ -63,18 +72,18 @@ class InfiniteGridState<Entity extends BaseEntity> extends State<InfiniteGrid<En
     uuid = 'InfiniteGrid-${identityHashCode(this)}';
   }
 
-  InfiniteListBloc get bloc => widget.bloc;
+  BlocxInfiniteListBloc get bloc => widget.bloc;
   InfiniteGridOptions get options => widget.options;
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<InfiniteListBloc>.value(
+    return BlocProvider<BlocxInfiniteListBloc>.value(
       value: widget.bloc,
-      child: BlocConsumer<InfiniteListBloc, InfiniteListState>(
+      child: BlocConsumer<BlocxInfiniteListBloc, BlocxInfiniteListState>(
         listener: blocListener,
         bloc: widget.bloc,
         buildWhen: (_, c) => c.shouldRebuild,
-        builder: (BuildContext context, InfiniteListState state) {
+        builder: (BuildContext context, BlocxInfiniteListState state) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -84,13 +93,13 @@ class InfiniteGridState<Entity extends BaseEntity> extends State<InfiniteGrid<En
                   onNotification: onScroll,
                   child: Listener(
                     onPointerDown: (d) =>
-                        bloc.add(InfiniteListEventVerticalDragStarted(globalY: d.position.dy)),
-                    onPointerUp: (d) => bloc.add(InfiniteListEventVerticalDragEnded()),
+                        bloc.add(BlocxInfiniteListEventVerticalDragStarted(globalY: d.position.dy)),
+                    onPointerUp: (d) => bloc.add(BlocxInfiniteListEventVerticalDragEnded()),
                     onPointerMove: maySwipe
-                        ? (d) => bloc.add(InfiniteListEventVerticalDragUpdated(globalY: d.position.dy))
+                        ? (d) => bloc.add(BlocxInfiniteListEventVerticalDragUpdated(globalY: d.position.dy))
                         : null,
                     onPointerCancel: maySwipe
-                        ? (_) => bloc.add(InfiniteListEventVerticalDragUpdated(globalY: null))
+                        ? (_) => bloc.add(BlocxInfiniteListEventVerticalDragUpdated(globalY: null))
                         : null,
                     child: gridWidget(context, state),
                   ),
@@ -109,8 +118,8 @@ class InfiniteGridState<Entity extends BaseEntity> extends State<InfiniteGrid<En
     return s.isAtTop && s.isScrollingUp && !s.isRefreshing && widget.refreshOnSwipe != null;
   }
 
-  void blocListener(BuildContext context, InfiniteListState state) {
-    if (state is InfiniteListStateRefresh) {
+  void blocListener(BuildContext context, BlocxInfiniteListState state) {
+    if (state is BlocxInfiniteListStateRefresh) {
       widget.refreshOnSwipe?.call();
     }
   }
@@ -121,7 +130,7 @@ class InfiniteGridState<Entity extends BaseEntity> extends State<InfiniteGrid<En
     final isAtTop = notification.metrics.pixels < 40;
     final isAtBottom = notification.metrics.pixels == notification.metrics.maxScrollExtent;
     bloc.add(
-      InfiniteListEventOnScroll(
+      BlocxInfiniteListEventOnScroll(
         isAtTop: isAtTop,
         isScrollingUp: isScrollingUp,
         isAtBottom: isAtBottom,
@@ -131,9 +140,8 @@ class InfiniteGridState<Entity extends BaseEntity> extends State<InfiniteGrid<En
     return false;
   }
 
-  Widget gridWidget(BuildContext context, InfiniteListState state) {
-    final delegate =
-        widget.gridDelegateBuilder?.call(options) ??
+  Widget gridWidget(BuildContext context, BlocxInfiniteListState state) {
+    final delegate = widget.gridDelegateBuilder?.call(options) ??
         SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: options.crossAxisCount,
           mainAxisSpacing: options.mainAxisSpacing,
@@ -153,7 +161,7 @@ class InfiniteGridState<Entity extends BaseEntity> extends State<InfiniteGrid<En
     );
   }
 
-  Widget _itemBuilder(BuildContext context, Entity data, int index, InfiniteListState state) {
+  Widget _itemBuilder(BuildContext context, Entity data, int index, BlocxInfiniteListState state) {
     final isBottomTrigger =
         index == (widget.items.length - options.loadMoreTriggerItemDistance) && !state.hasReachedEnd;
 
@@ -180,7 +188,7 @@ class InfiniteGridState<Entity extends BaseEntity> extends State<InfiniteGrid<En
     return child;
   }
 
-  void onVisibilityChanged(VisibilityInfo c, InfiniteListState state) {
+  void onVisibilityChanged(VisibilityInfo c, BlocxInfiniteListState state) {
     if (c.visibleFraction < 0.5 ||
         state.isLoadingMore ||
         widget.loadBottomData == null ||
@@ -191,7 +199,7 @@ class InfiniteGridState<Entity extends BaseEntity> extends State<InfiniteGrid<En
     widget.loadBottomData!.call();
   }
 
-  Widget loadMoreWidget(BuildContext context, InfiniteListState state) {
+  Widget loadMoreWidget(BuildContext context, BlocxInfiniteListState state) {
     final external = widget.loadMoreWidgetBuilder?.call(context, state.isLoadingMore);
     if (external != null) return external;
     final scheme = Theme.of(context).colorScheme;
@@ -213,7 +221,7 @@ class InfiniteGridState<Entity extends BaseEntity> extends State<InfiniteGrid<En
     );
   }
 
-  Widget swipeRefreshWidget(BuildContext context, InfiniteListState state) {
+  Widget swipeRefreshWidget(BuildContext context, BlocxInfiniteListState state) {
     final external = widget.refreshWidgetBuilder?.call(context, state.swipeRefreshHeight);
     if (external != null) return external;
     final primary = Theme.of(context).colorScheme.primary;

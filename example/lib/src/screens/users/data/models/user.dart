@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:blocx_core/blocx_core.dart';
 
 /// Minimal user profile usable across data layers.
-class User extends BaseEntity {
+class User extends BlocxBaseEntity {
   final int id; // unique stable id
   final String displayName;
   final String email;
@@ -61,12 +61,15 @@ class User extends BaseEntity {
     email: (map['email'] as String?) ?? '',
     avatarUrl: map['avatarUrl'] as String?,
     isActive: (map['isActive'] as bool?) ?? true,
-    createdAt: DateTime.tryParse(map['createdAt'] as String? ?? '') ?? DateTime.now(),
-    updatedAt: DateTime.tryParse(map['updatedAt'] as String? ?? '') ?? DateTime.now(),
+    createdAt:
+        DateTime.tryParse(map['createdAt'] as String? ?? '') ?? DateTime.now(),
+    updatedAt:
+        DateTime.tryParse(map['updatedAt'] as String? ?? '') ?? DateTime.now(),
   );
 
   String toJson() => jsonEncode(toMap());
-  factory User.fromJson(String source) => User.fromMap(jsonDecode(source) as Map<String, dynamic>);
+  factory User.fromJson(String source) =>
+      User.fromMap(jsonDecode(source) as Map<String, dynamic>);
 
   @override
   String toString() => 'UserEntity(id:$id, name:$displayName)';
@@ -77,6 +80,8 @@ class User extends BaseEntity {
   int get hashCode => id.hashCode;
 
   // Handy comparators (e.g., for lists)
-  static int byName(User a, User b) => a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase());
-  static int byUpdatedDesc(User a, User b) => b.updatedAt.compareTo(a.updatedAt);
+  static int byName(User a, User b) =>
+      a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase());
+  static int byUpdatedDesc(User a, User b) =>
+      b.updatedAt.compareTo(a.updatedAt);
 }

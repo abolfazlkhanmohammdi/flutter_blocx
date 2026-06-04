@@ -11,11 +11,15 @@ class FakeRepository {
   }
 
   Future<void> get randomWaitFuture async {
-    return await Future.delayed(Duration(seconds: faker.randomGenerator.integer(3, min: 1)));
+    return await Future.delayed(
+      Duration(seconds: faker.randomGenerator.integer(3, min: 1)),
+    );
   }
 
   Future<void> get randomWaitFutureShort async {
-    return await Future.delayed(Duration(milliseconds: faker.randomGenerator.integer(5, min: 1) * 100));
+    return await Future.delayed(
+      Duration(milliseconds: faker.randomGenerator.integer(5, min: 1) * 100),
+    );
   }
 
   String get image => faker.image.loremPicsum(

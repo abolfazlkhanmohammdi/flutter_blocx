@@ -4,7 +4,7 @@ import 'package:example/src/screens/note_tags/presentation/note_tags_screen.dart
 import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:flutter/material.dart';
 
-class UserCard extends BlocxCollectionWidget<User, dynamic> {
+class UserCard extends BlocxCollectionItem<User, dynamic> {
   const UserCard({super.key, required super.item, this.onEdit});
 
   final VoidCallback? onEdit;
@@ -156,24 +156,58 @@ class _Avatar extends StatelessWidget {
     final fg = Theme.of(context).colorScheme.onSecondaryContainer;
     final hasUrl = (url ?? '').isNotEmpty;
 
+    return _AvatarWithErrorHandling(url: hasUrl ? url! : null, name: name, radius: radius, bg: bg, fg: fg);
+  }
+}
+
+// Needed because error state requires setState, which needs a StatefulWidget
+class _AvatarWithErrorHandling extends StatefulWidget {
+  const _AvatarWithErrorHandling({
+    required this.url,
+    required this.name,
+    required this.radius,
+    required this.bg,
+    required this.fg,
+  });
+
+  final String? url;
+  final String name;
+  final double radius;
+  final Color bg;
+  final Color fg;
+
+  @override
+  State<_AvatarWithErrorHandling> createState() => _AvatarWithErrorHandlingState();
+}
+
+class _AvatarWithErrorHandlingState extends State<_AvatarWithErrorHandling> {
+  bool _imageError = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final showImage = widget.url != null && !_imageError;
+
     return CircleAvatar(
-      radius: radius,
-      backgroundColor: bg,
-      foregroundColor: fg,
-      backgroundImage: hasUrl ? NetworkImage(url!) : null,
-      child: hasUrl ? null : Text(_initials(name), style: const TextStyle(fontWeight: FontWeight.w600)),
+      radius: widget.radius,
+      backgroundColor: widget.bg,
+      foregroundColor: widget.fg,
+      backgroundImage: showImage ? NetworkImage(widget.url!) : null,
+      onBackgroundImageError: showImage ? (_, __) => setState(() => _imageError = true) : null,
+      child: showImage
+          ? null
+          : Text(_initials(widget.name), style: const TextStyle(fontWeight: FontWeight.w600)),
     );
   }
+}
 
-  String _initials(String s) {
-    final parts = s.trim().split(RegExp(r'\s+'));
-    if (parts.isEmpty) return '?';
-    if (parts.length == 1) {
-      final t = parts.first;
-      return (t.isNotEmpty ? t.characters.take(2).toString() : '?').toUpperCase();
-    }
-    return (parts.first.characters.first + parts.last.characters.first).toUpperCase();
+String _initials(String s) {
+  final parts = s.trim().split(RegExp(r'\s+'));
+  if (parts.isEmpty) return '?';
+  if (parts.length == 1) {
+    final t = parts.first;
+    return (t.isNotEmpty ? t.characters.take(2).toString() : '?').toUpperCase();
   }
+  return (parts.first.characters.first + parts.last.characters.first).toUpperCase();
 }
 
 class _StatusPill extends StatelessWidget {

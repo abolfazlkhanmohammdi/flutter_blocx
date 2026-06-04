@@ -1,5 +1,4 @@
-import 'package:blocx_core/blocx_core.dart';
-import 'package:flutter_blocx/list_widget.dart';
+import 'package:blocx_core/list_bloc.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
 import 'package:example/src/screens/notes/bloc/notes_bloc.dart';
 import 'package:example/src/screens/notes/data/models/note.dart';
@@ -7,15 +6,16 @@ import 'package:example/src/screens/notes/presentation/widgets/note_card.dart';
 import 'package:example/src/screens/notes/presentation/widgets/number_nudge.dart';
 import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blocx/list_widget.dart';
 
-class NotesScreen extends CollectionWidget<(NoteTag, User)> {
+class NotesScreen extends BlocxCollectionWidget<(NoteTag, User)> {
   const NotesScreen({super.key, super.payload});
 
   @override
   State<NotesScreen> createState() => _NotesScreenState();
 }
 
-class _NotesScreenState extends CollectionWidgetState<NotesScreen, Note, (NoteTag, User)> {
+class _NotesScreenState extends BlocxCollectionWidgetState<NotesScreen, Note, (NoteTag, User)> {
   late final TextEditingController searchController;
 
   @override
@@ -29,8 +29,6 @@ class _NotesScreenState extends CollectionWidgetState<NotesScreen, Note, (NoteTa
     super.dispose();
     searchController.dispose();
   }
-
-  _NotesScreenState() : super(bloc: NotesBloc());
 
   @override
   Widget itemBuilder(BuildContext context, Note item) {
@@ -55,7 +53,7 @@ class _NotesScreenState extends CollectionWidgetState<NotesScreen, Note, (NoteTa
   }
 
   @override
-  Widget? topWidget(BuildContext context, ListState<Note> state) {
+  Widget? topWidget(BuildContext context, BlocxCollectionState<Note> state) {
     return Card(
       margin: EdgeInsets.zero,
       color: Colors.white,
@@ -71,7 +69,7 @@ class _NotesScreenState extends CollectionWidgetState<NotesScreen, Note, (NoteTa
   }
 
   @override
-  Widget? bottomWidget(BuildContext context, ListState<Note> state) {
+  Widget? bottomWidget(BuildContext context, BlocxCollectionState<Note> state) {
     return AnimatedSize(
       duration: Duration(milliseconds: 200),
       child: Card(
@@ -138,4 +136,7 @@ class _NotesScreenState extends CollectionWidgetState<NotesScreen, Note, (NoteTa
       style: Theme.of(context).textTheme.bodyMedium,
     );
   }
+
+  @override
+  BlocxCollectionBloc<Note, (NoteTag, User)> get generateBloc => NotesBloc();
 }

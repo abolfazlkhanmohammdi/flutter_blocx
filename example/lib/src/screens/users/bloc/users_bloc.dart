@@ -1,48 +1,38 @@
 import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_core/list_bloc.dart';
+import 'package:example/src/core/blocs/collection_bloc.dart';
 import 'package:example/src/screens/users/bloc/use_cases/delete_user_use_case.dart';
 import 'package:example/src/screens/users/bloc/use_cases/get_users_use_case.dart';
 import 'package:example/src/screens/users/bloc/use_cases/search_users_use_case.dart';
 import 'package:example/src/screens/users/data/models/user.dart';
 
-class UsersBloc extends ListBloc<User, dynamic>
+class UsersBloc extends CollectionBloc<User, void>
     with
-        InfiniteListBlocMixin<User, dynamic>,
-        SearchableListBlocMixin<User, dynamic>,
-        DeletableListBlocMixin<User, dynamic>,
-        HighlightableListBlocMixin<User, dynamic>,
-        SelectableListBlocMixin<User, dynamic> {
-  UsersBloc() : super(ScreenManagerCubit(), InfiniteListBloc());
+        BlocxCollectionInfiniteMixin<User, void>,
+        BlocxCollectionSearchableMixin<User, void>,
+        BlocxCollectionDeletableMixin<User, void>,
+        BlocxCollectionHighlightableMixin<User, void>,
+        BlocxCollectionSelectableMixin<User, void> {
+  @override
+  BlocxPaginatedUseCaseTask<BlocxPaginatedUseCase<BlocxPaginationInput, User>, BlocxPaginationInput>?
+  get paginationTask => BlocxPaginatedUseCaseTask(
+    useCase: GetUsersUseCase(),
+    inputBuilder: (offset, limit) => BlocxPaginationInput(limit: limit, offset: offset),
+  );
 
   @override
-  (String, String?) convertErrorToMessageAndTitle(Object error) {
-    return ("error", "an error occurred!");
-  }
-
-  @override
-  PaginationUseCase<User, dynamic>? get loadInitialPageUseCase =>
-      GetUsersUseCase(loadCount: loadCount, offset: 0);
-
-  @override
-  PaginationUseCase<User, dynamic>? get loadNextPageUseCase =>
-      GetUsersUseCase(loadCount: loadCount, offset: offset);
-
-  @override
-  BaseUseCase<bool>? deleteItemUseCase(User item) {
-    return DeleteUserUseCase(user: item);
-  }
-
-  @override
-  SearchUseCase<User>? searchUseCase(String searchText, {int? loadCount, int? offset}) {
-    return SearchUsersUseCase(
-      searchText: searchText,
-      loadCount: loadCount ?? this.loadCount,
-      offset: offset ?? 0,
-    );
-  }
+  BlocxPaginatedUseCaseTask<BlocxPaginatedUseCase<BlocxSearchInput, User>, BlocxSearchInput>?
+  get searchUseCaseTask => BlocxPaginatedUseCaseTask(
+    useCase: SearchUsersUseCase(),
+    inputBuilder: (offset, limit) => SearchUsersInput(searchText: searchText, limit: limit, offset: offset),
+  );
 
   @override
   ErrorDisplayPolicy get errorDisplayPolicy => ErrorDisplayPolicy.page;
 
   @override
   bool get isSingleSelect => false;
+
+  @override
+  BlocxBaseUseCase<User, bool>? get deleteItemUseCase => DeleteUserUseCase();
 }

@@ -6,7 +6,7 @@ import 'package:example/src/screens/notes/presentation/notes_screen.dart';
 import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:flutter/material.dart';
 
-class NoteTagCard extends BlocxCollectionWidget<NoteTag, User> {
+class NoteTagCard extends BlocxCollectionItem<NoteTag, User> {
   final User user;
   const NoteTagCard({super.key, required this.user, required super.item});
 
@@ -15,7 +15,7 @@ class NoteTagCard extends BlocxCollectionWidget<NoteTag, User> {
     final cs = Theme.of(context).colorScheme;
     final t = Theme.of(context).textTheme;
     final canDelete = bloc(context).isDeletable;
-    final color = Color(item.colorArgb ?? cs.primary.value);
+    final color = Color(item.colorArgb ?? cs.primary.toARGB32());
 
     return Card(
       color: isHighlighted(context) || isSelected(context)
@@ -26,10 +26,14 @@ class NoteTagCard extends BlocxCollectionWidget<NoteTag, User> {
       child: InkWell(
         onTap: isBeingRemoved(context)
             ? null
-            : () => Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (context) => NotesScreen(payload: (item, user)))),
-        onLongPress: () => isHighlighted(context) ? clearHighlightedItem(context) : highlightItem(context),
+            : () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => NotesScreen(payload: (item, user)),
+                ),
+              ),
+        onLongPress: () => isHighlighted(context)
+            ? clearHighlightedItem(context)
+            : highlightItem(context),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -39,14 +43,21 @@ class NoteTagCard extends BlocxCollectionWidget<NoteTag, User> {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: _Swatch(color: color),
-                title: Text(item.name, style: t.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+                title: Text(
+                  item.name,
+                  style: t.titleSmall,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 subtitle: Text(
                   'Updated ${item.updatedAt.toLocal()}',
                   style: t.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                trailing: isSelected(context) ? Icon(Icons.check_circle, color: cs.primary) : null,
+                trailing: isSelected(context)
+                    ? Icon(Icons.check_circle, color: cs.primary)
+                    : null,
               ),
               const SizedBox(height: 8),
               Row(
@@ -67,17 +78,26 @@ class NoteTagCard extends BlocxCollectionWidget<NoteTag, User> {
                         icon: isBeingRemoved(context)
                             ? SizedBox.square(
                                 dimension: 16,
-                                child: CircularProgressIndicator(color: Colors.red),
+                                child: CircularProgressIndicator(
+                                  color: Colors.red,
+                                ),
                               )
                             : const Icon(Icons.delete, size: 16),
                         label: Text(
                           isBeingRemoved(context) ? "Deleting..." : 'Delete',
-                          style: textTheme(
-                            context,
-                          ).titleSmall?.copyWith(color: isBeingRemoved(context) ? Colors.red : Colors.white),
+                          style: textTheme(context).titleSmall?.copyWith(
+                            color: isBeingRemoved(context)
+                                ? Colors.red
+                                : Colors.white,
+                          ),
                         ),
-                        style: FilledButton.styleFrom(backgroundColor: cs.error, foregroundColor: cs.onError),
-                        onPressed: isBeingRemoved(context) ? null : () => removeItem(context),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: cs.error,
+                          foregroundColor: cs.onError,
+                        ),
+                        onPressed: isBeingRemoved(context)
+                            ? null
+                            : () => removeItem(context),
                       ),
                     ),
                 ],

@@ -1,12 +1,11 @@
-import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_core/form_bloc.dart';
 import 'package:example/src/screens/note_tags/bloc/form/note_tag_form_bloc.dart';
-import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag_form_data.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag_form_payload.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blocx/form_widget.dart';
 
-class NoteTagForm extends FormWidget<NoteTagFormPayload> {
+class NoteTagForm extends BlocxFormWidget<NoteTagFormPayload> {
   const NoteTagForm({super.key, required super.payload});
 
   @override
@@ -14,11 +13,11 @@ class NoteTagForm extends FormWidget<NoteTagFormPayload> {
 }
 
 class _NoteTagFormState
-    extends FormWidgetState<NoteTagForm, NoteTagFormData, NoteTagFormPayload, NoteTagFormKey> {
-  _NoteTagFormState() : super(bloc: NoteTagFormBloc());
+    extends BlocxFormWidgetState<NoteTagForm, NoteTagFormData, NoteTagFormPayload, NoteTagFormKey> {
+  _NoteTagFormState();
 
   @override
-  formWidget(BuildContext context, FormBlocState<NoteTagFormData, NoteTagFormKey> state) {
+  formWidget(BuildContext context, BlocxFormState<NoteTagFormData, NoteTagFormKey> state) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -34,8 +33,7 @@ class _NoteTagFormState
             type: TextFieldType.outlined,
             options: BlocXTextFieldOptions(maxLines: 10, minLines: 1),
           ),
-          FormButtonRow<NoteTagFormData, NoteTagFormPayload, NoteTagFormKey>(
-            isFormValid: isFormValid(state),
+          BlocxFormButtonRow<NoteTagFormData, NoteTagFormPayload, NoteTagFormKey>(
             formState: state,
             registerText: isUpdate ? "Edit" : "Register",
             registerSubmittingText: "Registering...",
@@ -51,10 +49,16 @@ class _NoteTagFormState
   }
 
   @override
-  void onFormSubmitted(FormStateFormSubmitted<NoteTagFormData, NoteTagFormKey> state) {
+  void onFormSubmitted(BlocxFormStateFormSubmitted<NoteTagFormData, NoteTagFormKey> state) {
     Navigator.of(context).pop(state.submittedData);
   }
 
   @override
   bool get isUpdate => payload?.toBeEdited != null;
+
+  @override
+  BlocxFormBloc<NoteTagFormData, NoteTagFormPayload, NoteTagFormKey> generateBloc() => NoteTagFormBloc();
+
+  @override
+  List<NoteTagFormKey> get keys => NoteTagFormKey.values;
 }

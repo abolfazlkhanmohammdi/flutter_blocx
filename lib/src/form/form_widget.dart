@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-abstract class FormWidget<P> extends StatefulWidget {
+abstract class BlocxFormWidget<P> extends StatefulWidget {
   final P? payload;
-  const FormWidget({super.key, this.payload});
+  const BlocxFormWidget({super.key, this.payload});
 }

@@ -5,7 +5,7 @@ import 'package:example/src/screens/notes/data/models/note.dart';
 import 'package:example/src/screens/users/data/models/user.dart';
 import 'package:flutter/material.dart';
 
-class NoteCard extends BlocxCollectionWidget<Note, (NoteTag, User)> {
+class NoteCard extends BlocxCollectionItem<Note, (NoteTag, User)> {
   const NoteCard({super.key, required super.item, this.onEdit, this.onOpen});
 
   final VoidCallback? onEdit;
@@ -207,7 +207,7 @@ class _ActionBtn extends BlocxStatelessWidget {
   }
 }
 
-class _Avatar extends StatelessWidget {
+class _Avatar extends StatefulWidget {
   const _Avatar({required this.titleFallback, this.name, this.url, required this.tint});
 
   final String titleFallback;
@@ -216,15 +216,24 @@ class _Avatar extends StatelessWidget {
   final Color tint;
 
   @override
+  State<_Avatar> createState() => _AvatarState();
+}
+
+class _AvatarState extends State<_Avatar> {
+  bool _imageError = false;
+
+  @override
   Widget build(BuildContext context) {
-    final hasUrl = (url ?? '').isNotEmpty;
-    final label = (name ?? titleFallback).trim();
+    final showImage = (widget.url ?? '').isNotEmpty && !_imageError;
+    final label = (widget.name ?? widget.titleFallback).trim();
+
     return CircleAvatar(
       radius: 22,
-      backgroundColor: tint.withAlpha(50),
+      backgroundColor: widget.tint.withAlpha(50),
       foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-      backgroundImage: hasUrl ? NetworkImage(url!) : null,
-      child: hasUrl ? null : Text(_initials(label), style: const TextStyle(fontWeight: FontWeight.w600)),
+      backgroundImage: showImage ? NetworkImage(widget.url!) : null,
+      onBackgroundImageError: showImage ? (_, __) => setState(() => _imageError = true) : null,
+      child: showImage ? null : Text(_initials(label), style: const TextStyle(fontWeight: FontWeight.w600)),
     );
   }
 

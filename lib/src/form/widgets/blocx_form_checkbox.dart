@@ -1,10 +1,10 @@
-import 'package:blocx_core/blocx_core.dart';
+import 'package:blocx_core/form_bloc.dart' show BlocxBaseFormEntity, BlocxFormEventUpdateData, BlocxFormBloc;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// A stateless, platform-adaptive checkbox.
 /// All non-function configuration is provided via [options].
-class BlocxFormCheckbox<F, P, E extends Enum> extends StatelessWidget {
+class BlocxFormCheckbox<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum> extends StatelessWidget {
   /// Non-function props live here (value, labels, styles, etc.).
   final BlocxCheckboxOptions options;
   final E formKey;
@@ -30,7 +30,7 @@ class BlocxFormCheckbox<F, P, E extends Enum> extends StatelessWidget {
   Widget _buildListTile(BuildContext context) {
     return CheckboxListTile.adaptive(
       value: options.isChecked,
-      onChanged: (value) => bloc(context).add(FormEventUpdateData(data: value, key: formKey)),
+      onChanged: (value) => bloc(context).add(BlocxFormEventUpdateData(data: value, key: formKey)),
       title: options.label != null ? Text(options.label!, style: options.labelStyle) : null,
       subtitle: options.subtitle != null ? Text(options.subtitle!, style: options.subtitleStyle) : null,
       controlAffinity: options.controlAffinity,
@@ -48,7 +48,7 @@ class BlocxFormCheckbox<F, P, E extends Enum> extends StatelessWidget {
   Widget _buildCompact(BuildContext context) {
     return Checkbox.adaptive(
       value: options.isChecked,
-      onChanged: (value) => bloc(context).add(FormEventUpdateData(data: value, key: formKey)),
+      onChanged: (value) => bloc(context).add(BlocxFormEventUpdateData(data: value, key: formKey)),
       visualDensity: options.visualDensity,
       activeColor: options.activeColor,
       checkColor: options.checkColor,
@@ -57,7 +57,7 @@ class BlocxFormCheckbox<F, P, E extends Enum> extends StatelessWidget {
     );
   }
 
-  FormBloc<F, P, E> bloc(BuildContext context) => BlocProvider.of<FormBloc<F, P, E>>(context);
+  BlocxFormBloc<F, P, E> bloc(BuildContext context) => BlocProvider.of<BlocxFormBloc<F, P, E>>(context);
 }
 
 /// Options bag for [BlocxFormCheckbox].
