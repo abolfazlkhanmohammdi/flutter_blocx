@@ -1,5 +1,5 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_core/list_bloc.dart'
+import 'package:blocx_core/collection_bloc.dart'
     show
         BlocxCollectionBloc,
         ListStateExtensions,

@@ -17,13 +17,13 @@ import 'package:flutter_blocx/src/core/widgets/blocx_stateless_widget.dart';
 /// submission. This prevents [FormValidationMode.onSubmit] forms from getting
 /// stuck after the first failed submit.
 ///
-/// Set [disableWhenInvalid] to `true` if you explicitly want the button disabled
-/// when [BlocxFormState.errors] is not empty.
-class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
-    extends BlocxStatelessWidget {
+/// Set [BlocxFormRegisterButtonOptions.disableWhenInvalid] to `true` if the
+/// button should be disabled when [BlocxFormState.errors] is not empty.
+class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P,
+    E extends Enum> extends BlocxStatelessWidget {
   /// The current form state.
   ///
-  /// Used to determine button loading, disabled state, and label text.
+  /// Used to determine the loading state, disabled state, and label text.
   final BlocxFormState<F, E> state;
 
   /// The visual variant of the button.
@@ -31,99 +31,60 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P, E extends 
   /// Defaults to [RegisterButtonType.filled].
   final RegisterButtonType type;
 
-  /// The label displayed when the form is idle.
+  /// The label displayed while the form is idle.
   final String buttonText;
 
   /// The label displayed while the form is submitting.
   final String submitText;
 
-  /// Optional style applied to [RegisterButtonType.elevated] buttons.
-  ///
-  /// Ignored when [style] is provided.
-  final ButtonStyle? elevatedStyle;
-
-  /// Optional style applied to [RegisterButtonType.filled] buttons.
-  ///
-  /// Ignored when [style] is provided.
-  final ButtonStyle? filledStyle;
-
-  /// Optional style applied to [RegisterButtonType.text] buttons.
-  ///
-  /// Ignored when [style] is provided.
-  final ButtonStyle? textStyle;
-
-  /// Optional style applied to [RegisterButtonType.outlined] buttons.
-  ///
-  /// Ignored when [style] is provided.
-  final ButtonStyle? outlinedStyle;
-
-  /// Optional style applied to the inner [Text] label.
-  final TextStyle? labelTextStyle;
-
-  /// Builds a custom loading indicator shown while submitting or checking fields.
-  ///
-  /// If null, a [CircularProgressIndicator] sized to 16×16 is used.
-  final WidgetBuilder? loadingIndicatorBuilder;
-
-  /// Horizontal spacing between the loading indicator and the label text.
-  ///
-  /// Defaults to `8.0`.
-  final double spacing;
-
-  /// A unified [ButtonStyle] that takes precedence over all per-type style
-  /// parameters.
-  final ButtonStyle? style;
+  /// Visual and behavioral configuration for the button.
+  final BlocxFormRegisterButtonOptions buttonOptions;
 
   /// Called when the button is tapped while idle.
   ///
-  /// If null, the button calls `submit` on the nearest ancestor
+  /// When omitted, the button calls `submit` on the nearest ancestor
   /// [BlocxFormWidgetState].
   final VoidCallback? onPressed;
 
-  /// Whether validation errors should disable the button.
-  ///
-  /// Defaults to `false` so [FormValidationMode.onSubmit] forms do not get stuck
-  /// after validation errors are shown. Invalid submission is still blocked by
-  /// [BlocxFormBloc.isFormSubmittable].
-  final bool disableWhenInvalid;
-
-  /// Creates a [BlocxFormRegisterButton].
+  /// Creates a form register button.
   const BlocxFormRegisterButton({
     super.key,
     required this.state,
     required this.buttonText,
     required this.submitText,
-    required this.onPressed,
     this.type = RegisterButtonType.filled,
-    this.elevatedStyle,
-    this.filledStyle,
-    this.textStyle,
-    this.outlinedStyle,
-    this.labelTextStyle,
-    this.loadingIndicatorBuilder,
-    this.spacing = 8.0,
-    this.style,
-    this.disableWhenInvalid = false,
+    this.buttonOptions = const BlocxFormRegisterButtonOptions(),
+    this.onPressed,
   });
 
   /// Whether the form is currently submitting.
-  bool get isSubmittingForm => state is BlocxFormStateSubmittingForm<F, E>;
+  bool get isSubmittingForm {
+    return state is BlocxFormStateSubmittingForm<F, E>;
+  }
 
   /// Whether any unique-field checks are currently running.
-  bool get isCheckingUniqueFields => state.checkingUniqueFields.isNotEmpty;
+  bool get isCheckingUniqueFields {
+    return state.checkingUniqueFields.isNotEmpty;
+  }
 
-  /// Whether any required field info is currently being fetched.
-  bool get isFetchingFieldInfo => state.fieldsFetchingInfo.isNotEmpty;
+  /// Whether any required field information is currently being fetched.
+  bool get isFetchingFieldInfo {
+    return state.fieldsFetchingInfo.isNotEmpty;
+  }
 
   /// Whether the state currently contains validation errors.
   bool get hasValidationErrors => state.errors.isNotEmpty;
 
-  /// Whether the button should show a loading indicator.
-  bool get isBusy => isSubmittingForm || isCheckingUniqueFields || isFetchingFieldInfo;
+  /// Whether the button should display a loading indicator.
+  bool get isBusy {
+    return isSubmittingForm || isCheckingUniqueFields || isFetchingFieldInfo;
+  }
 
   /// Whether the button should be disabled.
   bool get isDisabled {
-    return isBusy || (disableWhenInvalid && hasValidationErrors);
+    return isBusy ||
+        (buttonOptions.disableWhenInvalid && !state.isFormValid) ||
+        state.errors.isNotEmpty;
   }
 
   @override
@@ -131,27 +92,39 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P, E extends 
     final disabled = isDisabled;
     final label = isSubmittingForm ? submitText : buttonText;
 
-    switch (type) {
-      case RegisterButtonType.elevated:
-        return buildElevatedButton(context, label: label, disabled: disabled);
-
-      case RegisterButtonType.filled:
-        return buildFilledButton(context, label: label, disabled: disabled);
-
-      case RegisterButtonType.text:
-        return buildTextButton(context, label: label, disabled: disabled);
-
-      case RegisterButtonType.outlined:
-        return buildOutlinedButton(context, label: label, disabled: disabled);
-
-      case RegisterButtonType.other:
-        return buildOtherButton(context, label: label, disabled: disabled);
-    }
+    return switch (type) {
+      RegisterButtonType.elevated => buildElevatedButton(
+          context,
+          label: label,
+          disabled: disabled,
+        ),
+      RegisterButtonType.filled => buildFilledButton(
+          context,
+          label: label,
+          disabled: disabled,
+        ),
+      RegisterButtonType.text => buildTextButton(
+          context,
+          label: label,
+          disabled: disabled,
+        ),
+      RegisterButtonType.outlined => buildOutlinedButton(
+          context,
+          label: label,
+          disabled: disabled,
+        ),
+      RegisterButtonType.other => buildOtherButton(
+          context,
+          label: label,
+          disabled: disabled,
+        ),
+    };
   }
 
   /// Builds an [ElevatedButton] variant.
   ///
-  /// Override in a subclass for deeper control over the elevated style.
+  /// Override this method in a subclass for deeper control over the elevated
+  /// button implementation.
   @protected
   Widget buildElevatedButton(
     BuildContext context, {
@@ -159,15 +132,16 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P, E extends 
     required bool disabled,
   }) {
     return ElevatedButton(
-      style: style ?? elevatedStyle,
-      onPressed: disabled ? null : onPressed ?? getState(context).submit,
+      style: buttonOptions.style ?? buttonOptions.elevatedStyle,
+      onPressed: _resolveOnPressed(context, disabled),
       child: _buildContent(context, label: label),
     );
   }
 
   /// Builds a [FilledButton] variant.
   ///
-  /// Override in a subclass for deeper control over the filled style.
+  /// Override this method in a subclass for deeper control over the filled
+  /// button implementation.
   @protected
   Widget buildFilledButton(
     BuildContext context, {
@@ -175,31 +149,16 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P, E extends 
     required bool disabled,
   }) {
     return FilledButton(
-      style: style ?? filledStyle,
-      onPressed: disabled ? null : onPressed ?? getState(context).submit,
+      style: buttonOptions.style ?? buttonOptions.filledStyle,
+      onPressed: _resolveOnPressed(context, disabled),
       child: _buildContent(context, label: label),
     );
   }
 
-  /// Retrieves the nearest ancestor [BlocxFormWidgetState].
-  ///
-  /// Used internally to call `submit` when [onPressed] is null.
-  BlocxFormWidgetState<BlocxFormWidget<P>, F, P, E> getState(BuildContext context) {
-    final state = context.findAncestorStateOfType<BlocxFormWidgetState<BlocxFormWidget<P>, F, P, E>>();
-
-    if (state == null) {
-      throw FlutterError(
-        'BlocxFormRegisterButton could not find a matching '
-        'BlocxFormWidgetState<BlocxFormWidget<$P>, $F, $P, $E> ancestor.',
-      );
-    }
-
-    return state;
-  }
-
   /// Builds a [TextButton] variant.
   ///
-  /// Override in a subclass for deeper control over the text style.
+  /// Override this method in a subclass for deeper control over the text
+  /// button implementation.
   @protected
   Widget buildTextButton(
     BuildContext context, {
@@ -207,15 +166,16 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P, E extends 
     required bool disabled,
   }) {
     return TextButton(
-      style: style ?? textStyle,
-      onPressed: disabled ? null : onPressed ?? getState(context).submit,
+      style: buttonOptions.style ?? buttonOptions.textStyle,
+      onPressed: _resolveOnPressed(context, disabled),
       child: _buildContent(context, label: label),
     );
   }
 
   /// Builds an [OutlinedButton] variant.
   ///
-  /// Override in a subclass for deeper control over the outlined style.
+  /// Override this method in a subclass for deeper control over the outlined
+  /// button implementation.
   @protected
   Widget buildOutlinedButton(
     BuildContext context, {
@@ -223,16 +183,16 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P, E extends 
     required bool disabled,
   }) {
     return OutlinedButton(
-      style: style ?? outlinedStyle,
-      onPressed: disabled ? null : onPressed ?? getState(context).submit,
+      style: buttonOptions.style ?? buttonOptions.outlinedStyle,
+      onPressed: _resolveOnPressed(context, disabled),
       child: _buildContent(context, label: label),
     );
   }
 
   /// Builds a fully custom button variant.
   ///
-  /// The default implementation returns a [SizedBox.shrink]. Override this in
-  /// a subclass to provide a custom design while retaining state management.
+  /// The default implementation returns a [SizedBox.shrink]. Override this
+  /// method to provide a custom button while retaining the form-state logic.
   @protected
   Widget buildOtherButton(
     BuildContext context, {
@@ -242,28 +202,60 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P, E extends 
     return const SizedBox.shrink();
   }
 
-  /// Builds the shared inner content.
+  /// Retrieves the nearest ancestor [BlocxFormWidgetState].
   ///
-  /// The loading indicator is only shown while [isBusy] is true.
+  /// Used internally to submit the form when [onPressed] is omitted.
+  BlocxFormWidgetState<BlocxFormWidget<P>, F, P, E> getState(
+    BuildContext context,
+  ) {
+    final formState = context.findAncestorStateOfType<
+        BlocxFormWidgetState<BlocxFormWidget<P>, F, P, E>>();
+
+    if (formState == null) {
+      throw FlutterError(
+        'BlocxFormRegisterButton could not find a matching '
+        'BlocxFormWidgetState<BlocxFormWidget<$P>, $F, $P, $E> ancestor.',
+      );
+    }
+
+    return formState;
+  }
+
+  /// Resolves the effective button callback.
+  VoidCallback? _resolveOnPressed(
+    BuildContext context,
+    bool disabled,
+  ) {
+    if (disabled) return null;
+
+    return onPressed ?? getState(context).submit;
+  }
+
+  /// Builds the shared button content.
+  ///
+  /// The loading indicator is only displayed while [isBusy] is `true`.
   Widget _buildContent(
     BuildContext context, {
     required String label,
   }) {
-    final text = Text(label, style: labelTextStyle);
+    final text = Text(
+      label,
+      style: buttonOptions.labelTextStyle,
+    );
 
     if (!isBusy) return text;
 
-    final indicator = loadingIndicatorBuilder?.call(context) ?? _defaultLoadingIndicator(context);
+    final indicator = buttonOptions.loadingIndicatorBuilder?.call(context) ??
+        _defaultLoadingIndicator(context);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(
-          width: 16,
-          height: 16,
+        SizedBox.square(
+          dimension: 16,
           child: Center(child: indicator),
         ),
-        SizedBox(width: spacing),
+        SizedBox(width: buttonOptions.spacing),
         text,
       ],
     );
@@ -281,6 +273,70 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P, E extends 
   }
 }
 
+/// Configuration options for [BlocxFormRegisterButton].
+///
+/// These options control the button's styling, loading indicator, spacing, and
+/// validation-related disabling behavior.
+class BlocxFormRegisterButtonOptions {
+  /// A unified [ButtonStyle] applied to every button variant.
+  ///
+  /// When provided, this takes precedence over all variant-specific styles.
+  final ButtonStyle? style;
+
+  /// Style applied to [RegisterButtonType.elevated].
+  ///
+  /// Ignored when [style] is provided.
+  final ButtonStyle? elevatedStyle;
+
+  /// Style applied to [RegisterButtonType.filled].
+  ///
+  /// Ignored when [style] is provided.
+  final ButtonStyle? filledStyle;
+
+  /// Style applied to [RegisterButtonType.text].
+  ///
+  /// Ignored when [style] is provided.
+  final ButtonStyle? textStyle;
+
+  /// Style applied to [RegisterButtonType.outlined].
+  ///
+  /// Ignored when [style] is provided.
+  final ButtonStyle? outlinedStyle;
+
+  /// Style applied to the inner text label.
+  final TextStyle? labelTextStyle;
+
+  /// Builds the loading indicator shown while the form is busy.
+  ///
+  /// When omitted, a 16×16 [CircularProgressIndicator] is used.
+  final WidgetBuilder? loadingIndicatorBuilder;
+
+  /// Horizontal spacing between the loading indicator and label.
+  ///
+  /// Defaults to `8.0`.
+  final double spacing;
+
+  /// Whether validation errors should disable the button.
+  ///
+  /// Defaults to `false` so [FormValidationMode.onSubmit] forms do not become
+  /// stuck after displaying validation errors. Invalid submission is still
+  /// blocked by [BlocxFormBloc.isFormSubmittable].
+  final bool disableWhenInvalid;
+
+  /// Creates register button configuration options.
+  const BlocxFormRegisterButtonOptions({
+    this.style,
+    this.elevatedStyle,
+    this.filledStyle,
+    this.textStyle,
+    this.outlinedStyle,
+    this.labelTextStyle,
+    this.loadingIndicatorBuilder,
+    this.spacing = 8.0,
+    this.disableWhenInvalid = false,
+  });
+}
+
 /// The available visual variants for [BlocxFormRegisterButton].
 enum RegisterButtonType {
   /// Renders an [ElevatedButton].
@@ -295,6 +351,7 @@ enum RegisterButtonType {
   /// Renders an [OutlinedButton].
   outlined,
 
-  /// Renders a custom button via [BlocxFormRegisterButton.buildOtherButton].
+  /// Renders a custom button through
+  /// [BlocxFormRegisterButton.buildOtherButton].
   other,
 }

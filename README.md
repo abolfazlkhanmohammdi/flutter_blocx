@@ -163,17 +163,18 @@ The result is a consistent, scalable approach for building CRUD applications, da
   - [Form host handles](#form-host-handles)
   - [Form host actions](#form-host-actions)
   - [Form widgets that plug into the host](#form-widgets-that-plug-into-the-host)
-  - [BlocXFormTextField](#blocxformtextfield)
-  - [BlocXFormDropdown](#blocxformdropdown)
+  - [BlocxFormTextField](#blocxformtextfield)
+  - [BlocxFormDropdown](#blocxformdropdown)
   - [BlocxFormCheckbox](#blocxformcheckbox)
   - [BlocxFormRegisterButton](#blocxformregisterbutton)
   - [BlocxFormButtonRow](#blocxformbuttonrow)
 - [Screen Management](#screen-management)
   - [BlocxScreenManagerState](#blocxscreenmanagerstate)
   - [BlocxErrorWidget](#blocxerrorwidget)
+  - [BlocxSnackBar](#blocxsnackbar)
 - [Shared Utilities](#shared-utilities)
   - [ConfirmActionWidget](#confirmactionwidget)
-  - [BlocxStatelessWidget & BlocXWidgetState](#blocxstatelesswidget--blocxwidgetstate)
+  - [BlocxStatelessWidget & BlocxWidgetState](#blocxstatelesswidget--blocxwidgetstate)
 - [Localization](#localization)
 - [Quickstart: Collection Screen](#quickstart-collection-screen)
 - [Quickstart: Form Screen](#quickstart-form-screen)
@@ -190,8 +191,8 @@ Add both packages to your `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  blocx_core: ^0.8.2
-  flutter_blocx: ^0.8.4
+  blocx_core: ^0.9.0
+  flutter_blocx: ^0.9.0
 ```
 
 Or install via the command line:
@@ -203,16 +204,12 @@ flutter pub add flutter_blocx
 Import the library:
 
 ```dart
-// Everything: screen utilities, collection widgets, form widgets, shared widgets.
+// Main entry point: includes screen utilities, collection widgets, form widgets, and shared widgets.
 import 'package:flutter_blocx/flutter_blocx.dart';
 
-// Collection / list widgets and state.
-import 'package:flutter_blocx/list_widget.dart';
-
-// Form widgets and state.
+// Modular imports (optional fine-grained entry points):
 import 'package:flutter_blocx/form_widget.dart';
-
-// Stateful collection item base, if needed separately.
+import 'package:flutter_blocx/list_widget.dart';
 import 'package:flutter_blocx/blocx_collection_item_state.dart';
 ```
 
@@ -660,8 +657,8 @@ Use these two classes first. They create the screen-level structure that all for
 
 After this host state exists, you can wire in form widgets such as:
 
-- `BlocXFormTextField`
-- `BlocXFormDropdown`
+- `BlocxFormTextField` (or `BlocXFormTextField`)
+- `BlocxFormDropdown` (or `BlocXFormDropdown`)
 - `BlocxFormCheckbox`
 - `BlocxFormRegisterButton`
 - `BlocxFormButtonRow`
@@ -772,6 +769,7 @@ Inside a `BlocxFormWidgetState`, you get these useful handles:
 | `checkbox(key: ..., isChecked: ..., options: ...)` | Builds a bloc-wired checkbox. |
 | `getTextEditingController(key)` | Returns the managed controller for a field. |
 | `getFocusNode(key)` | Returns the managed focus node for a field. |
+| `requestFocusOnError(state)` | Focuses the first form field that currently has a validation error. |
 | `submit()` | Dispatches `BlocxFormEventSubmit`. |
 | `changeListener(data, key)` | Dispatches a field update for custom widgets. |
 | `setErrorToField(key, message)` | Adds a persistent field error. |
@@ -786,7 +784,9 @@ Inside a `BlocxFormWidgetState`, you get these useful handles:
 
 Once your screen extends `BlocxFormWidgetState`, the widgets below can be wired into it.
 
-### `BlocXFormTextField`
+> **Note:** Both `BlocxFormTextField` / `BlocXFormTextField` and `BlocxFormDropdown` / `BlocXFormDropdown` are exported and interchangeable.
+
+### `BlocxFormTextField`
 
 A `TextFormField` pre-wired to a `BlocxFormBloc` field. On every keystroke it dispatches `BlocxFormEventUpdateData`. It reads bloc state directly to display validation errors and shows a spinning `CircularProgressIndicator` in the suffix while a unique-field check is running.
 
@@ -796,7 +796,7 @@ Prefer the host helper:
 textField(
   SignUpField.email,
   type: TextFieldType.outlined,
-  options: const BlocXTextFieldOptions(
+  options: const BlocxTextFieldOptions(
     labelText: 'Email address',
     keyboardType: TextInputType.emailAddress,
   ),
@@ -809,7 +809,7 @@ Use `getTextEditingController(key)` when you need direct access to the managed c
 final emailController = getTextEditingController(SignUpField.email);
 ```
 
-`BlocXFormTextField` supports three visual variants through `TextFieldType`:
+`BlocxFormTextField` supports three visual variants through `TextFieldType`:
 
 | Value | Renders as |
 |---|---|
@@ -817,7 +817,7 @@ final emailController = getTextEditingController(SignUpField.email);
 | `outlined` | Material outlined border. |
 | `underlined` | Underline-only field. |
 
-`BlocXTextFieldOptions` key fields:
+`BlocxTextFieldOptions` key fields:
 
 | Field | Default | Description |
 |---|---|---|
@@ -838,7 +838,7 @@ final emailController = getTextEditingController(SignUpField.email);
 | `suffix` | `null` | Custom suffix widget. Overridden by the unique-field spinner. |
 | `contentPadding` | `EdgeInsets.symmetric(horizontal: 16, vertical: 8)` | Field padding. |
 
-### `BlocXFormDropdown`
+### `BlocxFormDropdown`
 
 A `DropdownButtonFormField` pre-wired to a `BlocxFormBloc` field. It dispatches `BlocxFormEventUpdateData` on every selection change and reads bloc state to display validation errors.
 
@@ -853,13 +853,13 @@ dropdown<String>(
       child: Text(country.name),
     );
   }).toList(),
-  options: const BlocXDropdownOptions(
+  options: const BlocxDropdownOptions(
     labelText: 'Country',
   ),
 )
 ```
 
-`BlocXDropdownOptions` key fields:
+`BlocxDropdownOptions` key fields:
 
 | Field | Default | Description |
 |---|---|---|
@@ -1009,7 +1009,7 @@ Override points:
 
 ### `BlocxErrorWidget`
 
-A ready-made full-page error card. Displays a title, message, short error summary, optional collapsible stack trace panel, and action buttons.
+A responsive, scrollable full-page error card. Displays a title, message, short error summary, optional collapsible stack trace panel, and action buttons.
 
 ```dart
 BlocxErrorWidget.fromState(
@@ -1031,6 +1031,19 @@ BlocxErrorWidget(
 ```
 
 The copy-details button uses `loc.copyDetails`. The close button uses `loc.close`. Retry and report buttons are shown only when the corresponding callbacks are non-null.
+
+### `BlocxSnackBar`
+
+A floating themed snackbar for surfacing operational notifications.
+
+```dart
+BlocxSnackBar.show(
+  context,
+  title: 'Success',
+  message: 'Profile updated successfully',
+  type: BlocXSnackbarType.info,
+);
+```
 
 ---
 
@@ -1072,17 +1085,19 @@ if (confirmed == true) {
 | `requireTyping` | `false` | Show a text field the user must match. |
 | `deleteWord` | `'DELETE'` | Word required when `requireTyping` is `true`. |
 
-### `BlocxStatelessWidget` & `BlocXWidgetState`
+### `BlocxStatelessWidget` & `BlocxWidgetState`
 
-Lightweight base classes that expose common Flutter helpers as named getters.
+Lightweight base classes that expose common Flutter context helpers as getters and methods.
 
 `BlocxStatelessWidget` provides:
 
 - `theme(context)`
 - `textTheme(context)`
 - `colorScheme(context)`
+- `width(context)`
+- `height(context)`
 
-`BlocXWidgetState<W>` provides:
+`BlocxWidgetState<W>` (or `BlocXWidgetState<W>`) provides:
 
 - `theme`
 - `textTheme`
@@ -1090,7 +1105,7 @@ Lightweight base classes that expose common Flutter helpers as named getters.
 - `width`
 - `height`
 
-Both `BlocxCollectionWidgetState` and `BlocxFormWidgetState` extend `BlocXWidgetState`, so these getters are available in every screen state class.
+Both `BlocxCollectionWidgetState` and `BlocxFormWidgetState` extend `BlocxWidgetState`, so these getters are available in every screen state class.
 
 ---
 
@@ -1177,7 +1192,7 @@ class User extends BlocxBaseEntity {
 
 ```dart
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_core/list_bloc.dart';
+import 'package:blocx_core/collection_bloc.dart';
 
 class FetchUsersUseCase extends BlocxPaginatedUseCase<BlocxPaginatedInput, User> {
   final UserRepository repo;
@@ -1233,7 +1248,7 @@ class DeleteUserUseCase extends BlocxBaseUseCase<String, bool> {
 
 ```dart
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_core/list_bloc.dart';
+import 'package:blocx_core/collection_bloc.dart';
 
 class UsersBloc extends BlocxCollectionBloc<User, void>
     with
@@ -1290,9 +1305,9 @@ class UsersBloc extends BlocxCollectionBloc<User, void>
 ### 4. Collection screen from `flutter_blocx`
 
 ```dart
-import 'package:blocx_core/list_bloc.dart';
+import 'package:blocx_core/collection_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blocx/list_widget.dart';
+import 'package:flutter_blocx/flutter_blocx.dart';
 
 class UsersScreen extends BlocxCollectionWidget<void> {
   const UsersScreen({super.key});
@@ -1520,7 +1535,7 @@ class SignUpBloc extends BlocxFormBloc<SignUpForm, void, SignUpField>
 ```dart
 import 'package:blocx_core/form_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blocx/form_widget.dart';
+import 'package:flutter_blocx/flutter_blocx.dart';
 
 class SignUpScreen extends BlocxFormWidget<void> {
   const SignUpScreen({super.key});
@@ -1530,7 +1545,7 @@ class SignUpScreen extends BlocxFormWidget<void> {
 }
 
 class _SignUpScreenState
-        extends BlocxFormWidgetState<SignUpScreen, SignUpForm, void, SignUpField> {
+    extends BlocxFormWidgetState<SignUpScreen, SignUpForm, void, SignUpField> {
   @override
   BlocxFormBloc<SignUpForm, void, SignUpField> generateBloc() {
     return SignUpBloc();
@@ -1543,9 +1558,9 @@ class _SignUpScreenState
 
   @override
   Widget formWidget(
-          BuildContext context,
-          BlocxFormState<SignUpForm, SignUpField> state,
-          ) {
+    BuildContext context,
+    BlocxFormState<SignUpForm, SignUpField> state,
+  ) {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -1554,7 +1569,7 @@ class _SignUpScreenState
           textField(
             SignUpField.email,
             type: TextFieldType.outlined,
-            options: const BlocXTextFieldOptions(
+            options: const BlocxTextFieldOptions(
               labelText: 'Email address',
               keyboardType: TextInputType.emailAddress,
             ),
@@ -1563,7 +1578,7 @@ class _SignUpScreenState
           textField(
             SignUpField.password,
             type: TextFieldType.outlined,
-            options: const BlocXTextFieldOptions(
+            options: const BlocxTextFieldOptions(
               labelText: 'Password',
               obscureText: true,
             ),
@@ -1572,7 +1587,7 @@ class _SignUpScreenState
           textField(
             SignUpField.confirmPassword,
             type: TextFieldType.outlined,
-            options: const BlocXTextFieldOptions(
+            options: const BlocxTextFieldOptions(
               labelText: 'Confirm password',
               obscureText: true,
             ),
@@ -1593,8 +1608,8 @@ class _SignUpScreenState
 
   @override
   void onFormSubmitted(
-          BlocxFormStateFormSubmitted<SignUpForm, SignUpField> state,
-          ) {
+    BlocxFormStateFormSubmitted<SignUpForm, SignUpField> state,
+  ) {
     Navigator.of(context).pushReplacementNamed('/home');
   }
 }

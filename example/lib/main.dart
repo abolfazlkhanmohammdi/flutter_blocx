@@ -21,7 +21,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       scrollBehavior: AppScrollBehavior(),
       title: 'Flutter Demo',
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
       home: SplashScreen(),
     );
   }
@@ -45,13 +47,30 @@ class ExampleLocalizations extends BlocXLocalizations {
       BlocXErrorCode.checkingUniqueValue => "Checking unique value",
       BlocXErrorCode.unknown => "Unknown error",
       BlocXErrorCode.valueNotAvailable => "This value is not available",
-      BlocXErrorCode.errorGettingInitialFormData => "Error getting initial form data",
+      BlocXErrorCode.errorGettingInitialFormData =>
+        "Error getting initial form data",
       BlocXErrorCode.fieldCannotBeEmpty => "This field cannot be empty",
     };
   }
 
   @override
   String get close => "Close";
+
+  @override
+  String get cancel => "Cancel";
+
+  @override
+  String get delete => "Delete";
+
+  @override
+  String get deleteItem => "Delete item";
+
+  @override
+  String get areYouSure => "Are you sure?";
+
+  @override
+  String get areYouSureYouWantToDeleteThisItem =>
+      "Are you sure you want to delete this item?";
 
   @override
   String get copyDetails => "Copy details";
@@ -190,6 +209,7 @@ class ExampleLocalizations extends BlocXLocalizations {
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)..badCertificateCallback = (_, __, ___) => true;
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (_, __, ___) => true;
   }
 }

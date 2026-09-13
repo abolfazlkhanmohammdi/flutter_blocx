@@ -1,10 +1,11 @@
 part of 'splash_bloc.dart';
 
-sealed class SplashState extends BaseState {
-  const SplashState({
-    required super.shouldRebuild,
-    required super.shouldListen,
-  });
+@immutable
+sealed class SplashState {
+  final bool shouldRebuild;
+  final bool shouldListen;
+
+  const SplashState({required this.shouldRebuild, required this.shouldListen});
 }
 
 final class SplashStateDataLoaded extends SplashState {

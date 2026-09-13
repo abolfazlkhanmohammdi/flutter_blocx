@@ -121,7 +121,7 @@ class NoteTagCard extends BlocxCollectionItem<NoteTag, User> {
         payload: NoteTagFormPayload(userId: user.id, toBeEdited: item),
       ),
     );
-    if (result == null) return;
+    if (result == null || !context.mounted) return;
     updateItem(context, result);
   }
 }

@@ -1,7 +1,8 @@
 import 'package:blocx_core/form_bloc.dart';
 import 'package:example/src/screens/note_tags/bloc/form/note_tag_form_bloc.dart';
 
-class NoteTagFormData extends BlocxBaseFormEntity<NoteTagFormData, NoteTagFormKey> {
+class NoteTagFormData
+    extends BlocxBaseFormEntity<NoteTagFormData, NoteTagFormKey> {
   final String name;
   final int userId;
   final int? tagId;
@@ -12,7 +13,8 @@ class NoteTagFormData extends BlocxBaseFormEntity<NoteTagFormData, NoteTagFormKe
   NoteTagFormData copyWith({
     String? name,
     int? userId,
-    Object? tagId = _noValue, // sentinel so we can distinguish "not passed" vs "null"
+    Object? tagId =
+        _noValue, // sentinel so we can distinguish "not passed" vs "null"
   }) {
     return NoteTagFormData(
       name: name ?? this.name,

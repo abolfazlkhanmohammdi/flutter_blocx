@@ -1,5 +1,5 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_core/list_bloc.dart';
+import 'package:blocx_core/collection_bloc.dart';
 import 'package:example/src/core/blocs/collection_bloc.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
 import 'package:example/src/screens/notes/bloc/use_cases/delete_note_use_case.dart';
@@ -21,28 +21,35 @@ class NotesBloc extends CollectionBloc<Note, (NoteTag, User)>
   NotesBloc() : super();
 
   @override
-  BlocxPaginatedUseCaseTask<BlocxPaginatedUseCase<BlocxPaginationInput, Note>, BlocxPaginationInput>?
+  BlocxPaginatedUseCaseTask<BlocxPaginatedInput, Note>?
   get refreshPageUseCaseTask => BlocxPaginatedUseCaseTask(
     useCase: GetNotesUseCase(),
-    inputBuilder: (offset, limit) => GetNotesInput(limit: limit, offset: offset),
+    inputBuilder: (offset, limit) =>
+        GetNotesInput(limit: limit, offset: offset),
   );
 
   @override
-  BlocxPaginatedUseCaseTask<BlocxPaginatedUseCase<BlocxPaginationInput, Note>, BlocxPaginationInput>?
-  get paginationTask => BlocxPaginatedUseCaseTask(
-    useCase: GetNotesUseCase(),
-    inputBuilder: (offset, limit) => GetNotesInput(limit: limit, offset: offset),
-  );
+  BlocxPaginatedUseCaseTask<BlocxPaginatedInput, Note>? get paginationTask =>
+      BlocxPaginatedUseCaseTask(
+        useCase: GetNotesUseCase(),
+        inputBuilder: (offset, limit) =>
+            GetNotesInput(limit: limit, offset: offset),
+      );
 
   @override
-  BlocxBaseUseCase<Note, bool>? get deleteItemUseCase => DeleteNoteUseCase();
+  BlocxUseCaseTask<Object?, bool>? deleteItemTask(Note item) =>
+      BlocxUseCaseTask(useCase: DeleteNoteUseCase(), inputBuilder: () => item);
 
   @override
-  BlocxPaginatedUseCaseTask<BlocxPaginatedUseCase<BlocxSearchInput, Note>, BlocxSearchInput>?
-  get searchUseCaseTask => BlocxPaginatedUseCaseTask(
-    useCase: SearchNotesUseCase(),
-    inputBuilder: (offset, limit) => SearchNotesInput(searchText: searchText, limit: limit, offset: offset),
-  );
+  BlocxPaginatedUseCaseTask<BlocxSearchInput, Note>? get searchUseCaseTask =>
+      BlocxPaginatedUseCaseTask(
+        useCase: SearchNotesUseCase(),
+        inputBuilder: (offset, limit) => SearchNotesInput(
+          searchText: searchText,
+          limit: limit,
+          offset: offset,
+        ),
+      );
 
   @override
   bool get isSingleSelect => false;

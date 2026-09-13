@@ -8,7 +8,10 @@ import 'package:example/src/screens/note_tags/data/repositories/note_tag_reposit
 class UpdateNoteTagUseCase extends BaseUseCase<NoteTagFormData, NoteTag> {
   @override
   Future<BlocxUseCaseResult<NoteTag>> perform(NoteTagFormData formData) async {
-    var updateResult = await NoteTagJsonRepository().update(formData.tagId!, name: formData.name);
+    var updateResult = await NoteTagJsonRepository().update(
+      formData.tagId!,
+      name: formData.name,
+    );
     if (!updateResult.ok) {
       return UseCaseResult.failure(StateError("Failed to register note tag"));
     }

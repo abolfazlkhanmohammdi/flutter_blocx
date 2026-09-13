@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.9.0]
+
+### Added
+
+* **Unified Package Exports in `package:flutter_blocx/flutter_blocx.dart`**
+  * Re-exported `form_widget.dart` and `list_widget.dart` from the main library entry point.
+  * Exported `BlocxFormCheckbox`, `BlocxScreenManagerState`, `BlocxErrorWidget`, `BlocxSnackBar`, and `BlocXLocalizations`.
+* **Typedef Aliases for API Consistency**
+  * Added `BlocxWidgetState`, `BlocxFormTextField`, `BlocxFormDropdown`, `BlocxTextFieldOptions`, `BlocxDropdownOptions`, and `BlocxSnackbarType` as aliases matching the `Blocx` casing convention.
+* **Automated Unit & Widget Test Suite**
+  * Added comprehensive widget and unit tests in `test/` for form fields, collection widgets, screen manager state, error page rendering, and snackbars.
+
+### Fixed
+
+* **Unified `BlocxStatelessWidget`**
+  * Resolved duplicate class definition across `src/core/base/` and `src/core/widgets/`.
+  * Preserved full backwards compatibility while unifying `width`, `height`, `theme`, `textTheme`, and `colorScheme` context getters.
+
 ## [0.8.4]
 
 ### Fixed

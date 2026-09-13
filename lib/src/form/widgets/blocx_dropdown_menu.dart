@@ -1,4 +1,5 @@
-import 'package:blocx_core/form_bloc.dart' show BlocxBaseFormEntity, BlocxFormEventUpdateData, BlocxFormBloc;
+import 'package:blocx_core/form_bloc.dart'
+    show BlocxBaseFormEntity, BlocxFormEventUpdateData, BlocxFormBloc;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx/flutter_blocx.dart';
@@ -29,7 +30,8 @@ import 'package:flutter_blocx/flutter_blocx.dart';
 /// - [P]: The payload type of the parent form.
 /// - [E]: The field enum type.
 /// - [T]: The value type of each [DropdownMenuItem].
-class BlocXFormDropdown<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum, T> extends StatefulWidget {
+class BlocXFormDropdown<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum,
+    T> extends StatefulWidget {
   /// The enum key that identifies this field in the form entity.
   final E formKey;
 
@@ -52,11 +54,12 @@ class BlocXFormDropdown<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum, 
   });
 
   @override
-  State<BlocXFormDropdown<F, P, E, T>> createState() => _BlocXFormDropdownState<F, P, E, T>();
+  State<BlocXFormDropdown<F, P, E, T>> createState() =>
+      _BlocXFormDropdownState<F, P, E, T>();
 }
 
-class _BlocXFormDropdownState<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum, T>
-    extends BlocXWidgetState<BlocXFormDropdown<F, P, E, T>> {
+class _BlocXFormDropdownState<F extends BlocxBaseFormEntity<F, E>, P,
+    E extends Enum, T> extends BlocXWidgetState<BlocXFormDropdown<F, P, E, T>> {
   T? _selectedValue;
 
   @override
@@ -87,21 +90,24 @@ class _BlocXFormDropdownState<F extends BlocxBaseFormEntity<F, E>, P, E extends 
       borderRadius: BorderRadius.circular(8),
       alignment: Alignment.center,
       items: widget.items,
-      onChanged: (v) => bloc.add(BlocxFormEventUpdateData(data: v, key: widget.formKey)),
+      onChanged: (v) =>
+          bloc.add(BlocxFormEventUpdateData(data: v, key: widget.formKey)),
     );
   }
 
   /// Returns the first error message set on [formKey] by the bloc, or falls
   /// back to [BlocXDropdownOptions.errorText] if provided.
   String? getErrorText() {
-    final index = bloc.state.errors.keys.toList().indexWhere((k) => k == widget.formKey);
+    final index =
+        bloc.state.errors.keys.toList().indexWhere((k) => k == widget.formKey);
     if (index >= 0) {
       return bloc.state.errors.values.toList()[index].first;
     }
     return widget.options.errorText;
   }
 
-  BlocxFormBloc<F, P, E> get bloc => BlocProvider.of<BlocxFormBloc<F, P, E>>(context);
+  BlocxFormBloc<F, P, E> get bloc =>
+      BlocProvider.of<BlocxFormBloc<F, P, E>>(context);
 }
 
 /// Visual and layout options for [BlocXFormDropdown].

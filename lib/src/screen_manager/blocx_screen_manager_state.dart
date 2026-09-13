@@ -45,7 +45,8 @@ import 'package:flutter_blocx/src/widgets/blocx_snack_bar.dart';
 ///   return Scaffold(appBar: AppBar(title: Text('My Screen')), body: body);
 /// }
 /// ```
-abstract class BlocxScreenManagerState<T extends StatefulWidget> extends BlocXWidgetState<T> {
+abstract class BlocxScreenManagerState<T extends StatefulWidget>
+    extends BlocXWidgetState<T> {
   late final ScreenManagerCubit _managerCubit;
 
   @override
@@ -78,7 +79,9 @@ abstract class BlocxScreenManagerState<T extends StatefulWidget> extends BlocXWi
       body = mainWidget(context, state);
     }
 
-    return wrapInScaffold ? decorateScaffold(scaffoldWidget(context, body)) : SafeArea(child: body);
+    return wrapInScaffold
+        ? decorateScaffold(scaffoldWidget(context, body))
+        : SafeArea(child: body);
   }
 
   void _managerListener(BuildContext context, ScreenManagerCubitState state) {
@@ -102,7 +105,8 @@ abstract class BlocxScreenManagerState<T extends StatefulWidget> extends BlocXWi
     String? title,
     BlocXSnackbarType snackbarType,
   ) {
-    BlocxSnackBar.show(context, message: message, type: snackbarType, title: title);
+    BlocxSnackBar.show(context,
+        message: message, type: snackbarType, title: title);
   }
 
   /// Whether the body should be wrapped in a [Scaffold].
@@ -119,7 +123,7 @@ abstract class BlocxScreenManagerState<T extends StatefulWidget> extends BlocXWi
   /// Hook to decorate the scaffold returned by [scaffoldWidget].
   ///
   /// Called only when [wrapInScaffold] is `true`. Override to wrap the
-  /// scaffold with additional widgets (e.g. a [WillPopScope]).
+  /// scaffold with additional widgets (e.g. a [PopScope]).
   @protected
   Widget decorateScaffold(Widget scaffold) => scaffold;
 
