@@ -75,7 +75,7 @@ class _NoteTagFormState
 
   @override
   BlocxFormBloc<NoteTagFormData, NoteTagFormPayload, NoteTagFormKey>
-  generateBloc() => NoteTagFormBloc();
+  get generateBloc => NoteTagFormBloc();
 
   @override
   List<NoteTagFormKey> get keys => NoteTagFormKey.values;

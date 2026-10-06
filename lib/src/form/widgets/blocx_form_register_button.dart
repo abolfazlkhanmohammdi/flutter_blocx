@@ -19,8 +19,8 @@ import 'package:flutter_blocx/src/core/widgets/blocx_stateless_widget.dart';
 ///
 /// Set [BlocxFormRegisterButtonOptions.disableWhenInvalid] to `true` if the
 /// button should be disabled when [BlocxFormState.errors] is not empty.
-class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P,
-    E extends Enum> extends BlocxStatelessWidget {
+class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
+    extends BlocxStatelessWidget {
   /// The current form state.
   ///
   /// Used to determine the loading state, disabled state, and label text.
@@ -82,9 +82,7 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P,
 
   /// Whether the button should be disabled.
   bool get isDisabled {
-    return isBusy ||
-        (buttonOptions.disableWhenInvalid && !state.isFormValid) ||
-        state.errors.isNotEmpty;
+    return isBusy || (buttonOptions.disableWhenInvalid && !state.isFormValid) || state.errors.isNotEmpty;
   }
 
   @override
@@ -92,7 +90,7 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P,
     final disabled = isDisabled;
     final label = isSubmittingForm ? submitText : buttonText;
 
-    return switch (type) {
+    var widget = switch (type) {
       RegisterButtonType.elevated => buildElevatedButton(
           context,
           label: label,
@@ -119,6 +117,8 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P,
           disabled: disabled,
         ),
     };
+
+    return Tooltip(message: state.errors.values.join(".\n"), child: widget);
   }
 
   /// Builds an [ElevatedButton] variant.
@@ -149,7 +149,7 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P,
     required bool disabled,
   }) {
     return FilledButton(
-      style: buttonOptions.style ?? buttonOptions.filledStyle,
+      style: buttonOptions.filledStyle ?? buttonOptions.style,
       onPressed: _resolveOnPressed(context, disabled),
       child: _buildContent(context, label: label),
     );
@@ -208,8 +208,7 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P,
   BlocxFormWidgetState<BlocxFormWidget<P>, F, P, E> getState(
     BuildContext context,
   ) {
-    final formState = context.findAncestorStateOfType<
-        BlocxFormWidgetState<BlocxFormWidget<P>, F, P, E>>();
+    final formState = context.findAncestorStateOfType<BlocxFormWidgetState<BlocxFormWidget<P>, F, P, E>>();
 
     if (formState == null) {
       throw FlutterError(
@@ -245,8 +244,8 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P,
 
     if (!isBusy) return text;
 
-    final indicator = buttonOptions.loadingIndicatorBuilder?.call(context) ??
-        _defaultLoadingIndicator(context);
+    final indicator =
+        buttonOptions.loadingIndicatorBuilder?.call(context) ?? _defaultLoadingIndicator(context);
 
     return Row(
       mainAxisSize: MainAxisSize.min,

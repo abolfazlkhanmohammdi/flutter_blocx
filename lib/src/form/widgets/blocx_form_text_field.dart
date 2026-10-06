@@ -1,5 +1,4 @@
-import 'package:blocx_core/form_bloc.dart'
-    show BlocxBaseFormEntity, BlocxFormBloc, BlocxFormEventUpdateData;
+import 'package:blocx_core/form_bloc.dart' show BlocxBaseFormEntity, BlocxFormBloc, BlocxFormEventUpdateData;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,13 +20,13 @@ import 'package:flutter_blocx/flutter_blocx.dart';
 /// - [F]: The form entity type.
 /// - [P]: The form payload type.
 /// - [E]: The form field enum type.
-class BlocXFormTextField<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
-    extends StatefulWidget {
+class BlocXFormTextField<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum> extends StatefulWidget {
   /// The enum key that identifies this field in the form entity.
   final E formKey;
 
   /// The visual style variant used to build the default decoration.
   final TextFieldType textFieldType;
+  final TypeConverter? typeConverter;
 
   /// Optional external controller.
   ///
@@ -53,24 +52,23 @@ class BlocXFormTextField<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
     this.textFieldOptions = const BlocXTextFieldOptions(),
     this.controller,
     this.validator,
+    this.typeConverter,
   });
 
   @override
-  State<BlocXFormTextField<F, P, E>> createState() =>
-      BlocXFormTextFieldState<F, P, E>();
+  State<BlocXFormTextField<F, P, E>> createState() => BlocXFormTextFieldState<F, P, E>();
 }
 
 /// State for [BlocXFormTextField].
-class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P,
-    E extends Enum> extends BlocXWidgetState<BlocXFormTextField<F, P, E>> {
+class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
+    extends BlocXWidgetState<BlocXFormTextField<F, P, E>> {
   TextEditingController? _internalController;
 
   /// Whether this state owns and should dispose the active controller.
   bool get _ownsController => widget.controller == null;
 
   /// The active text controller.
-  TextEditingController get _controller =>
-      widget.controller ?? _internalController!;
+  TextEditingController get _controller => widget.controller ?? _internalController!;
 
   @override
   void initState() {
@@ -118,10 +116,10 @@ class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P,
       minLines: options.minLines,
       obscureText: options.obscureText,
       decoration: _buildDecoration(context),
-      onChanged: (text) {
+      onChanged: (String text) {
         bloc.add(
           BlocxFormEventUpdateData(
-            data: text,
+            data: widget.typeConverter == null ? text : widget.typeConverter!.call(text),
             key: widget.formKey,
           ),
         );
@@ -150,8 +148,7 @@ class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P,
   }
 
   /// The nearest [BlocxFormBloc] in the widget tree.
-  BlocxFormBloc<F, P, E> get bloc =>
-      BlocProvider.of<BlocxFormBloc<F, P, E>>(context);
+  BlocxFormBloc<F, P, E> get bloc => BlocProvider.of<BlocxFormBloc<F, P, E>>(context);
 
   /// Builds the [InputDecoration] for the active text field type and options.
   ///
@@ -192,9 +189,9 @@ class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P,
       suffixText: options.suffixText,
       filled: _shouldUseFilledBackground(options),
       fillColor: options.fillColor,
-      isDense: true,
-      contentPadding: options.contentPadding ??
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      isDense: options.isDense,
+      contentPadding: options.contentPadding,
+      constraints: options.constraints,
       border: _buildBorder(options),
     );
   }
@@ -233,8 +230,7 @@ class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P,
   }
 
   /// Whether a unique-field check is currently running for this field.
-  bool get isCheckingUniqueField =>
-      bloc.state.checkingUniqueFields.contains(widget.formKey);
+  bool get isCheckingUniqueField => bloc.state.checkingUniqueFields.contains(widget.formKey);
 
   /// Returns the trailing-content widget for the field (physical right,
   /// regardless of locale — see [_buildDecoration]).
@@ -257,9 +253,7 @@ class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P,
 
     if (options.suffix != null) return options.suffix;
 
-    final canShowClear = options.showClearButton &&
-        !options.obscureText &&
-        _controller.text.isNotEmpty;
+    final canShowClear = options.showClearButton && !options.obscureText && _controller.text.isNotEmpty;
 
     if (!canShowClear) return null;
 
@@ -287,9 +281,7 @@ class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P,
   /// Falls back to [BlocXTextFieldOptions.errorText] when the bloc has no error
   /// for [widget.formKey].
   String? getErrorText(BlocXTextFieldOptions options) {
-    final index = bloc.state.errors.keys
-        .toList()
-        .indexWhere((key) => key == widget.formKey);
+    final index = bloc.state.errors.keys.toList().indexWhere((key) => key == widget.formKey);
 
     if (index >= 0) {
       return bloc.state.errors.values.toList()[index].first;
@@ -449,6 +441,16 @@ class BlocXTextFieldOptions {
   /// Content padding inside the field.
   final EdgeInsetsGeometry? contentPadding;
 
+  /// Whether the input decorator is dense.
+  ///
+  /// When null, falls back to ambient [InputDecorationTheme.isDense].
+  final bool? isDense;
+
+  /// Defines minimum and maximum sizes for the input decorator.
+  ///
+  /// When null, falls back to ambient [InputDecorationTheme.constraints].
+  final BoxConstraints? constraints;
+
   /// Creates text field configuration options.
   const BlocXTextFieldOptions({
     this.decoration,
@@ -484,6 +486,8 @@ class BlocXTextFieldOptions {
     this.fillColor,
     this.borderRadius,
     this.contentPadding,
+    this.isDense,
+    this.constraints,
     this.errorMaxLines = 1,
     this.enabled = true,
   });
@@ -527,6 +531,8 @@ extension BlocXTextFieldOptionsCopyWith on BlocXTextFieldOptions {
     Color? fillColor,
     BorderRadius? borderRadius,
     EdgeInsetsGeometry? contentPadding,
+    bool? isDense,
+    BoxConstraints? constraints,
   }) {
     return BlocXTextFieldOptions(
         decoration: decoration ?? this.decoration,
@@ -562,7 +568,11 @@ extension BlocXTextFieldOptionsCopyWith on BlocXTextFieldOptions {
         fillColor: fillColor ?? this.fillColor,
         borderRadius: borderRadius ?? this.borderRadius,
         contentPadding: contentPadding ?? this.contentPadding,
+        isDense: isDense ?? this.isDense,
+        constraints: constraints ?? this.constraints,
         suffixText: suffixText ?? this.suffixText,
         suffixStyle: suffixStyle ?? this.suffixStyle);
   }
 }
+
+typedef TypeConverter<T> = T Function(String value);

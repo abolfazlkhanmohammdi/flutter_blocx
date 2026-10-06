@@ -16,10 +16,7 @@ import 'package:flutter_blocx/src/screen_manager/blocx_screen_manager_state.dart
 /// - [F]: The immutable form entity type.
 /// - [P]: The optional payload type for edit/update forms.
 /// - [E]: The form field enum type.
-abstract class BlocxFormWidgetState<
-    W extends BlocxFormWidget<P>,
-    F extends BlocxBaseFormEntity<F, E>,
-    P,
+abstract class BlocxFormWidgetState<W extends BlocxFormWidget<P>, F extends BlocxBaseFormEntity<F, E>, P,
     E extends Enum> extends BlocxScreenManagerState<W> {
   /// The form bloc that drives this screen.
   ///
@@ -31,7 +28,7 @@ abstract class BlocxFormWidgetState<
 
   @override
   void initState() {
-    bloc = generateBloc();
+    bloc = generateBloc;
     bloc.add(BlocxFormEventInit(payload: widget.payload));
     super.initState();
   }
@@ -39,7 +36,7 @@ abstract class BlocxFormWidgetState<
   /// Instantiates the [BlocxFormBloc] for this screen.
   ///
   /// Called once in [initState]. Inject dependencies here.
-  BlocxFormBloc<F, P, E> generateBloc();
+  BlocxFormBloc<F, P, E> get generateBloc;
 
   @override
   Widget mainWidget(BuildContext context, ScreenManagerCubitState state) {
@@ -65,8 +62,7 @@ abstract class BlocxFormWidgetState<
     } else if (state is BlocxFormStateFormSubmitted<F, E>) {
       onFormSubmitted(state);
     } else if (state is BlocxFormStateFormUpdated<F, E>) {
-      onFormUpdated(
-          state.formData, state.updatedKey, state.oldValue, state.newValue);
+      onFormUpdated(state.formData, state.updatedKey, state.oldValue, state.newValue);
     }
   }
 
@@ -80,27 +76,26 @@ abstract class BlocxFormWidgetState<
   ///
   /// Frequently used values can be passed directly. Direct parameters override
   /// their corresponding values in [options].
-  BlocXFormTextField<F, P, E> textField(
-    E key, {
-    BlocXTextFieldOptions? options,
-    FormFieldValidator<String>? validator,
-    TextFieldType? type,
-    String? labelText,
-    String? hintText,
-    String? helperText,
-    Widget? prefix,
-    Widget? suffix,
-    TextInputType? keyboardType,
-    TextInputAction? textInputAction,
-    bool? obscureText,
-    bool? enabled,
-    bool? autofocus,
-    bool? showClearButton,
-    int? maxLines,
-    int? errorMaxLines,
-    int? minLines,
-    int? maxLength,
-  }) {
+  BlocXFormTextField<F, P, E> textField(E key,
+      {BlocXTextFieldOptions? options,
+      FormFieldValidator<String>? validator,
+      TextFieldType? type,
+      String? labelText,
+      String? hintText,
+      String? helperText,
+      Widget? prefix,
+      Widget? suffix,
+      TextInputType? keyboardType,
+      TextInputAction? textInputAction,
+      bool? obscureText,
+      bool? enabled,
+      bool? autofocus,
+      bool? showClearButton,
+      int? maxLines,
+      int? errorMaxLines,
+      int? minLines,
+      int? maxLength,
+      TypeConverter? converter}) {
     final resolvedOptions = (options ?? const BlocXTextFieldOptions()).copyWith(
         labelText: labelText,
         hintText: hintText,
@@ -119,13 +114,13 @@ abstract class BlocxFormWidgetState<
         errorMaxLines: errorMaxLines);
 
     return BlocXFormTextField<F, P, E>(
-      key: ValueKey<E>(key),
-      formKey: key,
-      textFieldOptions: resolvedOptions,
-      controller: getTextEditingController(key),
-      validator: validator,
-      textFieldType: type ?? defaultTextFieldType,
-    );
+        key: ValueKey<E>(key),
+        formKey: key,
+        textFieldOptions: resolvedOptions,
+        controller: getTextEditingController(key),
+        validator: validator,
+        textFieldType: type ?? defaultTextFieldType,
+        typeConverter: converter);
   }
 
   /// Builds a [BlocxFormRegisterButton] connected to the current form [state].
@@ -160,8 +155,7 @@ abstract class BlocxFormWidgetState<
       formState: state,
       registerText: registerText,
       registerSubmittingText: registerSubmittingText ?? registerText,
-      secondButtonText:
-          secondButtonText ?? BlocXLocalizations.localizations.cancel,
+      secondButtonText: secondButtonText ?? BlocXLocalizations.localizations.cancel,
       onRegisterPressed: state.isValid ? onRegisterPressed : null,
       onSecondButtonPressed: onSecondButtonPressed,
       registerType: registerType ?? RegisterButtonType.filled,
@@ -245,8 +239,7 @@ abstract class BlocxFormWidgetState<
       final controller = _getTextEditingControllerIfExists(key);
       if (controller == null) continue;
 
-      final value =
-          formData.getFormattedValueByKey(key) ?? formData.getValueByKey(key);
+      final value = formData.getFormattedValueByKey(key) ?? formData.getValueByKey(key);
 
       controller.text = value?.toString() ?? '';
     }

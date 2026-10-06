@@ -32,7 +32,7 @@ abstract class BlocxStatefulCollectionItem<T extends BlocxBaseEntity>
 abstract class BlocxCollectionItemState<
     W extends BlocxStatefulCollectionItem<T>,
     T extends BlocxBaseEntity,
-    P> extends State<W> {
+    P> extends BlocXWidgetState<W> {
   /// Provide the item this row represents.
   ///
   /// Default implementation tries to read `widget.item`. If your widget uses a
