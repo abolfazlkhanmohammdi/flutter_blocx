@@ -115,10 +115,7 @@ class NotesJsonRepository extends FakeRepository {
     }
 
     if (userId != null || (userIds != null && userIds.isNotEmpty)) {
-      final Set<int> allowedUsers = {
-        if (userId != null) userId,
-        if (userIds != null) ...userIds,
-      }.toSet();
+      final Set<int> allowedUsers = {?userId, ...?userIds}.toSet();
 
       results = results.where((n) {
         final t = tagById[(n['tagId'] as num?)?.toInt() ?? -1];
@@ -170,9 +167,9 @@ class NotesJsonRepository extends FakeRepository {
 
       return <String, dynamic>{
         ...n,
-        if (uid != null) 'userId': uid,
-        if (tagJson != null) 'noteTag': tagJson,
-        if (userJson != null) 'user': userJson,
+        'userId': ?uid,
+        'noteTag': ?tagJson,
+        'user': ?userJson,
       };
     }).toList();
 
@@ -224,10 +221,10 @@ class NotesJsonRepository extends FakeRepository {
     final current = Map<String, dynamic>.from(_notes[idx]);
     final updated = {
       ...current,
-      if (title != null) 'title': title,
-      if (content != null) 'content': content,
-      if (isPinned != null) 'isPinned': isPinned,
-      if (isArchived != null) 'isArchived': isArchived,
+      'title': ?title,
+      'content': ?content,
+      'isPinned': ?isPinned,
+      'isArchived': ?isArchived,
       'updatedAt': DateTime.now().toIso8601String(),
     };
 
@@ -341,9 +338,9 @@ class NotesJsonRepository extends FakeRepository {
 
       return <String, dynamic>{
         ...n,
-        if (tagJson != null) 'noteTag': tagJson,
-        if (userJson != null) 'user': userJson,
-        if (uid != null) 'userId': uid,
+        'noteTag': ?tagJson,
+        'user': ?userJson,
+        'userId': ?uid,
       };
     }).toList();
 

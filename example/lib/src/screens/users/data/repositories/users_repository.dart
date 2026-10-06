@@ -154,11 +154,11 @@ class UserJsonRepository extends FakeRepository implements BlocxBaseEntity {
 
     final updated = {
       ...current,
-      if (displayName != null) 'displayName': displayName,
-      if (newUsername != null) 'username': newUsername,
-      if (email != null) 'email': email,
-      if (avatarUrl != null) 'avatarUrl': avatarUrl,
-      if (isActive != null) 'isActive': isActive,
+      'displayName': ?displayName,
+      'username': ?newUsername,
+      'email': ?email,
+      'avatarUrl': ?avatarUrl,
+      'isActive': ?isActive,
       'updatedAt': DateTime.now().toIso8601String(),
     };
 

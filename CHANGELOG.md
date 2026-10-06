@@ -24,8 +24,10 @@
   * `BlocXFormTextField` now forwards `options.isDense`, `options.contentPadding`, and `options.constraints` directly to `InputDecoration` instead of forcing `isDense: true` and a hardcoded `EdgeInsets.symmetric(horizontal: 16, vertical: 16)` fallback.
 * **`BlocxFormRegisterButton` Disabled State**
   * `BlocxFormRegisterButton.isDisabled` now also disables the button when `state.errors.isNotEmpty`.
-* **Documentation Overhaul**
-  * Rebuilt `README.md` with concise architecture guides, side-by-side comparisons, and cross-package `blocx_core` + `flutter_blocx` quickstarts.
+* **Full Web & WASM Platform Compatibility**
+  * Removed the unused `logger` dependency and paired with `blocx_core: ^1.0.0` for 100% Web and WASM runtime support across all 6 Flutter platforms.
+* **Documentation & Pub Score Improvements**
+  * Rebuilt `README.md` with concise architecture guides, side-by-side comparisons, and cross-package `blocx_core` + `flutter_blocx` quickstarts, and expanded `pubspec.yaml` metadata.
 
 ### Fixed
 

@@ -15,7 +15,8 @@ class NotesScreen extends BlocxCollectionWidget<(NoteTag, User)> {
   State<NotesScreen> createState() => _NotesScreenState();
 }
 
-class _NotesScreenState extends BlocxCollectionWidgetState<NotesScreen, Note, (NoteTag, User)> {
+class _NotesScreenState
+    extends BlocxCollectionWidgetState<NotesScreen, Note, (NoteTag, User)> {
   @override
   Widget itemBuilder(BuildContext context, Note item) {
     return NoteCard(item: item);
@@ -43,10 +44,14 @@ class _NotesScreenState extends BlocxCollectionWidgetState<NotesScreen, Note, (N
     return Card(
       margin: EdgeInsets.zero,
       color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(bottom: Radius.circular(16))),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: searchField(options: BlocxSearchFieldOptions(hintText: "Type to search")),
+        child: searchField(
+          options: BlocxSearchFieldOptions(hintText: "Type to search"),
+        ),
       ),
     );
   }
@@ -58,7 +63,9 @@ class _NotesScreenState extends BlocxCollectionWidgetState<NotesScreen, Note, (N
       child: Card(
         margin: EdgeInsets.zero,
         color: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
           child: Column(
@@ -68,7 +75,8 @@ class _NotesScreenState extends BlocxCollectionWidgetState<NotesScreen, Note, (N
                 min: 0,
                 max: state.list.length - 1,
                 buttonLabel: "Scroll to this item",
-                onSubmit: (index) => scrollToItem(state.list[index], highlightItem: true),
+                onSubmit: (index) =>
+                    scrollToItem(state.list[index], highlightItem: true),
               ),
               AnimatedContainer(
                 width: MediaQuery.sizeOf(context).width,
@@ -77,16 +85,24 @@ class _NotesScreenState extends BlocxCollectionWidgetState<NotesScreen, Note, (N
                   children: [
                     if (state.selectedCount > 0) ...[
                       Expanded(
-                        child: Text("${state.selectedCount} items are selected", textAlign: TextAlign.center),
+                        child: Text(
+                          "${state.selectedCount} items are selected",
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                       IconButton(
-                        onPressed: () => deleteMultipleItems(state.selectedItems),
+                        onPressed: () =>
+                            deleteMultipleItems(state.selectedItems),
                         icon: state.beingRemovedItemIds.isNotEmpty
-                            ? SizedBox.square(dimension: 16, child: CircularProgressIndicator())
+                            ? SizedBox.square(
+                                dimension: 16,
+                                child: CircularProgressIndicator(),
+                              )
                             : Icon(Icons.delete, color: Colors.red),
                       ),
                       IconButton(
-                        onPressed: () => deselectMultipleItems(state.selectedItems),
+                        onPressed: () =>
+                            deselectMultipleItems(state.selectedItems),
                         icon: Icon(Icons.deselect, color: colorScheme.primary),
                       ),
                     ],
@@ -96,9 +112,13 @@ class _NotesScreenState extends BlocxCollectionWidgetState<NotesScreen, Note, (N
               if (payload != null) ...[
                 SizedBox(height: 16),
                 FilledButton(
-                  style: FilledButton.styleFrom(shape: RoundedRectangleBorder(), padding: EdgeInsets.all(24)),
-                  onPressed: () =>
-                      Navigator.of(context).push(MaterialPageRoute(builder: (_) => NotesScreen())),
+                  style: FilledButton.styleFrom(
+                    shape: RoundedRectangleBorder(),
+                    padding: EdgeInsets.all(24),
+                  ),
+                  onPressed: () => Navigator.of(
+                    context,
+                  ).push(MaterialPageRoute(builder: (_) => NotesScreen())),
                   child: Text("show all notes"),
                 ),
               ],

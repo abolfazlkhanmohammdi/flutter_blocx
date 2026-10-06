@@ -16,7 +16,10 @@ import 'package:flutter_blocx/src/screen_manager/blocx_screen_manager_state.dart
 /// - [F]: The immutable form entity type.
 /// - [P]: The optional payload type for edit/update forms.
 /// - [E]: The form field enum type.
-abstract class BlocxFormWidgetState<W extends BlocxFormWidget<P>, F extends BlocxBaseFormEntity<F, E>, P,
+abstract class BlocxFormWidgetState<
+    W extends BlocxFormWidget<P>,
+    F extends BlocxBaseFormEntity<F, E>,
+    P,
     E extends Enum> extends BlocxScreenManagerState<W> {
   /// The form bloc that drives this screen.
   ///
@@ -62,7 +65,8 @@ abstract class BlocxFormWidgetState<W extends BlocxFormWidget<P>, F extends Bloc
     } else if (state is BlocxFormStateFormSubmitted<F, E>) {
       onFormSubmitted(state);
     } else if (state is BlocxFormStateFormUpdated<F, E>) {
-      onFormUpdated(state.formData, state.updatedKey, state.oldValue, state.newValue);
+      onFormUpdated(
+          state.formData, state.updatedKey, state.oldValue, state.newValue);
     }
   }
 
@@ -155,7 +159,8 @@ abstract class BlocxFormWidgetState<W extends BlocxFormWidget<P>, F extends Bloc
       formState: state,
       registerText: registerText,
       registerSubmittingText: registerSubmittingText ?? registerText,
-      secondButtonText: secondButtonText ?? BlocXLocalizations.localizations.cancel,
+      secondButtonText:
+          secondButtonText ?? BlocXLocalizations.localizations.cancel,
       onRegisterPressed: state.isValid ? onRegisterPressed : null,
       onSecondButtonPressed: onSecondButtonPressed,
       registerType: registerType ?? RegisterButtonType.filled,
@@ -239,7 +244,8 @@ abstract class BlocxFormWidgetState<W extends BlocxFormWidget<P>, F extends Bloc
       final controller = _getTextEditingControllerIfExists(key);
       if (controller == null) continue;
 
-      final value = formData.getFormattedValueByKey(key) ?? formData.getValueByKey(key);
+      final value =
+          formData.getFormattedValueByKey(key) ?? formData.getValueByKey(key);
 
       controller.text = value?.toString() ?? '';
     }

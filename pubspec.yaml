@@ -1,9 +1,9 @@
 name: flutter_blocx
-description: Ui widgets to work with blocx_core.
+description: Flutter UI widgets for paginated lists, infinite grids, slivers, reactive forms, and screen state management powered by blocx_core.
 version: 1.0.0
 repository: https://github.com/abolfazlkhanmohammdi/flutter_blocx
 issue_tracker: https://github.com/abolfazlkhanmohammdi/flutter_blocx/issues
-topics: [bloc, architecture, lists, forms]
+topics: [bloc, architecture, lists, forms, flutter]
 environment:
   sdk: ">=3.5.0 <4.0.0"
 
@@ -14,7 +14,6 @@ dependencies:
   flutter_bloc: ^9.1.1
   implicitly_animated_list: ^2.3.0
   visibility_detector: ^0.4.0+2
-  logger: ^2.8.0
   scroll_to_index: ^3.0.1
 
 dev_dependencies:
