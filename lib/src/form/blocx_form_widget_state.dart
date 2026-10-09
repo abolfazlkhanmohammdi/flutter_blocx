@@ -36,6 +36,17 @@ abstract class BlocxFormWidgetState<
     super.initState();
   }
 
+  @override
+  void onRetry(BuildContext context) {
+    super.onRetry(context);
+    reload();
+  }
+
+  /// Re-initializes the form with [widget.payload].
+  void reload() {
+    bloc.add(BlocxFormEventInit(payload: widget.payload));
+  }
+
   /// Instantiates the [BlocxFormBloc] for this screen.
   ///
   /// Called once in [initState]. Inject dependencies here.

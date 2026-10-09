@@ -50,6 +50,21 @@ abstract class BlocxCollectionWidgetState<
   }
 
   @override
+  void onRetry(BuildContext context) {
+    super.onRetry(context);
+    reload();
+  }
+
+  /// Triggers a reload of the initial collection page using [widget.payload].
+  void reload() {
+    _bloc.add(
+      BlocxCollectionEventLoadInitialPage<Entity, Payload>(
+        payload: widget.payload,
+      ),
+    );
+  }
+
+  @override
   Widget mainWidget(BuildContext context, ScreenManagerCubitState state) {
     return BlocProvider<BlocxCollectionBloc<Entity, Payload>>.value(
       value: _bloc,

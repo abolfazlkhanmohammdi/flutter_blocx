@@ -91,9 +91,34 @@ abstract class BlocxScreenManagerState<T extends StatefulWidget>
       final message = loc.errorCodeMessage(state.errorCode);
       displaySnackBar(context, message, null, state.snackbarType);
     } else if (state is ScreenManagerCubitStatePop) {
-      Navigator.of(context).maybePop();
+      onPop(context);
     }
   }
+
+  /// Callback invoked when a [ScreenManagerCubitStatePop] event is received.
+  ///
+  /// Defaults to `Navigator.of(context).maybePop()`. Override to customize
+  /// back-navigation behavior for declarative routers such as `go_router` or `auto_route`.
+  @protected
+  void onPop(BuildContext context) {
+    Navigator.of(context).maybePop();
+  }
+
+  /// Handles user retry action from a full-page error widget.
+  ///
+  /// Calls [ScreenManagerCubit.clearError] to dismiss the full-page error,
+  /// followed by [onRetry].
+  @protected
+  void handleRetry(BuildContext context) {
+    _managerCubit.clearError();
+    onRetry(context);
+  }
+
+  /// Hook called during [handleRetry] after [managerCubit.clearError].
+  ///
+  /// Override in subclasses to reload or refresh screen data.
+  @protected
+  void onRetry(BuildContext context) {}
 
   /// Shows a [BlocxSnackBar] with the given parameters.
   ///
@@ -136,7 +161,10 @@ abstract class BlocxScreenManagerState<T extends StatefulWidget>
     BuildContext context,
     ScreenManagerCubitStateDisplayErrorPage state,
   ) {
-    return BlocxErrorWidget.fromState(state);
+    return BlocxErrorWidget.fromState(
+      state,
+      onRetry: () => handleRetry(context),
+    );
   }
 
   /// Builds the full-page error widget for
@@ -157,7 +185,10 @@ abstract class BlocxScreenManagerState<T extends StatefulWidget>
       error: state.error,
       stackTrace: state.stackTrace,
     );
-    return BlocxErrorWidget(error: readable);
+    return BlocxErrorWidget(
+      error: readable,
+      onRetry: () => handleRetry(context),
+    );
   }
 
   /// The primary screen content.

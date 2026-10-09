@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  blocx_core: ^1.0.1
+  blocx_core: ^1.1.0
   flutter_bloc: ^9.1.1
   implicitly_animated_list: ^2.3.0
   visibility_detector: ^0.4.0+2

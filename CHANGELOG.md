@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.0] - Unreleased
+
+### Added
+* Added retry support to default `errorWidget` and `errorWidgetByErrorCode` in `BlocxScreenManagerState`, invoking `managerCubit.clearError()` to dismiss full-page errors followed by the `onRetry(BuildContext)` hook (overridden in `BlocxCollectionWidgetState` and `BlocxFormWidgetState` to automatically reload data).
+* Added `onPop(BuildContext)` hook in `BlocxScreenManagerState` (defaulting to `Navigator.of(context).maybePop()`) to enable custom navigation handling for declarative routing solutions (`go_router`, `auto_route`).
+
 ## [1.0.1] - 2026-10-09
 
 ### Documentation
