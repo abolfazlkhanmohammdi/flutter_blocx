@@ -127,8 +127,8 @@ class SliverBlocxInfiniteListState<Entity extends BlocxBaseEntity>
             slivers.add(widget.sliverBottom!);
           }
 
-          return NotificationListener<UserScrollNotification>(
-            onNotification: (n) => _onScroll(n),
+          return NotificationListener<ScrollNotification>(
+            onNotification: (n) => _handleScrollNotification(n, state),
             child: Listener(
               onPointerDown: (d) => bloc.add(
                   BlocxInfiniteListEventVerticalDragStarted(
@@ -154,6 +154,43 @@ class SliverBlocxInfiniteListState<Entity extends BlocxBaseEntity>
         },
       ),
     );
+  }
+
+  bool _handleScrollNotification(
+      ScrollNotification n, BlocxInfiniteListState state) {
+    if (n is UserScrollNotification) {
+      _onScroll(n);
+    }
+    _checkScrollExtentLoadMore(n.metrics, state);
+    return false;
+  }
+
+  bool _isTriggeringLoadMore = false;
+
+  void _checkScrollExtentLoadMore(
+      ScrollMetrics metrics, BlocxInfiniteListState state) {
+    if (!state.isLoadingMore && !bloc.state.isLoadingMore) {
+      _isTriggeringLoadMore = false;
+    }
+
+    if (_isTriggeringLoadMore ||
+        state.isLoadingMore ||
+        bloc.state.isLoadingMore ||
+        state.hasReachedEnd ||
+        state.isScrollingUp ||
+        widget.loadBottomData == null) {
+      return;
+    }
+
+    final nearBottom = options.reverse
+        ? metrics.extentBefore <= 150.0
+        : metrics.extentAfter <= 150.0;
+
+    if (nearBottom && metrics.maxScrollExtent > 0) {
+      _isTriggeringLoadMore = true;
+      bloc.setLoadingBottomStatus(true);
+      widget.loadBottomData!.call();
+    }
   }
 
   bool _onScroll(UserScrollNotification n) {

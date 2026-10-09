@@ -118,23 +118,57 @@ class InfiniteListWidgetState<Entity extends BlocxBaseEntity>
   Widget maybeSetupRefresh(BlocxInfiniteListState state,
       {required Widget child}) {
     if (!widget.isRefreshable) return child;
-    return NotificationListener<UserScrollNotification>(
-      onNotification: onScroll,
-      child: Listener(
-        onPointerDown: (d) => bloc.add(
-            BlocxInfiniteListEventVerticalDragStarted(globalY: d.position.dy)),
-        onPointerUp: (d) => bloc.add(BlocxInfiniteListEventVerticalDragEnded()),
-        onPointerMove: maySwipe
-            ? (d) => bloc.add(BlocxInfiniteListEventVerticalDragUpdated(
-                globalY: d.position.dy))
-            : null,
-        onPointerCancel: maySwipe
-            ? (_) => bloc
-                .add(BlocxInfiniteListEventVerticalDragUpdated(globalY: null))
-            : null,
-        child: child,
-      ),
+    return Listener(
+      onPointerDown: (d) => bloc.add(
+          BlocxInfiniteListEventVerticalDragStarted(globalY: d.position.dy)),
+      onPointerUp: (d) => bloc.add(BlocxInfiniteListEventVerticalDragEnded()),
+      onPointerMove: maySwipe
+          ? (d) => bloc.add(
+              BlocxInfiniteListEventVerticalDragUpdated(globalY: d.position.dy))
+          : null,
+      onPointerCancel: maySwipe
+          ? (_) =>
+              bloc.add(BlocxInfiniteListEventVerticalDragUpdated(globalY: null))
+          : null,
+      child: child,
     );
+  }
+
+  bool _handleScrollNotification(
+      ScrollNotification n, BlocxInfiniteListState state) {
+    if (n is UserScrollNotification) {
+      onScroll(n);
+    }
+    _checkScrollExtentLoadMore(n.metrics, state);
+    return false;
+  }
+
+  bool _isTriggeringLoadMore = false;
+
+  void _checkScrollExtentLoadMore(
+      ScrollMetrics metrics, BlocxInfiniteListState state) {
+    if (!state.isLoadingMore && !bloc.state.isLoadingMore) {
+      _isTriggeringLoadMore = false;
+    }
+
+    if (_isTriggeringLoadMore ||
+        state.isLoadingMore ||
+        bloc.state.isLoadingMore ||
+        state.hasReachedEnd ||
+        state.isScrollingUp ||
+        widget.loadBottomData == null) {
+      return;
+    }
+
+    final nearBottom = options.reverse
+        ? metrics.extentBefore <= 150.0
+        : metrics.extentAfter <= 150.0;
+
+    if (nearBottom && metrics.maxScrollExtent > 0) {
+      _isTriggeringLoadMore = true;
+      bloc.setLoadingBottomStatus(true);
+      widget.loadBottomData!();
+    }
   }
 
   bool get _atTopByController =>
@@ -274,16 +308,19 @@ class InfiniteListWidgetState<Entity extends BlocxBaseEntity>
   }
 
   Widget _plainList(BuildContext context, BlocxInfiniteListState state) {
-    return ListView.separated(
-      controller: widget.scrollController ?? effectiveController,
-      physics: options.scrollPhysics ?? const AlwaysScrollableScrollPhysics(),
-      shrinkWrap: options.shrinkWrap,
-      itemCount: widget.items.length,
-      padding: options.padding,
-      reverse: options.reverse,
-      separatorBuilder:
-          widget.separatorBuilder ?? (_, __) => const SizedBox(height: 8),
-      itemBuilder: (c, i) => _itemBuilder(c, widget.items[i], i, state),
+    return NotificationListener<ScrollNotification>(
+      onNotification: (n) => _handleScrollNotification(n, state),
+      child: ListView.separated(
+        controller: widget.scrollController ?? effectiveController,
+        physics: options.scrollPhysics ?? const AlwaysScrollableScrollPhysics(),
+        shrinkWrap: options.shrinkWrap,
+        itemCount: widget.items.length,
+        padding: options.padding,
+        reverse: options.reverse,
+        separatorBuilder:
+            widget.separatorBuilder ?? (_, __) => const SizedBox(height: 8),
+        itemBuilder: (c, i) => _itemBuilder(c, widget.items[i], i, state),
+      ),
     );
   }
 }
