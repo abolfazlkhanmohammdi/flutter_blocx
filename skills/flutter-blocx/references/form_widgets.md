@@ -58,6 +58,7 @@ abstract class BlocxFormWidgetState<
     }
     ```
   - *(Note: If you rely on the default `applyInitialDataToForm`, your `BlocxBaseFormEntity` subclass **must** override `getFormattedValueByKey(E key)` so it does not throw `UnimplementedError`!)*
+  - **Cursor Preservation**: The default `applyInitialDataToForm` checks whether `controller.text` differs from the new value before mutating. When updated, it preserves the cursor selection clamped to the new string length (`TextSelection.collapsed(offset: min(controller.selection.end, text.length))`), preventing cursor jumps during active stream sync.
 - **`void onFormSubmitted(BlocxFormStateFormSubmitted<F, E> state)`**
   - Called when form submission completes and emits `BlocxFormStateFormSubmitted<F, E>`. Access the UseCase result data via `state.submittedData` (e.g., `Navigator.of(context).pop(state.submittedData)`).
 - **`void onFormUpdated(F formData, E updatedKey, dynamic oldValue, dynamic newValue)`**
@@ -183,6 +184,7 @@ checkbox(
 ```dart
 submitButton(
   isUpdate ? 'Update' : 'Create',
+  formState: state, // optional snapshot state (avoids reading live bloc fields)
   submitText: 'Saving...',
   type: RegisterButtonType.filled, // .filled, .elevated, .outlined, .text, .other
   options: const BlocxFormRegisterButtonOptions(
@@ -198,6 +200,7 @@ submitButton(
   - `isBusy`: `isSubmittingForm || isCheckingUniqueFields || isFetchingFieldInfo` (shows a 16×16 loading spinner next to the label)
   - `isDisabled`: `isBusy || (buttonOptions.disableWhenInvalid && !state.isFormValid) || state.errors.isNotEmpty`
 - When `onPressed` is omitted, tapping resolves the nearest `BlocxFormWidgetState` ancestor and calls `submit()`.
+- Pass `formState: state` from `formWidget(context, state)` so the button renders directly from the current immutable state snapshot rather than reading live mutable bloc fields.
 
 ### Submit + Cancel Button Row (`formButtonRow` / `BlocxFormButtonRow<F, P, E>`)
 Renders a horizontal row with a primary `BlocxFormRegisterButton` and a secondary cancel `OutlinedButton` (which defaults to `Navigator.of(context).maybePop()` and disables popping while submitting):
@@ -218,10 +221,11 @@ BlocxFormButtonRow<ProfileFormEntity, UserProfileEntity, ProfileFormField>(
   ),
 )
 ```
-- You can also call the `formButtonRow(...)` helper on `BlocxFormWidgetState` when providing an explicit `onRegisterPressed: submit` callback:
+- You can also call the `formButtonRow(...)` helper on `BlocxFormWidgetState`, which also supports `formState: state`:
   ```dart
   formButtonRow(
     isUpdate ? 'Save Changes' : 'Register',
+    formState: state,
     registerSubmittingText: 'Saving...',
     onRegisterPressed: submit,
   )

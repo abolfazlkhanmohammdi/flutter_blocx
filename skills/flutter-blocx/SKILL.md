@@ -54,7 +54,7 @@ Both `Blocx...` and `BlocX...` spellings are exported for classes that historica
 
 ---
 
-## 2. Seven Critical Rules & Gotchas
+## 2. Eight Critical Rules & Gotchas
 
 ### Rule 1: Exact Generic Type Signatures
 Never guess or reorder generic type parameters on `flutter_blocx` classes:
@@ -152,6 +152,11 @@ When `BlocxFormEventInit(payload: widget.payload)` runs in `BlocxFormWidgetState
 - **`BlocXWidgetState` / `BlocxWidgetState` Theme & Size Getters**:
   - `BlocxScreenManagerState`, `BlocxCollectionWidgetState`, `BlocxFormWidgetState`, and `BlocxCollectionItemState` all extend `BlocXWidgetState<W>`, exposing `theme`, `textTheme`, `colorScheme`, `width`, and `height` getters directly without passing `BuildContext`.
 - **Localization (`loc`)**: Ensure `BlocXLocalizations.localizations` is initialized at app startup (or in test `setUpAll`) if you use a custom localization subclass, because widgets read `loc` (`BlocXLocalizations.localizations`) for default labels (`loc.loadingText`, `loc.emptyListText`, `loc.cancel`, `loc.delete`, `loc.tryAgain`, etc.).
+
+### Rule 8: Immutable State Snapshot Reading & Initial Load Error Retries
+- **Collection Error Retries**: `BlocxCollectionWidgetState` automatically renders `collectionErrorWidget` (`BlocxErrorWidget` with a retry callback triggering `refreshData()`) whenever initial load fails (`BlocxCollectionStateError`). Avoid endless loading spinners or blank screens by leaving this intact or overriding `collectionErrorWidget` with custom retry UI.
+- **Snapshot Reading in Form Helpers**: Always pass `formState: state` when calling `submitButton(..., formState: state)` or `formButtonRow(..., formState: state)` within `formWidget(context, state)`. This guarantees busy/disabled button states evaluate the immutable snapshot rather than reading live mutable bloc fields.
+- **Identifier-Based Item Indexing**: `BlocxCollectionItem.index(context)` resolves indices via `state.indexOfId(item.identifier)` rather than reference equality, ensuring resilient lookup across state emissions. Lists also pass builder indices directly to avoid $O(n^2)$ lookup passes.
 
 ---
 
