@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.1] - Unreleased
+## [1.0.1] - 2026-10-09
 
 ### Documentation
 * Recorded baseline test and analysis results in `docs/fix-notes.md`.
