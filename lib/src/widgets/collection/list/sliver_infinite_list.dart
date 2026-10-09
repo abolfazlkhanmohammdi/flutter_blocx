@@ -259,10 +259,8 @@ class SliverBlocxInfiniteListState<Entity extends BlocxBaseEntity>
         child: child);
   }
 
-  Widget _animatedItemWithOptionalSeparator(
-      BuildContext context, Entity data, BlocxInfiniteListState state) {
-    final index = widget.items.indexOf(data);
-
+  Widget _animatedItemWithOptionalSeparator(BuildContext context, Entity data,
+      int index, BlocxInfiniteListState state) {
     final isBottomLoadingTrigger =
         index == (widget.items.length - options.loadMoreTriggerItemDistance) &&
             !state.hasReachedEnd;
@@ -291,8 +289,8 @@ class SliverBlocxInfiniteListState<Entity extends BlocxBaseEntity>
       BuildContext context, BlocxInfiniteListState state) {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
-        (c, i) =>
-            _animatedItemWithOptionalSeparator(context, widget.items[i], state),
+        (c, i) => _animatedItemWithOptionalSeparator(
+            context, widget.items[i], i, state),
         childCount: widget.items.length,
       ),
     );

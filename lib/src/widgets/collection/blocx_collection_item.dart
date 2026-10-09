@@ -148,7 +148,8 @@ abstract class BlocxCollectionItem<T extends BlocxBaseEntity, P>
   // Dispatch helpers (validated)
   // ---------------------------------------------------------------------------
 
-  int index(BuildContext context) => bloc(context).list.indexOf(item);
+  int index(BuildContext context) =>
+      bloc(context).state.indexOfId(item.identifier);
 
   @protected
   void removeItem(BuildContext context) {

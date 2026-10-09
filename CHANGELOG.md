@@ -12,6 +12,7 @@
 ### Fixed
 * Handled `BlocxCollectionStateError` in `BlocxCollectionWidgetState`, displaying `collectionErrorWidget` (`BlocxErrorWidget` with "Try again" action) on initial load failure rather than leaving the screen in an endless loading spinner or empty view.
 * Aligned `collectionWrapperBuilder` to read `isLoading` and `isSearching` directly from incoming state snapshots rather than polling internal mutable bloc fields.
+* Eliminated $O(n^2)$ `indexOf` lookups during collection list building by directly passing the delegate item index in `InfiniteList` and `SliverInfiniteList`, and updated `BlocxCollectionItem.index(context)` to resolve indices by `identifier` via `state.indexOfId` instead of reference equality.
 
 ## [1.0.0]
 

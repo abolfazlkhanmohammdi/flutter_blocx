@@ -250,9 +250,8 @@ class InfiniteListWidgetState<Entity extends BlocxBaseEntity>
     );
   }
 
-  Widget _itemBuilder(
-      BuildContext context, Entity data, BlocxInfiniteListState state) {
-    final index = widget.items.indexOf(data);
+  Widget _itemBuilder(BuildContext context, Entity data, int index,
+      BlocxInfiniteListState state) {
     final isBottomLoadingTrigger =
         index == (widget.items.length - options.loadMoreTriggerItemDistance) &&
             !state.hasReachedEnd;
@@ -284,7 +283,7 @@ class InfiniteListWidgetState<Entity extends BlocxBaseEntity>
       reverse: options.reverse,
       separatorBuilder:
           widget.separatorBuilder ?? (_, __) => const SizedBox(height: 8),
-      itemBuilder: (c, i) => _itemBuilder(c, widget.items[i], state),
+      itemBuilder: (c, i) => _itemBuilder(c, widget.items[i], i, state),
     );
   }
 }
