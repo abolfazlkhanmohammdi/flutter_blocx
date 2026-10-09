@@ -128,15 +128,19 @@ abstract class BlocxFormWidgetState<
   }
 
   /// Builds a [BlocxFormRegisterButton] connected to the current form [state].
+  ///
+  /// Pass [formState] to bind directly to a specific state snapshot instead of
+  /// resolving from the bloc.
   BlocxFormRegisterButton<F, P, E> submitButton(
     String buttonText, {
     String? submitText,
     BlocxFormRegisterButtonOptions? options,
     VoidCallback? onPressed,
     RegisterButtonType? type,
+    BlocxFormState<F, E>? formState,
   }) {
     return BlocxFormRegisterButton<F, P, E>(
-      state: state,
+      state: formState ?? state,
       buttonText: buttonText,
       submitText: submitText ?? buttonText,
       onPressed: onPressed,
@@ -146,6 +150,9 @@ abstract class BlocxFormWidgetState<
   }
 
   /// Builds a [BlocxFormButtonRow] connected to the current form [state].
+  ///
+  /// Pass [formState] to bind directly to a specific state snapshot instead of
+  /// resolving from the bloc.
   BlocxFormButtonRow<F, P, E> formButtonRow(
     String registerText, {
     String? registerSubmittingText,
@@ -154,14 +161,16 @@ abstract class BlocxFormWidgetState<
     VoidCallback? onRegisterPressed,
     VoidCallback? onSecondButtonPressed,
     RegisterButtonType? registerType,
+    BlocxFormState<F, E>? formState,
   }) {
+    final effectiveState = formState ?? state;
     return BlocxFormButtonRow<F, P, E>(
-      formState: state,
+      formState: effectiveState,
       registerText: registerText,
       registerSubmittingText: registerSubmittingText ?? registerText,
       secondButtonText:
           secondButtonText ?? BlocXLocalizations.localizations.cancel,
-      onRegisterPressed: state.isValid ? onRegisterPressed : null,
+      onRegisterPressed: effectiveState.isValid ? onRegisterPressed : null,
       onSecondButtonPressed: onSecondButtonPressed,
       registerType: registerType ?? RegisterButtonType.filled,
       options: options ?? const BlocxFormButtonRowOptions(),
@@ -239,6 +248,9 @@ abstract class BlocxFormWidgetState<
   ///
   /// Called automatically when [BlocxFormStateApplyInitialDataToForm] is
   /// emitted.
+  ///
+  /// Updates controller text only when changed to avoid resetting the cursor,
+  /// and preserves existing cursor selection (clamped to the new text length).
   void applyInitialDataToForm(F formData) {
     for (final key in keys) {
       final controller = _getTextEditingControllerIfExists(key);
@@ -247,7 +259,19 @@ abstract class BlocxFormWidgetState<
       final value =
           formData.getFormattedValueByKey(key) ?? formData.getValueByKey(key);
 
-      controller.text = value?.toString() ?? '';
+      final newText = value?.toString() ?? '';
+      if (controller.text != newText) {
+        final currentSelection = controller.selection;
+        final newOffset = currentSelection.isValid
+            ? currentSelection.baseOffset.clamp(0, newText.length)
+            : newText.length;
+
+        controller.value = controller.value.copyWith(
+          text: newText,
+          selection: TextSelection.collapsed(offset: newOffset),
+          composing: TextRange.empty,
+        );
+      }
     }
   }
 

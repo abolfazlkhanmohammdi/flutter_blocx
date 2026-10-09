@@ -14,6 +14,8 @@
 * Aligned `collectionWrapperBuilder` to read `isLoading` and `isSearching` directly from incoming state snapshots rather than polling internal mutable bloc fields.
 * Eliminated $O(n^2)$ `indexOf` lookups during collection list building by directly passing the delegate item index in `InfiniteList` and `SliverInfiniteList`, and updated `BlocxCollectionItem.index(context)` to resolve indices by `identifier` via `state.indexOfId` instead of reference equality.
 * Added scroll extent threshold checks in `InfiniteList` and `SliverInfiniteList` as a robust fallback for triggering next-page loading (`loadBottomData`) when scrolled near the list edge, guarded by an internal triggering flag to prevent duplicate event dispatches during active drag notifications.
+* Updated `applyInitialDataToForm` in `BlocxFormWidgetState` to only update controller text when changed and preserve the active cursor position (clamped to the new text length).
+* Added optional `BlocxFormState<F, E>? formState` parameter to `submitButton` and `formButtonRow` helpers in `BlocxFormWidgetState`, enabling direct snapshot reading and avoiding reliance on internal mutable bloc fields.
 
 ## [1.0.0]
 
