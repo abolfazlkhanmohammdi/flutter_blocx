@@ -202,14 +202,25 @@ abstract class BlocxFormWidgetState<
   }
 
   /// Builds a [BlocxFormCheckbox] connected to [key].
+  ///
+  /// Specify checked state and display options via [options].
+  /// The [isChecked] parameter is deprecated in favor of `options.isChecked`.
   BlocxFormCheckbox<F, P, E> checkbox({
     required E key,
-    required bool isChecked,
+    @Deprecated(
+      'Specify isChecked inside BlocxCheckboxOptions instead. '
+      'This parameter will be removed in 2.0.0.',
+    )
+    bool? isChecked,
     BlocxCheckboxOptions? options,
   }) {
+    final effectiveOptions = options != null
+        ? (isChecked != null ? options.copyWith(isChecked: isChecked) : options)
+        : BlocxCheckboxOptions(isChecked: isChecked ?? false);
+
     return BlocxFormCheckbox<F, P, E>(
       formKey: key,
-      options: options ?? BlocxCheckboxOptions(isChecked: isChecked),
+      options: effectiveOptions,
     );
   }
 

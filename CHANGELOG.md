@@ -6,6 +6,7 @@
 * Added retry support to default `errorWidget` and `errorWidgetByErrorCode` in `BlocxScreenManagerState`, invoking `managerCubit.clearError()` to dismiss full-page errors followed by the `onRetry(BuildContext)` hook (overridden in `BlocxCollectionWidgetState` and `BlocxFormWidgetState` to automatically reload data).
 * Added `onPop(BuildContext)` hook in `BlocxScreenManagerState` (defaulting to `Navigator.of(context).maybePop()`) to enable custom navigation handling for declarative routing solutions (`go_router`, `auto_route`).
 * Updated `BlocxCollectionWidgetState.searchingText` and `BlocxSearchField` default hint to use `loc.searchingText` and `loc.searchHint` from `BlocXLocalizations`.
+* Deprecated redundant `isChecked` argument in `BlocxFormWidgetState.checkbox(...)` in favor of specifying `isChecked` in `BlocxCheckboxOptions`, keeping both functional for backward compatibility.
 
 ## [1.0.1] - 2026-10-09
 
