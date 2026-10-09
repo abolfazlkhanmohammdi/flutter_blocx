@@ -37,10 +37,14 @@ class BlocXFormTextField<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
   /// automatically.
   final TextEditingController? controller;
 
-  /// Standard [TextFormField] validator.
+  /// Optional standard [FormFieldValidator] for integration with Flutter's [FormState.validate].
   ///
-  /// Runs on the raw string value. Bloc-driven validation errors are displayed
-  /// through the field decoration.
+  /// ### Validation Precedence
+  /// - Errors produced by pure-Dart bloc validators ([BlocxFormValidator]) are
+  ///   reactively streamed into `state.errors` and rendered via [InputDecoration.errorText].
+  /// - When Flutter's [Form.validate] is called, any error returned by this [validator]
+  ///   takes visual precedence in [FormFieldState]. If this validator returns `null`,
+  ///   any underlying bloc-level error for [formKey] remains visible.
   final FormFieldValidator<String>? validator;
 
   /// Visual and behavioural options for the text field.

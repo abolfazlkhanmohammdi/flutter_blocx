@@ -431,6 +431,18 @@ class _ProfileFormScreenState extends BlocxFormWidgetState<
 | `submitButton(...)` / `BlocxFormRegisterButton` | Reacts to `isSubmitting`, `isCheckingUniqueField`, and `isLoadingRequiredFields` with an inline progress indicator |
 | `formButtonRow(...)` / `BlocxFormButtonRow` | Primary `BlocxFormRegisterButton` paired with a secondary cancel/back button (`Navigator.maybePop()`) |
 
+#### Form Validation Precedence
+
+`flutter_blocx` supports two complementary validation mechanisms:
+
+1. **BlocX Reactive Validation (Recommended):** Configured on the bloc via `BlocxFormValidator` rules, async uniqueness checks (`BlocxUniqueFieldValidatorMixin`), and step validation. Errors are reactively streamed into `bloc.state.errors` and rendered via `InputDecoration.errorText`.
+2. **Flutter `validator:` Hook:** An optional standard `FormFieldValidator<String>` passed to `textField(..., validator: ...)`.
+
+**Precedence Rules:**
+- When Flutter's `FormState.validate()` runs, any non-null error string returned by Flutter's `validator` hook takes visual precedence in `FormFieldState`.
+- When the Flutter validator returns `null` (passes), any active bloc-level error for that field in `bloc.state.errors` remains rendered on screen.
+- **Guideline:** Place domain validation rules and asynchronous checks in your `BlocxFormBloc` using pure-Dart `BlocxFieldValidator` classes. Use Flutter's `validator:` hook for local UI formatting or when interoperating with third-party form wrappers.
+
 ---
 
 ## Screen Management & Shared UX

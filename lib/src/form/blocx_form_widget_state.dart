@@ -91,6 +91,15 @@ abstract class BlocxFormWidgetState<
   ///
   /// Frequently used values can be passed directly. Direct parameters override
   /// their corresponding values in [options].
+  ///
+  /// ### Validation Precedence
+  /// - **BlocX Reactive Validation (Recommended):** Defined on the bloc using
+  ///   [BlocxFormValidator]. Validation errors are streamed into `state.errors`
+  ///   and displayed via [InputDecoration.errorText].
+  /// - **Flutter `validator` Hook:** An optional [FormFieldValidator] passed
+  ///   here. When a parent [FormState.validate] executes, an error returned by
+  ///   this hook takes visual precedence in [FormFieldState]. If this hook returns
+  ///   `null`, any active bloc-level error for [key] remains displayed.
   BlocXFormTextField<F, P, E> textField(E key,
       {BlocXTextFieldOptions? options,
       FormFieldValidator<String>? validator,

@@ -7,6 +7,7 @@
 * Added `onPop(BuildContext)` hook in `BlocxScreenManagerState` (defaulting to `Navigator.of(context).maybePop()`) to enable custom navigation handling for declarative routing solutions (`go_router`, `auto_route`).
 * Updated `BlocxCollectionWidgetState.searchingText` and `BlocxSearchField` default hint to use `loc.searchingText` and `loc.searchHint` from `BlocXLocalizations`.
 * Deprecated redundant `isChecked` argument in `BlocxFormWidgetState.checkbox(...)` in favor of specifying `isChecked` in `BlocxCheckboxOptions`, keeping both functional for backward compatibility.
+* Documented `validator:` parameter precedence vs pure-Dart BlocX field validation in `README.md` and dartdoc comments.
 
 ## [1.0.1] - 2026-10-09
 
