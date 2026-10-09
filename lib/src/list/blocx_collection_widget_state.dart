@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx/list_widget.dart';
 import 'package:flutter_blocx/src/core/localizations/loc_provider.dart';
+import 'package:flutter_blocx/src/screen_manager/blocx_error_widget.dart';
 import 'package:flutter_blocx/src/screen_manager/blocx_screen_manager_state.dart';
 import 'package:implicitly_animated_list/implicitly_animated_list.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -69,14 +70,22 @@ abstract class BlocxCollectionWidgetState<
   ) {
     final top = topWidget(context, state);
     final bottom = bottomWidget(context, state);
-    final isLoadingOrSearching = isLoading || isSearching;
-    final isEmpty = !isLoading && state.list.isEmpty;
+    final isErrorState = state is BlocxCollectionStateError<Entity>;
+    final isLoadingOrSearching =
+        (state is BlocxCollectionStateLoading<Entity>) || state.isSearching;
+    final isEmpty =
+        !isLoadingOrSearching && !isErrorState && state.list.isEmpty;
 
-    final coreBox = isLoadingOrSearching || isEmpty
-        ? isLoadingOrSearching
-            ? loadingWidget(context, state)
-            : emptyWidget(context, state)
-        : collectionWidget(context, state);
+    final Widget coreBox;
+    if (state is BlocxCollectionStateError<Entity> && state.list.isEmpty) {
+      coreBox = collectionErrorWidget(context, state);
+    } else if (isLoadingOrSearching) {
+      coreBox = loadingWidget(context, state);
+    } else if (isEmpty) {
+      coreBox = emptyWidget(context, state);
+    } else {
+      coreBox = collectionWidget(context, state);
+    }
 
     final children = <Widget>[
       if (top != null) top,
@@ -217,6 +226,34 @@ abstract class BlocxCollectionWidgetState<
           textAlign: TextAlign.center,
         ),
       ],
+    );
+  }
+
+  /// Whether the collection is currently in an error state.
+  bool get isError => _bloc.state is BlocxCollectionStateError;
+
+  /// Builds the error widget displayed when initial page loading fails.
+  ///
+  /// By default, renders a centered [BlocxErrorWidget] with a "Try again"
+  /// button that triggers [retryInitialPage].
+  Widget collectionErrorWidget(
+    BuildContext context,
+    BlocxCollectionStateError<Entity> state,
+  ) {
+    return Center(
+      child: BlocxErrorWidget(
+        error: ReadableError(message: state.message),
+        onRetry: retryInitialPage,
+      ),
+    );
+  }
+
+  /// Retries loading the initial page after an error.
+  void retryInitialPage() {
+    _bloc.add(
+      BlocxCollectionEventLoadInitialPage<Entity, Payload>(
+        payload: widget.payload,
+      ),
     );
   }
 
@@ -363,7 +400,7 @@ abstract class BlocxCollectionWidgetState<
           loading: loadingWidget(context, state),
           empty: emptyWidget(context, state),
           isEmpty: state.list.isEmpty,
-          isLoading: isLoading,
+          isLoading: state is BlocxCollectionStateLoading<Entity>,
           sliverBottom: sliverBottomWidget(context, state),
           sliverTop: sliverTopWidget(context, state),
         );
@@ -396,7 +433,7 @@ abstract class BlocxCollectionWidgetState<
           refreshOnSwipe: _bloc.isRefreshable ? refreshData : null,
           loadBottomData: _bloc.isInfinite ? loadNextPage : null,
           loadTopData: null,
-          isLoading: isLoading,
+          isLoading: state is BlocxCollectionStateLoading<Entity>,
           isEmpty: state.list.isEmpty,
           scrollController: scrollController,
           sliverTop: sliverTopWidget(context, state),

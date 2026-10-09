@@ -9,6 +9,10 @@
 * Added GitHub Actions CI workflow (`.github/workflows/ci.yml`) covering formatting, static analysis (`--fatal-infos`), tests with coverage, dry-run publishing, and example web build.
 * Added `bloc_test` and `mocktail` dev dependencies and created `FakeCollectionBloc` test helper in `test/helpers/`.
 
+### Fixed
+* Handled `BlocxCollectionStateError` in `BlocxCollectionWidgetState`, displaying `collectionErrorWidget` (`BlocxErrorWidget` with "Try again" action) on initial load failure rather than leaving the screen in an endless loading spinner or empty view.
+* Aligned `collectionWrapperBuilder` to read `isLoading` and `isSearching` directly from incoming state snapshots rather than polling internal mutable bloc fields.
+
 ## [1.0.0]
 
 ### Added

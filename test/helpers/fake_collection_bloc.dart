@@ -23,13 +23,23 @@ class FakeCollectionBloc extends BlocxCollectionBloc<TestItemEntity, void>
         BlocxCollectionSearchableMixin<TestItemEntity, void>,
         BlocxCollectionSelectableMixin<TestItemEntity, void> {
   final List<TestItemEntity> initialItems;
+  bool shouldFail;
+  Object? failureError;
 
-  FakeCollectionBloc({this.initialItems = const []}) : super();
+  FakeCollectionBloc({
+    this.initialItems = const [],
+    this.shouldFail = false,
+    this.failureError,
+  }) : super();
 
   @override
   BlocxPaginatedUseCaseTask<BlocxPaginatedInput, TestItemEntity>?
       get paginationTask => BlocxPaginatedUseCaseTask(
-            useCase: _FakePaginatedUseCase(initialItems),
+            useCase: _FakePaginatedUseCase(
+              initialItems,
+              shouldFail: () => shouldFail,
+              failureError: () => failureError,
+            ),
             inputBuilder: (offset, limit) =>
                 BlocxPaginatedInput(offset: offset, limit: limit),
           );
@@ -38,12 +48,21 @@ class FakeCollectionBloc extends BlocxCollectionBloc<TestItemEntity, void>
 class _FakePaginatedUseCase
     extends BlocxPaginatedUseCase<BlocxPaginatedInput, TestItemEntity> {
   final List<TestItemEntity> items;
+  final bool Function() shouldFail;
+  final Object? Function() failureError;
 
-  _FakePaginatedUseCase(this.items);
+  _FakePaginatedUseCase(
+    this.items, {
+    required this.shouldFail,
+    required this.failureError,
+  });
 
   @override
   Future<BlocxUseCaseResult<BlocxPage<TestItemEntity>>> perform(
       BlocxPaginatedInput input) async {
+    if (shouldFail()) {
+      throw failureError() ?? Exception('Server connection failed');
+    }
     final start = input.offset.clamp(0, items.length);
     final end = (start + input.limit).clamp(0, items.length);
     return success(BlocxPage(
