@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_blocx/src/core/localizations/loc_provider.dart';
 
 class ConfirmActionWidget extends StatefulWidget {
   const ConfirmActionWidget({super.key, required this.options});
@@ -92,11 +93,13 @@ class _ConfirmDeleteSheetState extends State<ConfirmActionWidget> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(options.title,
+                    Text(options.title ?? loc.areYouSure,
                         style: textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w700)),
                     const SizedBox(height: 8),
-                    Text(options.question,
+                    Text(
+                        options.question ??
+                            loc.areYouSureYouWantToDeleteThisItem,
                         style: textTheme.bodyMedium
                             ?.copyWith(color: cs.onSurfaceVariant)),
                   ],
@@ -128,7 +131,7 @@ class _ConfirmDeleteSheetState extends State<ConfirmActionWidget> {
                         : () {
                             Navigator.of(context).pop(false);
                           },
-                    child: Text(options.cancelText),
+                    child: Text(options.cancelText ?? loc.cancel),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -158,7 +161,7 @@ class _ConfirmDeleteSheetState extends State<ConfirmActionWidget> {
                                   AlwaysStoppedAnimation<Color>(cs.onError),
                             ),
                           )
-                        : Text(options.confirmText),
+                        : Text(options.confirmText ?? loc.delete),
                   ),
                 ),
               ],
@@ -173,20 +176,20 @@ class _ConfirmDeleteSheetState extends State<ConfirmActionWidget> {
 }
 
 class ConfirmActionOptions {
-  final String title;
-  final String question;
-  final String confirmText;
-  final String cancelText;
+  final String? title;
+  final String? question;
+  final String? confirmText;
+  final String? cancelText;
   final IconData icon;
   final bool requireTyping;
   final String deleteWord;
   final String? imageUrl;
 
-  const ConfirmActionOptions({
-    this.title = 'Delete item',
-    this.question = 'This action cannot be undone. Are you sure?',
-    this.confirmText = 'Delete',
-    this.cancelText = 'Cancel',
+  ConfirmActionOptions({
+    this.title,
+    this.question,
+    this.confirmText,
+    this.cancelText,
     this.icon = Icons.delete_outline,
     this.requireTyping = false,
     this.deleteWord = 'DELETE',

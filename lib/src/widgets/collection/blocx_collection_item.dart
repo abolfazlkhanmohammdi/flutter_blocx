@@ -1,5 +1,5 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_core/list_bloc.dart'
+import 'package:blocx_core/collection_bloc.dart'
     show
         BlocxCollectionBloc,
         ListStateExtensions,
@@ -200,18 +200,27 @@ abstract class BlocxCollectionItem<T extends BlocxBaseEntity, P>
   bool get confirmBeforeDelete => true;
   String? get itemName => null;
 
-  Future<void> confirmThenDelete(BuildContext context) async {
+  ConfirmActionOptions get confirmDeleteOptions => ConfirmActionOptions();
+
+  Future<void> confirmThenDelete(BuildContext context,
+      {ConfirmActionOptions? confirmDeleteOptions}) async {
     var result = await showModalBottomSheet(
       context: context,
       builder: (_) {
-        return ConfirmActionWidget(options: confirmDeleteOptions);
+        return ConfirmActionWidget(
+            options: confirmDeleteOptions ?? this.confirmDeleteOptions);
       },
     );
-    if (result == null || !result) return;
+    if (result == null || !result || !context.mounted) return;
     onDeleteConfirmed(context);
   }
 
   void onDeleteConfirmed(BuildContext context) {
+    assert(
+      bloc(context).isDeletable,
+      '${bloc(context).runtimeType} must mix in BlocxCollectionDeletableMixin to support deletion.',
+    );
+    if (!bloc(context).isDeletable) return;
     bloc(context).add(BlocxCollectionEventRemoveItem(item: item));
   }
 
@@ -222,8 +231,6 @@ abstract class BlocxCollectionItem<T extends BlocxBaseEntity, P>
   void insertItem(BuildContext context, T item, {int index = 0}) {
     bloc(context).add(BlocxCollectionEventAddItem(item: item, index: index));
   }
-
-  ConfirmActionOptions get confirmDeleteOptions => ConfirmActionOptions();
 
   bool areAllSelected(BuildContext context) =>
       bloc(context).state.selectedItemIds.length == bloc(context).list.length;

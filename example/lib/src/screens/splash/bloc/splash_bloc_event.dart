@@ -1,5 +1,6 @@
 part of 'splash_bloc.dart';
 
-sealed class SplashEvent extends BaseEvent {}
+@immutable
+sealed class SplashEvent {}
 
 final class SplashEventInit extends SplashEvent {}

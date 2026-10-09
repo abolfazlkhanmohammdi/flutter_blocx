@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_core/list_bloc.dart';
+import 'package:blocx_core/collection_bloc.dart';
 import 'package:example/src/core/use_cases/base_search_use_case.dart';
 import 'package:example/src/core/use_cases/use_case_result.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
@@ -12,7 +12,7 @@ class SearchNotesUseCase extends BaseSearchUseCase<SearchNotesInput, Note> {
   @override
   Future<UseCaseResult<BlocxPage<Note>>> perform(SearchNotesInput input) async {
     var result = await NotesJsonRepository().searchNotes(
-      input.searchText,
+      input.searchText ?? '',
       input.limit,
       input.offset,
       input.user,

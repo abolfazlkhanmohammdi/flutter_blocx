@@ -1,5 +1,73 @@
 # Changelog
 
+## [1.0.0]
+
+### Added
+
+* **Stable `1.0.0` Release & `blocx_core: ^1.0.0` Compatibility**
+  * Upgraded `blocx_core` dependency to `^1.0.0`, supporting live `BlocxEventHub` collection and form stream synchronization (`BlocxFormStateApplyInitialDataToForm` and automatic route pop on entity deletion).
+* **Type Conversion & Layout Options in `BlocXFormTextField` / `textField()`**
+  * Added `TypeConverter<T>` typedef (`T Function(String value)`) and `typeConverter` / `converter` parameter to `BlocXFormTextField` and `BlocxFormWidgetState.textField(...)` to convert raw text input (e.g., to `int`, `double`, or custom types) before dispatching `BlocxFormEventUpdateData`.
+  * Added `isDense` and `constraints` options to `BlocXTextFieldOptions` (and `BlocXTextFieldOptionsCopyWith`).
+* **Validation Error Tooltip on `BlocxFormRegisterButton`**
+  * Wrapped `BlocxFormRegisterButton` in a `Tooltip` displaying active form validation errors (`state.errors.values.join(".\n")`).
+* **`BlocxCollectionItemState` Theme & Dimension Helpers**
+  * `BlocxCollectionItemState<W, T, P>` now extends `BlocXWidgetState<W>` (`BlocxWidgetState<W>`), exposing `theme`, `textTheme`, `colorScheme`, `width`, and `height` getters directly inside stateful collection items without passing `BuildContext`.
+* **Bundled AI Agent Skill (`skills/flutter-blocx`)**
+  * Added a comprehensive `flutter-blocx` AI coding skill (`SKILL.md` and `references/`) covering all collection screens, layouts, item widgets, reactive form controls, and screen manager components.
+
+### Changed
+
+* **Unified `generateBloc` Getter Across Collection & Form Screen States**
+  * Changed `BlocxFormWidgetState.generateBloc` from a method (`generateBloc()`) to a getter (`BlocxFormBloc<F, P, E> get generateBloc;`) matching `BlocxCollectionWidgetState.generateBloc`.
+* **`BlocXFormTextField` Default Decoration Density & Padding**
+  * `BlocXFormTextField` now forwards `options.isDense`, `options.contentPadding`, and `options.constraints` directly to `InputDecoration` instead of forcing `isDense: true` and a hardcoded `EdgeInsets.symmetric(horizontal: 16, vertical: 16)` fallback.
+* **`BlocxFormRegisterButton` Disabled State**
+  * `BlocxFormRegisterButton.isDisabled` now also disables the button when `state.errors.isNotEmpty`.
+* **Full Web & WASM Platform Compatibility**
+  * Removed the unused `logger` dependency and paired with `blocx_core: ^1.0.0` for 100% Web and WASM runtime support across all 6 Flutter platforms.
+* **Documentation & Pub Score Improvements**
+  * Rebuilt `README.md` with concise architecture guides, side-by-side comparisons, and cross-package `blocx_core` + `flutter_blocx` quickstarts, and expanded `pubspec.yaml` metadata.
+
+### Fixed
+
+* **`BlocxFormRegisterButton` Filled Style Precedence**
+  * Fixed `buildFilledButton` in `BlocxFormRegisterButton` to prioritize `buttonOptions.filledStyle` before falling back to `buttonOptions.style`.
+
+### Migration Guide
+
+#### Change `generateBloc()` method to `get generateBloc` getter in `BlocxFormWidgetState`
+
+```dart
+// Before (0.9.0)
+@override
+BlocxFormBloc<ProfileForm, User, ProfileField> generateBloc() => ProfileFormBloc();
+
+// After (1.0.0)
+@override
+BlocxFormBloc<ProfileForm, User, ProfileField> get generateBloc => ProfileFormBloc();
+```
+
+---
+
+## [0.9.0]
+
+### Added
+
+* **Unified Package Exports in `package:flutter_blocx/flutter_blocx.dart`**
+  * Re-exported `form_widget.dart` and `list_widget.dart` from the main library entry point.
+  * Exported `BlocxFormCheckbox`, `BlocxScreenManagerState`, `BlocxErrorWidget`, `BlocxSnackBar`, and `BlocXLocalizations`.
+* **Typedef Aliases for API Consistency**
+  * Added `BlocxWidgetState`, `BlocxFormTextField`, `BlocxFormDropdown`, `BlocxTextFieldOptions`, `BlocxDropdownOptions`, and `BlocxSnackbarType` as aliases matching the `Blocx` casing convention.
+* **Automated Unit & Widget Test Suite**
+  * Added comprehensive widget and unit tests in `test/` for form fields, collection widgets, screen manager state, error page rendering, and snackbars.
+
+### Fixed
+
+* **Unified `BlocxStatelessWidget`**
+  * Resolved duplicate class definition across `src/core/base/` and `src/core/widgets/`.
+  * Preserved full backwards compatibility while unifying `width`, `height`, `theme`, `textTheme`, and `colorScheme` context getters.
+
 ## [0.8.4]
 
 ### Fixed

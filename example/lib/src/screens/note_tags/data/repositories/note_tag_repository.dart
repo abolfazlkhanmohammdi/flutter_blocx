@@ -160,7 +160,7 @@ class NoteTagJsonRepository extends FakeRepository implements BlocxBaseEntity {
 
     final updated = {
       ...current,
-      if (newName != null) 'name': newName,
+      'name': ?newName,
       'updatedAt': DateTime.now().toIso8601String(),
     };
 

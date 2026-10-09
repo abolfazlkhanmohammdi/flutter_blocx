@@ -1,30 +1,29 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_core/list_bloc.dart'
+import 'package:blocx_core/collection_bloc.dart'
     show
         BlocxCollectionEventSearch,
         BlocxCollectionEventClearSearch,
         BlocxCollectionBloc;
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// A search text field that integrates with a [SearchableListBlocMixin].
 ///
 /// - Typing triggers [BlocxCollectionEventSearch].
 /// - Clearing input triggers [BlocxCollectionEventClearSearch].
-class BlocxSearchField<T extends BlocxBaseEntity, P> extends StatelessWidget {
+class BlocxSearchField<Entity extends BlocxBaseEntity, Payload>
+    extends StatelessWidget {
   final TextEditingController controller;
   final BlocxSearchFieldOptions options;
-
+  final BlocxCollectionBloc<Entity, Payload> bloc;
   const BlocxSearchField({
     super.key,
     required this.controller,
     this.options = const BlocxSearchFieldOptions(),
+    required this.bloc,
   });
 
   @override
   Widget build(BuildContext context) {
-    final bloc = _blocOrThrowSearchable(context);
-
     final defaultDecoration = InputDecoration(
       hintText: options.hintText ?? "Search...",
       hintStyle: options.hintStyle ??
@@ -38,7 +37,7 @@ class BlocxSearchField<T extends BlocxBaseEntity, P> extends StatelessWidget {
               icon: const Icon(Icons.clear),
               onPressed: () {
                 controller.clear();
-                bloc.add(BlocxCollectionEventClearSearch<T>());
+                bloc.add(BlocxCollectionEventClearSearch<Entity>());
               },
             )
           : null,
@@ -61,31 +60,10 @@ class BlocxSearchField<T extends BlocxBaseEntity, P> extends StatelessWidget {
       obscureText: options.obscureText,
       // ← keep onChange exactly as you had it
       onChanged: (text) =>
-          bloc.add(BlocxCollectionEventSearch<T>(searchText: text)),
+          bloc.add(BlocxCollectionEventSearch<Entity>(searchText: text)),
       onSubmitted: (text) =>
-          bloc.add(BlocxCollectionEventSearch<T>(searchText: text)),
+          bloc.add(BlocxCollectionEventSearch<Entity>(searchText: text)),
     );
-  }
-
-  /// Returns the nearest [ListBloc<T, P>] and ensures it supports searching.
-  ///
-  /// Throws a clear [FlutterError] if:
-  /// - No `ListBloc<T, P>` is found in the widget tree, or
-  /// - The bloc does not implement `SearchableListBlocContract<T>`.
-  BlocxCollectionBloc<T, P> _blocOrThrowSearchable(BuildContext context) {
-    final b =
-        BlocProvider.of<BlocxCollectionBloc<T, P>>(context, listen: false);
-    if (!b.isSearchable) {
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('BlocxSearchField requires a searchable ListBloc.'),
-        ErrorDescription(
-          'Found a ListBloc<$T, $P>, but it does not implement '
-          'SearchableListBlocMixin<$T,$P>.\n'
-          'mix SearchableListBlocMixin in your bloc.',
-        ),
-      ]);
-    }
-    return b;
   }
 }
 

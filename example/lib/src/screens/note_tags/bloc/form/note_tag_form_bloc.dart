@@ -10,8 +10,14 @@ import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag_form_data.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag_form_payload.dart';
 
-class NoteTagFormBloc extends FormBloc<NoteTagFormData, NoteTagFormPayload, NoteTagFormKey>
-    with BlocxUniqueFieldValidatorMixin<NoteTagFormData, NoteTagFormPayload, NoteTagFormKey> {
+class NoteTagFormBloc
+    extends FormBloc<NoteTagFormData, NoteTagFormPayload, NoteTagFormKey>
+    with
+        BlocxUniqueFieldValidatorMixin<
+          NoteTagFormData,
+          NoteTagFormPayload,
+          NoteTagFormKey
+        > {
   NoteTagFormBloc() : super(NoteTagFormData(name: "", userId: -1));
 
   @override
@@ -27,7 +33,7 @@ class NoteTagFormBloc extends FormBloc<NoteTagFormData, NoteTagFormPayload, Note
   bool get isUpdate => payload!.toBeEdited != null;
 
   @override
-  BlocxUseCaseTask<BlocxBaseUseCase<NoteTagFormData, NoteTag>, NoteTagFormData> get submitUseCaseTask =>
+  BlocxUseCaseTask<NoteTagFormData, NoteTag> get submitUseCaseTask =>
       BlocxUseCaseTask(
         useCase: isUpdate ? UpdateNoteTagUseCase() : RegisterNoteTagUseCase(),
         inputBuilder: () => formData,
@@ -37,18 +43,18 @@ class NoteTagFormBloc extends FormBloc<NoteTagFormData, NoteTagFormPayload, Note
   List<NoteTagFormKey> get uniqueFieldKeys => [NoteTagFormKey.name];
 
   @override
-  BlocxUseCaseTask<BlocxBaseUseCase<dynamic, bool>, dynamic>? useCaseIsUniqueValueAvailable(
+  BlocxUseCaseTask<dynamic, bool>? useCaseIsUniqueValueAvailable(
+    NoteTagFormData formData,
     NoteTagFormKey key,
-    value,
+    dynamic value,
   ) {
-    var result = switch (key) {
+    return switch (key) {
       NoteTagFormKey.name => BlocxUseCaseTask(
         useCase: CheckUniqueNoteTagNameUseCase(),
         inputBuilder: () => value,
       ),
       _ => null,
     };
-    return result;
   }
 }
 

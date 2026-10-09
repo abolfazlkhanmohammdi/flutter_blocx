@@ -1,0 +1,45 @@
+{
+  "skill_name": "flutter-blocx",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a Flutter ProductsScreen and ProductCard using flutter_blocx and blocx_core for a ProductEntity (id, name, price, category). ProductsScreen should take a void payload, wrap in a Scaffold with an AppBar, use HideOnScrollFabMixin, render a 2-column grid using CollectionSettings and InfiniteGridOptions, include a top search bar using searchField(), and show a bottom bulk-action bar when items are selected (with deselect and delete buttons). ProductCard should extend BlocxCollectionItem, support selection toggling, show a loading indicator when isBeingRemoved is true, and customize confirmDeleteOptions.",
+      "expected_output": "A complete, analyzer-clean Dart file implementing ProductEntity, ProductsCollectionBloc, ProductsScreen, _ProductsScreenState (extending BlocxCollectionWidgetState with HideOnScrollFabMixin), and ProductCard (extending BlocxCollectionItem).",
+      "files": [],
+      "expectations": [
+        "ProductsScreen extends BlocxCollectionWidget<void> and _ProductsScreenState extends BlocxCollectionWidgetState<ProductsScreen, ProductEntity, void> with HideOnScrollFabMixin",
+        "generateBloc is implemented as a getter (BlocxCollectionBloc<ProductEntity, void> get generateBloc), not a method",
+        "wrapInScaffold is true and scaffoldWidget(BuildContext context, Widget body) is overridden with NotificationListener<UserScrollNotification>(onNotification: onScrollNotification) and floatingActionButton: getFloatingActionButton(context)",
+        "settings returns CollectionSettings(type: CollectionWidgetStateType.grid, options: InfiniteGridOptions(crossAxisCount: 2, ...))",
+        "topWidget uses searchField(options: ...) and bottomWidget uses state.selectedCount, deselectMultipleItems(state.selectedItems), and deleteMultipleItems(state.selectedItems)",
+        "ProductCard extends BlocxCollectionItem<ProductEntity, void>, implements buildContent(BuildContext context, ProductEntity item), overrides confirmDeleteOptions, and uses isSelected(context), isBeingRemoved(context), toggleSelection(context), and removeItem(context)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Create a Flutter ProfileFormScreen using flutter_blocx and blocx_core for editing a UserProfileEntity (id, username, email, age, role, acceptTerms). Include ProfileFormField enum, ProfileFormEntity (extending BlocxBaseFormEntity), ProfileFormBloc, and ProfileFormScreen + _ProfileFormScreenState (extending BlocxFormWidgetState). The form UI must use textField() for username, email, and age (with an int converter for age), dropdown<String>() for role, checkbox() for acceptTerms, and BlocxFormButtonRow for submit/cancel, plus proper controller hydration in applyInitialDataToForm and popping with submittedData in onFormSubmitted.",
+      "expected_output": "A complete, analyzer-clean Dart file implementing the UserProfileEntity, ProfileFormField, ProfileFormEntity, ProfileFormBloc, and ProfileFormScreen with _ProfileFormScreenState.",
+      "files": [],
+      "expectations": [
+        "ProfileFormScreen extends BlocxFormWidget<UserProfileEntity> and _ProfileFormScreenState extends BlocxFormWidgetState<ProfileFormScreen, ProfileFormEntity, UserProfileEntity, ProfileFormField>",
+        "generateBloc is implemented as a getter (BlocxFormBloc<ProfileFormEntity, UserProfileEntity, ProfileFormField> get generateBloc), and keys getter returns ProfileFormField.values",
+        "applyInitialDataToForm(ProfileFormEntity formData) hydrates the managed controllers using getTextEditingController(...)",
+        "formWidget uses textField(...) with a converter for the integer age field, dropdown<String>(...), checkbox(...), and BlocxFormButtonRow (or formButtonRow)",
+        "onFormSubmitted(BlocxFormStateFormSubmitted<ProfileFormEntity, ProfileFormField> state) pops the navigator with state.submittedData"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Create a Flutter StatefulCollectionItem widget (OrderStatefulTile extending BlocxStatefulCollectionItem<OrderEntity> and _OrderStatefulTileState extending BlocxCollectionItemState<OrderStatefulTile, OrderEntity, String>) and a custom screen (OrderSummaryScreen) whose State extends BlocxScreenManagerState<OrderSummaryScreen> directly. In OrderSummaryScreen, customize errorWidget using BlocxErrorWidget.fromState with an onRetry callback, trigger BlocxSnackBar.show with BlocxSnackbarType, and trigger ConfirmActionWidget.show with requireTyping: true.",
+      "expected_output": "A complete, analyzer-clean Dart file demonstrating BlocxStatefulCollectionItem + BlocxCollectionItemState (using context-free helpers) and a custom BlocxScreenManagerState screen using BlocxErrorWidget.fromState, BlocxSnackBar.show, and ConfirmActionWidget.show.",
+      "files": [],
+      "expectations": [
+        "OrderStatefulTile extends BlocxStatefulCollectionItem<OrderEntity> and _OrderStatefulTileState extends BlocxCollectionItemState<OrderStatefulTile, OrderEntity, String>",
+        "_OrderStatefulTileState implements Widget buildContent(OrderEntity item) (without BuildContext) and uses context-free getters/methods (isSelected, isExpanded, isBeingRemoved, toggleSelection(), toggleExpansion(), removeItem())",
+        "_OrderSummaryScreenState extends BlocxScreenManagerState<OrderSummaryScreen>, overrides ScreenManagerCubit get managerCubit, wrapInScaffold => true, scaffoldWidget(context, body), and mainWidget(context, state)",
+        "_OrderSummaryScreenState overrides errorWidget(context, state) returning BlocxErrorWidget.fromState(state, onRetry: ...)",
+        "Uses BlocxSnackBar.show(context, ..., type: BlocxSnackbarType...) and ConfirmActionWidget.show(context, options: ConfirmActionOptions(..., requireTyping: true, ...))"
+      ]
+    }
+  ]
+}

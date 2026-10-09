@@ -1,5 +1,5 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_core/list_bloc.dart';
+import 'package:blocx_core/collection_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx/list_widget.dart';
@@ -16,27 +16,30 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 /// Type parameters:
 ///
 /// - [W]: The [BlocxCollectionWidget] subclass this state belongs to.
-/// - [T]: The collection item entity type.
-/// - [P]: The optional payload type used during initial loading.
-abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T extends BlocxBaseEntity, P>
-    extends BlocxScreenManagerState<W> {
-  late final BlocxCollectionBloc<T, P> _bloc;
+/// - [Entity]: The collection item entity type.
+/// - [Payload]: The optional payload type used during initial loading.
+abstract class BlocxCollectionWidgetState<
+    W extends BlocxCollectionWidget<Payload>,
+    Entity extends BlocxBaseEntity,
+    Payload> extends BlocxScreenManagerState<W> {
+  late final BlocxCollectionBloc<Entity, Payload> _bloc;
 
   /// The active scroll controller used by the rendered collection widget.
   ScrollController? scrollController;
-
+  late final TextEditingController searchController;
   bool _ownsScrollController = false;
   bool _autoScrollListenerAttached = false;
   bool _hasAutoScrolled = false;
 
   @override
   void initState() {
+    searchController = TextEditingController();
     _bloc = generateBloc;
     setScrollController();
 
     if (loadOnInit) {
       _bloc.add(
-        BlocxCollectionEventLoadInitialPage<T, P>(
+        BlocxCollectionEventLoadInitialPage<Entity, Payload>(
           payload: widget.payload,
         ),
       );
@@ -47,9 +50,10 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
 
   @override
   Widget mainWidget(BuildContext context, ScreenManagerCubitState state) {
-    return BlocProvider<BlocxCollectionBloc<T, P>>.value(
+    return BlocProvider<BlocxCollectionBloc<Entity, Payload>>.value(
       value: _bloc,
-      child: BlocConsumer<BlocxCollectionBloc<T, P>, BlocxCollectionState<T>>(
+      child: BlocConsumer<BlocxCollectionBloc<Entity, Payload>,
+          BlocxCollectionState<Entity>>(
         buildWhen: (_, current) => current.shouldRebuild,
         listenWhen: (_, current) => current.shouldListen,
         listener: _listListener,
@@ -61,7 +65,7 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
   /// Wraps the main collection widget with optional top and bottom widgets.
   Widget collectionWrapperBuilder(
     BuildContext context,
-    BlocxCollectionState<T> state,
+    BlocxCollectionState<Entity> state,
   ) {
     final top = topWidget(context, state);
     final bottom = bottomWidget(context, state);
@@ -92,26 +96,31 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
   double get topBottomAndListSpacing => 8.0;
 
   /// Optional widget displayed above the collection.
-  Widget? topWidget(BuildContext context, BlocxCollectionState<T> state) => null;
+  Widget? topWidget(BuildContext context, BlocxCollectionState<Entity> state) =>
+      null;
 
   /// Optional widget displayed below the collection.
-  Widget? bottomWidget(BuildContext context, BlocxCollectionState<T> state) => null;
+  Widget? bottomWidget(
+          BuildContext context, BlocxCollectionState<Entity> state) =>
+      null;
 
   /// Optional sliver displayed above sliver collections.
-  Widget? sliverTopWidget(BuildContext context, BlocxCollectionState<T> state) => null;
+  Widget? sliverTopWidget(
+          BuildContext context, BlocxCollectionState<Entity> state) =>
+      null;
 
   /// Optional sliver displayed below sliver collections.
   Widget? sliverBottomWidget(
     BuildContext context,
-    BlocxCollectionState<T> state,
+    BlocxCollectionState<Entity> state,
   ) =>
       null;
 
   /// Builds one visual item for [item].
-  Widget itemBuilder(BuildContext context, T item);
+  Widget itemBuilder(BuildContext context, Entity item);
 
-  void _listListener(BuildContext context, BlocxCollectionState<T> state) {
-    if (state is BlocxCollectionStateScrollToItem<T>) {
+  void _listListener(BuildContext context, BlocxCollectionState<Entity> state) {
+    if (state is BlocxCollectionStateScrollToItem<Entity>) {
       final controller = scrollController;
 
       if (controller is AutoScrollController) {
@@ -126,8 +135,8 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
   }
 
   /// Reacts to listen-only collection states.
-  void blocListener(BuildContext context, BlocxCollectionState<T> state) {
-    if (state is BlocxCollectionStateSelectionChanged<T>) {
+  void blocListener(BuildContext context, BlocxCollectionState<Entity> state) {
+    if (state is BlocxCollectionStateSelectionChanged<Entity>) {
       onSelectionChanged(context, state.selectionData);
     }
   }
@@ -140,11 +149,12 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
 
   /// Dispatches a search event with [text].
   void search(String text) {
-    _bloc.add(BlocxCollectionEventSearch<T>(searchText: text));
+    _bloc.add(BlocxCollectionEventSearch<Entity>(searchText: text));
   }
 
   /// Builds the loading widget.
-  Widget loadingWidget(BuildContext context, BlocxCollectionState<T> state) {
+  Widget loadingWidget(
+      BuildContext context, BlocxCollectionState<Entity> state) {
     return Column(
       spacing: 24,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -164,12 +174,12 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
 
   /// Dispatches a refresh event.
   void refreshData() {
-    _bloc.add(BlocxCollectionEventRefreshData<T>());
+    _bloc.add(BlocxCollectionEventRefreshData<Entity>());
   }
 
   /// Dispatches a load-next-page event.
   void loadNextPage() {
-    _bloc.add(BlocxCollectionEventLoadNextPage<T>());
+    _bloc.add(BlocxCollectionEventLoadNextPage<Entity>());
   }
 
   /// Optional delete animation builder for animated collection widgets.
@@ -184,13 +194,13 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
   }
 
   /// The current widget payload.
-  P? get payload => widget.payload;
+  Payload? get payload => widget.payload;
 
   /// Text shown while search is running.
   String get searchingText => 'Searching data, please wait';
 
   /// Builds the empty-state widget.
-  Widget emptyWidget(BuildContext context, BlocxCollectionState<T> state) {
+  Widget emptyWidget(BuildContext context, BlocxCollectionState<Entity> state) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -213,17 +223,18 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
   /// Scrolls to [item].
   ///
   /// Requires the collection bloc to support [BlocxCollectionScrollableMixin].
-  void scrollToItem(T item, {bool highlightItem = false}) {
+  void scrollToItem(Entity item, {bool highlightItem = false}) {
     if (!_bloc.isScrollable) {
       throw StateError(
         'scrollToIndex can only be used on a bloc that mixes in '
-        'BlocxCollectionScrollableMixin<$T, $P>.',
+        'BlocxCollectionScrollableMixin<$Entity, $Payload>.',
       );
     }
 
-    final scrollableBloc = _bloc as BlocxCollectionScrollableMixin<T, P>;
+    final scrollableBloc =
+        _bloc as BlocxCollectionScrollableMixin<Entity, Payload>;
     scrollableBloc.add(
-      BlocxCollectionEventScrollToItem<T>(
+      BlocxCollectionEventScrollToItem<Entity>(
         item: item,
         highlightItem: highlightItem,
       ),
@@ -244,7 +255,8 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
         scrollController = providedController;
         _ownsScrollController = false;
       } else {
-        scrollController = _bloc.isScrollable ? AutoScrollController() : ScrollController();
+        scrollController =
+            _bloc.isScrollable ? AutoScrollController() : ScrollController();
         _ownsScrollController = true;
       }
     }
@@ -284,13 +296,13 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
   }
 
   /// Dispatches a remove-multiple-items event.
-  void deleteMultipleItems(List<T> items) {
-    _bloc.add(BlocxCollectionEventRemoveMultipleItems<T>(items: items));
+  void deleteMultipleItems(List<Entity> items) {
+    _bloc.add(BlocxCollectionEventRemoveMultipleItems<Entity>(items: items));
   }
 
   /// Dispatches a deselect-multiple-items event.
-  void deselectMultipleItems(List<T> items) {
-    _bloc.add(BlocxCollectionEventDeselectMultipleItems<T>(items: items));
+  void deselectMultipleItems(List<Entity> items) {
+    _bloc.add(BlocxCollectionEventDeselectMultipleItems<Entity>(items: items));
   }
 
   CollectionWidgetStateType get _collectionDisplayType => settings.type;
@@ -310,19 +322,20 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
   bool get loadOnInit => true;
 
   /// Creates the collection bloc for this state.
-  BlocxCollectionBloc<T, P> get generateBloc;
+  BlocxCollectionBloc<Entity, Payload> get generateBloc;
 
   /// The collection bloc that drives this screen.
-  BlocxCollectionBloc<T, P> get bloc => _bloc;
+  BlocxCollectionBloc<Entity, Payload> get bloc => _bloc;
 
   /// Builds the concrete collection widget for [state].
-  Widget collectionWidget(BuildContext context, BlocxCollectionState<T> state) {
+  Widget collectionWidget(
+      BuildContext context, BlocxCollectionState<Entity> state) {
     final opts = _collectionOptions;
     opts.assertCorrectType(_collectionDisplayType);
 
     switch (_collectionDisplayType) {
       case CollectionWidgetStateType.list:
-        return InfiniteList<T>(
+        return InfiniteList<Entity>(
           options: opts.asOrThrow<InfiniteListOptions>(),
           items: state.list,
           itemBuilder: itemBuilder,
@@ -337,7 +350,7 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
         );
 
       case CollectionWidgetStateType.sliverList:
-        return SliverInfiniteList<T>(
+        return SliverInfiniteList<Entity>(
           options: opts.asOrThrow<SliverInfiniteListOptions>(),
           items: state.list,
           itemBuilder: itemBuilder,
@@ -356,7 +369,7 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
         );
 
       case CollectionWidgetStateType.animatedList:
-        return AnimatedInfiniteList<T>(
+        return AnimatedInfiniteList<Entity>(
           isRefreshable: _bloc.isRefreshable,
           options: opts.asOrThrow<AnimatedInfiniteListOptions>(),
           items: state.list,
@@ -374,7 +387,7 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
         );
 
       case CollectionWidgetStateType.animatedSliverList:
-        return AnimatedSliverInfiniteList<T>(
+        return AnimatedSliverInfiniteList<Entity>(
           options: opts.asOrThrow<AnimatedSliverInfiniteListOptions>(),
           items: state.list,
           itemBuilder: itemBuilder,
@@ -395,7 +408,7 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
         );
 
       case CollectionWidgetStateType.grid:
-        return InfiniteGrid<T>(
+        return InfiniteGrid<Entity>(
           options: opts.asOrThrow<InfiniteGridOptions>(),
           items: state.list,
           itemBuilder: itemBuilder,
@@ -408,7 +421,7 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
         );
 
       case CollectionWidgetStateType.sliverGrid:
-        return SliverInfiniteGrid<T>(
+        return SliverInfiniteGrid<Entity>(
           options: opts.asOrThrow<SliverInfiniteGridOptions>(),
           items: state.list,
           itemBuilder: itemBuilder,
@@ -423,12 +436,13 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
   }
 
   /// Dispatches an add-item event.
-  void addToList(T item, {int index = 0}) {
-    _bloc.add(BlocxCollectionEventAddItem<T>(item: item, index: index));
+  void addToList(Entity item, {int index = 0}) {
+    _bloc.add(BlocxCollectionEventAddItem<Entity>(item: item, index: index));
   }
 
   @override
   void dispose() {
+    searchController.dispose();
     final controller = scrollController;
 
     if (_autoScrollListenerAttached && controller is AutoScrollController) {
@@ -452,11 +466,24 @@ abstract class BlocxCollectionWidgetState<W extends BlocxCollectionWidget<P>, T 
   /// Called when the collection selection changes.
   void onSelectionChanged(
     BuildContext context,
-    SelectionChangedData<T> selectionData,
+    SelectionChangedData<Entity> selectionData,
   ) {}
 
   @override
   ScreenManagerCubit get managerCubit => bloc.screenManagerCubit;
+
+  void setFilter<Filter>(Filter filter) {
+    bloc.add(BlocxCollectionEventFilter<Entity, Filter>(filter: filter));
+  }
+
+  BlocxSearchField<Entity, Payload> searchField(
+      {BlocxSearchFieldOptions? options}) {
+    return BlocxSearchField(
+      controller: searchController,
+      bloc: bloc,
+      options: options ?? BlocxSearchFieldOptions(),
+    );
+  }
 }
 
 /// Collection display type.

@@ -1,4 +1,4 @@
-import 'package:blocx_core/list_bloc.dart';
+import 'package:blocx_core/collection_bloc.dart';
 import 'package:flutter_blocx/list_widget.dart';
 import 'package:example/src/screens/note_tags/bloc/note_tags_bloc.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
@@ -15,7 +15,8 @@ class NoteTagsScreen extends BlocxCollectionWidget<User> {
   State<NoteTagsScreen> createState() => _NoteTagsScreenState();
 }
 
-class _NoteTagsScreenState extends BlocxCollectionWidgetState<NoteTagsScreen, NoteTag, User>
+class _NoteTagsScreenState
+    extends BlocxCollectionWidgetState<NoteTagsScreen, NoteTag, User>
     with HideOnScrollFabMixin {
   @override
   Widget itemBuilder(BuildContext context, NoteTag item) {
@@ -38,14 +39,24 @@ class _NoteTagsScreenState extends BlocxCollectionWidgetState<NoteTagsScreen, No
               tag: "user-${payload!.id}",
               child: Container(
                 margin: EdgeInsets.all(8),
-                child: CircleAvatar(foregroundImage: NetworkImage(payload!.avatarUrl!)),
+                child: CircleAvatar(
+                  foregroundImage: NetworkImage(payload!.avatarUrl!),
+                ),
               ),
             ),
-            Expanded(child: Text("Note tags for '${payload!.displayName}'", style: textTheme.bodyMedium)),
+            Expanded(
+              child: Text(
+                "Note tags for '${payload!.displayName}'",
+                style: textTheme.bodyMedium,
+              ),
+            ),
           ],
         ),
       ),
-      body: NotificationListener<UserScrollNotification>(onNotification: onScrollNotification, child: body),
+      body: NotificationListener<UserScrollNotification>(
+        onNotification: onScrollNotification,
+        child: body,
+      ),
       floatingActionButton: getFloatingActionButton(context),
     );
   }
@@ -54,7 +65,8 @@ class _NoteTagsScreenState extends BlocxCollectionWidgetState<NoteTagsScreen, No
   Future<void> onFabPressed(data) async {
     var result = await showModalBottomSheet<NoteTag>(
       context: context,
-      builder: (_) => NoteTagForm(payload: NoteTagFormPayload(userId: payload!.id)),
+      builder: (_) =>
+          NoteTagForm(payload: NoteTagFormPayload(userId: payload!.id)),
     );
     if (result == null) return;
     addToList(result);

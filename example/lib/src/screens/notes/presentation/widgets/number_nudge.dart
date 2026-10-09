@@ -53,8 +53,9 @@ class _NumberNudgeState extends State<NumberNudge> {
     int clamped = v;
     if (max != null) {
       clamped = clamped.clamp(widget.min, max);
-    } else if (clamped < widget.min)
+    } else if (clamped < widget.min) {
       clamped = widget.min;
+    }
 
     // only update if changed
     if (_value == clamped) return;

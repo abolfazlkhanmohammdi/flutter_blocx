@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:blocx_core/list_bloc.dart';
+import 'package:blocx_core/collection_bloc.dart';
 import 'package:example/src/core/use_cases/base_pagination_use_case.dart';
 import 'package:example/src/core/use_cases/use_case_result.dart';
 import 'package:example/src/screens/note_tags/data/models/note_tag.dart';
@@ -24,9 +24,14 @@ class GetNotesUseCase extends BasePaginationUseCase<GetNotesInput, Note> {
   }
 }
 
-class GetNotesInput extends BlocxPaginationInput {
+class GetNotesInput extends BlocxPaginatedInput {
   final User? user;
   final NoteTag? noteTag;
 
-  GetNotesInput({required super.limit, required super.offset, this.user, this.noteTag});
+  GetNotesInput({
+    required super.limit,
+    required super.offset,
+    this.user,
+    this.noteTag,
+  });
 }

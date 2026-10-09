@@ -1,4 +1,5 @@
-import 'package:blocx_core/form_bloc.dart' show BlocxBaseFormEntity, BlocxFormBloc, BlocxFormEventUpdateData;
+import 'package:blocx_core/form_bloc.dart'
+    show BlocxBaseFormEntity, BlocxFormBloc, BlocxFormEventUpdateData;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,12 +21,14 @@ import 'package:flutter_blocx/flutter_blocx.dart';
 /// - [F]: The form entity type.
 /// - [P]: The form payload type.
 /// - [E]: The form field enum type.
-class BlocXFormTextField<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum> extends StatefulWidget {
+class BlocXFormTextField<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
+    extends StatefulWidget {
   /// The enum key that identifies this field in the form entity.
   final E formKey;
 
   /// The visual style variant used to build the default decoration.
   final TextFieldType textFieldType;
+  final TypeConverter? typeConverter;
 
   /// Optional external controller.
   ///
@@ -51,22 +54,25 @@ class BlocXFormTextField<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
     this.textFieldOptions = const BlocXTextFieldOptions(),
     this.controller,
     this.validator,
+    this.typeConverter,
   });
 
   @override
-  State<BlocXFormTextField<F, P, E>> createState() => BlocXFormTextFieldState<F, P, E>();
+  State<BlocXFormTextField<F, P, E>> createState() =>
+      BlocXFormTextFieldState<F, P, E>();
 }
 
 /// State for [BlocXFormTextField].
-class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
-    extends BlocXWidgetState<BlocXFormTextField<F, P, E>> {
+class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P,
+    E extends Enum> extends BlocXWidgetState<BlocXFormTextField<F, P, E>> {
   TextEditingController? _internalController;
 
   /// Whether this state owns and should dispose the active controller.
   bool get _ownsController => widget.controller == null;
 
   /// The active text controller.
-  TextEditingController get _controller => widget.controller ?? _internalController!;
+  TextEditingController get _controller =>
+      widget.controller ?? _internalController!;
 
   @override
   void initState() {
@@ -114,10 +120,12 @@ class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P, E extends 
       minLines: options.minLines,
       obscureText: options.obscureText,
       decoration: _buildDecoration(context),
-      onChanged: (text) {
+      onChanged: (String text) {
         bloc.add(
           BlocxFormEventUpdateData(
-            data: text,
+            data: widget.typeConverter == null
+                ? text
+                : widget.typeConverter!.call(text),
             key: widget.formKey,
           ),
         );
@@ -146,18 +154,29 @@ class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P, E extends 
   }
 
   /// The nearest [BlocxFormBloc] in the widget tree.
-  BlocxFormBloc<F, P, E> get bloc => BlocProvider.of<BlocxFormBloc<F, P, E>>(context);
+  BlocxFormBloc<F, P, E> get bloc =>
+      BlocProvider.of<BlocxFormBloc<F, P, E>>(context);
 
   /// Builds the [InputDecoration] for the active text field type and options.
+  ///
+  /// [options.prefix]/[options.prefixText] are always rendered on the
+  /// physical **left**, and [options.suffix] (plus the unique-field spinner
+  /// and clear button, via [getSuffix]) is always rendered on the physical
+  /// **right** — regardless of locale.
+  ///
+  /// Flutter's [InputDecoration.prefixIcon]/[InputDecoration.suffixIcon] slots
+  /// are logical (start/end, which flip under RTL), so which slot each side's
+  /// content is fed into is swapped based on the ambient [Directionality].
   InputDecoration _buildDecoration(BuildContext context) {
     final options = widget.textFieldOptions;
-    final suffix = getSuffix(options);
+    final trailing = getSuffix(options);
+    final leading = options.prefix;
     final errorText = getErrorText(options);
 
     if (options.decoration != null) {
       return options.decoration!.copyWith(
         errorText: errorText,
-        suffixIcon: suffix ?? options.decoration!.suffixIcon,
+        suffixIcon: trailing ?? options.decoration!.suffixIcon,
       );
     }
 
@@ -170,12 +189,16 @@ class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P, E extends 
       helperStyle: options.helperStyle,
       errorText: errorText,
       errorStyle: options.errorStyle,
-      prefixIcon: options.prefix,
-      suffixIcon: suffix,
+      errorMaxLines: options.errorMaxLines,
+      prefixIcon: leading,
+      suffixIcon: trailing,
+      prefixText: options.prefixText,
+      suffixText: options.suffixText,
       filled: _shouldUseFilledBackground(options),
       fillColor: options.fillColor,
-      isDense: true,
-      contentPadding: options.contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      isDense: options.isDense,
+      contentPadding: options.contentPadding,
+      constraints: options.constraints,
       border: _buildBorder(options),
     );
   }
@@ -214,9 +237,11 @@ class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P, E extends 
   }
 
   /// Whether a unique-field check is currently running for this field.
-  bool get isCheckingUniqueField => bloc.state.checkingUniqueFields.contains(widget.formKey);
+  bool get isCheckingUniqueField =>
+      bloc.state.checkingUniqueFields.contains(widget.formKey);
 
-  /// Returns the suffix widget for the field.
+  /// Returns the trailing-content widget for the field (physical right,
+  /// regardless of locale — see [_buildDecoration]).
   ///
   /// Priority order:
   ///
@@ -236,7 +261,9 @@ class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P, E extends 
 
     if (options.suffix != null) return options.suffix;
 
-    final canShowClear = options.showClearButton && !options.obscureText && _controller.text.isNotEmpty;
+    final canShowClear = options.showClearButton &&
+        !options.obscureText &&
+        _controller.text.isNotEmpty;
 
     if (!canShowClear) return null;
 
@@ -264,7 +291,9 @@ class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P, E extends 
   /// Falls back to [BlocXTextFieldOptions.errorText] when the bloc has no error
   /// for [widget.formKey].
   String? getErrorText(BlocXTextFieldOptions options) {
-    final index = bloc.state.errors.keys.toList().indexWhere((key) => key == widget.formKey);
+    final index = bloc.state.errors.keys
+        .toList()
+        .indexWhere((key) => key == widget.formKey);
 
     if (index >= 0) {
       return bloc.state.errors.values.toList()[index].first;
@@ -367,20 +396,46 @@ class BlocXTextFieldOptions {
   /// Bloc-driven errors override this value.
   final String? errorText;
 
+  final int errorMaxLines;
+
   /// Style for the error text.
   final TextStyle? errorStyle;
 
-  /// Widget placed at the start of the field.
+  /// Widget always rendered on the physical **left** of the field, regardless
+  /// of locale. Takes priority over [prefixText] when both are set.
   final Widget? prefix;
 
-  /// Widget placed at the end of the field.
+  /// Constant, non-editable text always rendered on the physical start of
   ///
-  /// Overridden by the unique-field progress indicator when a check is running.
+  /// the field.
+  ///
+  /// Never part of the controller's value. Ignored when [prefix] is set.
+  final String? prefixText;
+
+  /// Constant, non-editable text always rendered on the physical end of
+  ///
+  /// the field.
+  ///
+  /// Never part of the controller's value. Ignored when [prefix] is set.
+  final String? suffixText;
+
+  /// Style for [prefixText].
+  final TextStyle? prefixStyle;
+
+  /// Style for [suffixText].
+  final TextStyle? suffixStyle;
+
+  /// Widget always rendered on the physical **right** of the field, regardless
+  /// of locale.
+  ///
+  /// Overridden by the unique-field progress indicator when a check is
+  /// running; otherwise takes priority over the clear button.
   final Widget? suffix;
 
   /// Whether to show a clear button when the field has text.
   ///
-  /// Ignored when [obscureText] is `true`.
+  /// Ignored when [obscureText] is `true`. Renders on the physical right,
+  /// alongside/instead of [suffix] per [getSuffix]'s priority order.
   final bool showClearButton;
 
   /// Whether the filled text field variant uses a filled background.
@@ -397,6 +452,16 @@ class BlocXTextFieldOptions {
 
   /// Content padding inside the field.
   final EdgeInsetsGeometry? contentPadding;
+
+  /// Whether the input decorator is dense.
+  ///
+  /// When null, falls back to ambient [InputDecorationTheme.isDense].
+  final bool? isDense;
+
+  /// Defines minimum and maximum sizes for the input decorator.
+  ///
+  /// When null, falls back to ambient [InputDecorationTheme.constraints].
+  final BoxConstraints? constraints;
 
   /// Creates text field configuration options.
   const BlocXTextFieldOptions({
@@ -423,12 +488,103 @@ class BlocXTextFieldOptions {
     this.errorText,
     this.errorStyle,
     this.prefix,
+    this.prefixText,
+    this.prefixStyle,
+    this.suffixText,
+    this.suffixStyle,
     this.suffix,
     this.showClearButton = true,
     this.filled = true,
     this.fillColor,
     this.borderRadius,
     this.contentPadding,
+    this.isDense,
+    this.constraints,
+    this.errorMaxLines = 1,
     this.enabled = true,
   });
 }
+
+extension BlocXTextFieldOptionsCopyWith on BlocXTextFieldOptions {
+  BlocXTextFieldOptions copyWith({
+    InputDecoration? decoration,
+    TextStyle? style,
+    TextInputType? keyboardType,
+    TextDirection? textDirection,
+    TextCapitalization? textCapitalization,
+    TextInputAction? textInputAction,
+    TextAlign? textAlign,
+    int? maxLines,
+    int? minLines,
+    int? maxLength,
+    int? minLength,
+    int? errorMaxLines,
+    bool? autofocus,
+    bool? enabled,
+    bool? obscureText,
+    List<TextInputFormatter>? inputFormatters,
+    String? labelText,
+    TextStyle? labelStyle,
+    String? hintText,
+    TextStyle? hintStyle,
+    String? helperText,
+    TextStyle? helperStyle,
+    String? errorText,
+    TextStyle? errorStyle,
+    Widget? prefix,
+    String? prefixText,
+    TextStyle? prefixStyle,
+    String? suffixText,
+    TextStyle? suffixStyle,
+    TextDirection? prefixDirection,
+    Widget? suffix,
+    bool? showClearButton,
+    bool? filled,
+    Color? fillColor,
+    BorderRadius? borderRadius,
+    EdgeInsetsGeometry? contentPadding,
+    bool? isDense,
+    BoxConstraints? constraints,
+  }) {
+    return BlocXTextFieldOptions(
+        decoration: decoration ?? this.decoration,
+        style: style ?? this.style,
+        errorMaxLines: errorMaxLines ?? this.errorMaxLines,
+        keyboardType: keyboardType ?? this.keyboardType,
+        textDirection: textDirection ?? this.textDirection,
+        textCapitalization: textCapitalization ?? this.textCapitalization,
+        textInputAction: textInputAction ?? this.textInputAction,
+        textAlign: textAlign ?? this.textAlign,
+        maxLines: maxLines ?? this.maxLines,
+        minLines: minLines ?? this.minLines,
+        maxLength: maxLength ?? this.maxLength,
+        minLength: minLength ?? this.minLength,
+        autofocus: autofocus ?? this.autofocus,
+        enabled: enabled ?? this.enabled,
+        obscureText: obscureText ?? this.obscureText,
+        inputFormatters: inputFormatters ?? this.inputFormatters,
+        labelText: labelText ?? this.labelText,
+        labelStyle: labelStyle ?? this.labelStyle,
+        hintText: hintText ?? this.hintText,
+        hintStyle: hintStyle ?? this.hintStyle,
+        helperText: helperText ?? this.helperText,
+        helperStyle: helperStyle ?? this.helperStyle,
+        errorText: errorText ?? this.errorText,
+        errorStyle: errorStyle ?? this.errorStyle,
+        prefix: prefix ?? this.prefix,
+        prefixText: prefixText ?? this.prefixText,
+        prefixStyle: prefixStyle ?? this.prefixStyle,
+        suffix: suffix ?? this.suffix,
+        showClearButton: showClearButton ?? this.showClearButton,
+        filled: filled ?? this.filled,
+        fillColor: fillColor ?? this.fillColor,
+        borderRadius: borderRadius ?? this.borderRadius,
+        contentPadding: contentPadding ?? this.contentPadding,
+        isDense: isDense ?? this.isDense,
+        constraints: constraints ?? this.constraints,
+        suffixText: suffixText ?? this.suffixText,
+        suffixStyle: suffixStyle ?? this.suffixStyle);
+  }
+}
+
+typedef TypeConverter<T> = T Function(String value);

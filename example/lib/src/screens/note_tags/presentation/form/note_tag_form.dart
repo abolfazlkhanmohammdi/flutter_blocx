@@ -13,11 +13,20 @@ class NoteTagForm extends BlocxFormWidget<NoteTagFormPayload> {
 }
 
 class _NoteTagFormState
-    extends BlocxFormWidgetState<NoteTagForm, NoteTagFormData, NoteTagFormPayload, NoteTagFormKey> {
+    extends
+        BlocxFormWidgetState<
+          NoteTagForm,
+          NoteTagFormData,
+          NoteTagFormPayload,
+          NoteTagFormKey
+        > {
   _NoteTagFormState();
 
   @override
-  formWidget(BuildContext context, BlocxFormState<NoteTagFormData, NoteTagFormKey> state) {
+  formWidget(
+    BuildContext context,
+    BlocxFormState<NoteTagFormData, NoteTagFormKey> state,
+  ) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -25,7 +34,9 @@ class _NoteTagFormState
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            isUpdate ? "Edit note tag ${payload!.toBeEdited!.name}" : "Create a new Note Tag",
+            isUpdate
+                ? "Edit note tag ${payload!.toBeEdited!.name}"
+                : "Create a new Note Tag",
             style: textTheme.titleMedium?.copyWith(color: colorScheme.primary),
           ),
           textField(
@@ -33,7 +44,11 @@ class _NoteTagFormState
             type: TextFieldType.outlined,
             options: BlocXTextFieldOptions(maxLines: 10, minLines: 1),
           ),
-          BlocxFormButtonRow<NoteTagFormData, NoteTagFormPayload, NoteTagFormKey>(
+          BlocxFormButtonRow<
+            NoteTagFormData,
+            NoteTagFormPayload,
+            NoteTagFormKey
+          >(
             formState: state,
             registerText: isUpdate ? "Edit" : "Register",
             registerSubmittingText: "Registering...",
@@ -49,7 +64,9 @@ class _NoteTagFormState
   }
 
   @override
-  void onFormSubmitted(BlocxFormStateFormSubmitted<NoteTagFormData, NoteTagFormKey> state) {
+  void onFormSubmitted(
+    BlocxFormStateFormSubmitted<NoteTagFormData, NoteTagFormKey> state,
+  ) {
     Navigator.of(context).pop(state.submittedData);
   }
 
@@ -57,7 +74,8 @@ class _NoteTagFormState
   bool get isUpdate => payload?.toBeEdited != null;
 
   @override
-  BlocxFormBloc<NoteTagFormData, NoteTagFormPayload, NoteTagFormKey> generateBloc() => NoteTagFormBloc();
+  BlocxFormBloc<NoteTagFormData, NoteTagFormPayload, NoteTagFormKey>
+  get generateBloc => NoteTagFormBloc();
 
   @override
   List<NoteTagFormKey> get keys => NoteTagFormKey.values;

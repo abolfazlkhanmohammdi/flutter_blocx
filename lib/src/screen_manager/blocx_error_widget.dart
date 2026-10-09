@@ -65,7 +65,7 @@ class BlocxErrorWidget extends StatelessWidget {
             surfaceTintColor: scheme.errorContainer,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
