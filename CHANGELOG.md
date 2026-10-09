@@ -7,6 +7,7 @@
 
 ### Infrastructure
 * Added GitHub Actions CI workflow (`.github/workflows/ci.yml`) covering formatting, static analysis (`--fatal-infos`), tests with coverage, dry-run publishing, and example web build.
+* Added `bloc_test` and `mocktail` dev dependencies and created `FakeCollectionBloc` test helper in `test/helpers/`.
 
 ## [1.0.0]
 
