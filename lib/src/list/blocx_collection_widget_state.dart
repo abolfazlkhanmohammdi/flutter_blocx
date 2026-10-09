@@ -221,7 +221,9 @@ abstract class BlocxCollectionWidgetState<
   Payload? get payload => widget.payload;
 
   /// Text shown while search is running.
-  String get searchingText => 'Searching data, please wait';
+  ///
+  /// Defaults to [loc.searchingText]. Override to customize per screen.
+  String get searchingText => loc.searchingText;
 
   /// Builds the empty-state widget.
   Widget emptyWidget(BuildContext context, BlocxCollectionState<Entity> state) {

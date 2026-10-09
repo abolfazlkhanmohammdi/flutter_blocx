@@ -5,6 +5,7 @@ import 'package:blocx_core/collection_bloc.dart'
         BlocxCollectionEventClearSearch,
         BlocxCollectionBloc;
 import 'package:flutter/material.dart';
+import 'package:flutter_blocx/src/core/localizations/loc_provider.dart';
 
 /// A search text field that integrates with a [SearchableListBlocMixin].
 ///
@@ -25,7 +26,7 @@ class BlocxSearchField<Entity extends BlocxBaseEntity, Payload>
   @override
   Widget build(BuildContext context) {
     final defaultDecoration = InputDecoration(
-      hintText: options.hintText ?? "Search...",
+      hintText: options.hintText ?? loc.searchHint,
       hintStyle: options.hintStyle ??
           Theme.of(
             context,
