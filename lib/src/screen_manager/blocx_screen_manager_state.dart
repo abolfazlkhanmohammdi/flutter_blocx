@@ -130,8 +130,12 @@ abstract class BlocxScreenManagerState<T extends StatefulWidget>
     String? title,
     BlocXSnackbarType snackbarType,
   ) {
-    BlocxSnackBar.show(context,
-        message: message, type: snackbarType, title: title);
+    BlocxSnackBar.show(
+      context,
+      message: message,
+      type: snackbarType,
+      title: title,
+    );
   }
 
   /// Whether the body should be wrapped in a [Scaffold].

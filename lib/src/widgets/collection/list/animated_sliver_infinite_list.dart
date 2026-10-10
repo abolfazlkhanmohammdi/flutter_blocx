@@ -17,16 +17,23 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 Animation<double> _driveDefaultAnimation(Animation<double> parent) {
-  return CurvedAnimation(parent: parent, curve: Curves.easeInOutQuad)
-      .drive(Tween<double>(begin: 0, end: 1));
+  return CurvedAnimation(
+    parent: parent,
+    curve: Curves.easeInOutQuad,
+  ).drive(Tween<double>(begin: 0, end: 1));
 }
 
 Widget _defaultAnimation(
-    BuildContext context, Widget child, Animation<double> animation) {
+  BuildContext context,
+  Widget child,
+  Animation<double> animation,
+) {
   return SizeTransition(
     sizeFactor: _driveDefaultAnimation(animation),
     child: FadeTransition(
-        opacity: _driveDefaultAnimation(animation), child: child),
+      opacity: _driveDefaultAnimation(animation),
+      child: child,
+    ),
   );
 }
 
@@ -46,9 +53,9 @@ class AnimatedSliverInfiniteList<Entity extends BlocxBaseEntity>
 
   final ScrollController? scrollController;
   final Widget? Function(BuildContext context, bool isLoadingMore)?
-      loadMoreWidgetBuilder;
+  loadMoreWidgetBuilder;
   final Widget? Function(BuildContext context, double swipeRefreshHeight)?
-      refreshWidgetBuilder;
+  refreshWidgetBuilder;
   final Widget loading;
   final Widget empty;
   final bool? isLoading;
@@ -127,8 +134,11 @@ class AnimatedSliverBlocxInfiniteListState<Entity extends BlocxBaseEntity>
             slivers.add(SliverToBoxAdapter(child: refresh));
           }
           if (showLoading || showEmpty) {
-            slivers.add(SliverFillRemaining(
-                child: showLoading ? widget.loading : widget.empty));
+            slivers.add(
+              SliverFillRemaining(
+                child: showLoading ? widget.loading : widget.empty,
+              ),
+            );
           } else {
             final core = _buildAnimatedList(context, state);
             slivers.add(_maybePad(core, options.padding));
@@ -147,17 +157,23 @@ class AnimatedSliverBlocxInfiniteListState<Entity extends BlocxBaseEntity>
             onNotification: (n) => _onScroll(n),
             child: Listener(
               onPointerDown: (d) => bloc.add(
-                  BlocxInfiniteListEventVerticalDragStarted(
-                      globalY: d.position.dy)),
+                BlocxInfiniteListEventVerticalDragStarted(
+                  globalY: d.position.dy,
+                ),
+              ),
               onPointerUp: (_) =>
                   bloc.add(BlocxInfiniteListEventVerticalDragEnded()),
               onPointerMove: _maySwipe(state)
-                  ? (d) => bloc.add(BlocxInfiniteListEventVerticalDragUpdated(
-                      globalY: d.position.dy))
+                  ? (d) => bloc.add(
+                      BlocxInfiniteListEventVerticalDragUpdated(
+                        globalY: d.position.dy,
+                      ),
+                    )
                   : null,
               onPointerCancel: _maySwipe(state)
                   ? (_) => bloc.add(
-                      BlocxInfiniteListEventVerticalDragUpdated(globalY: null))
+                      BlocxInfiniteListEventVerticalDragUpdated(globalY: null),
+                    )
                   : null,
               child: CustomScrollView(
                 controller: effectiveController,
@@ -211,9 +227,13 @@ class AnimatedSliverBlocxInfiniteListState<Entity extends BlocxBaseEntity>
       widget.refreshOnSwipe != null;
 
   Widget? _buildSwipeRefresh(
-      BuildContext context, BlocxInfiniteListState state) {
-    final external =
-        widget.refreshWidgetBuilder?.call(context, state.swipeRefreshHeight);
+    BuildContext context,
+    BlocxInfiniteListState state,
+  ) {
+    final external = widget.refreshWidgetBuilder?.call(
+      context,
+      state.swipeRefreshHeight,
+    );
     if (external != null) return external;
 
     if (state.swipeRefreshHeight <= 0) return null;
@@ -223,16 +243,19 @@ class AnimatedSliverBlocxInfiniteListState<Entity extends BlocxBaseEntity>
       height: state.swipeRefreshHeight,
       child: const Center(
         child: SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(color: Colors.white)),
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
       ),
     );
   }
 
   Widget? _buildLoadMore(BuildContext context, BlocxInfiniteListState state) {
-    final external =
-        widget.loadMoreWidgetBuilder?.call(context, state.isLoadingMore);
+    final external = widget.loadMoreWidgetBuilder?.call(
+      context,
+      state.isLoadingMore,
+    );
     if (external != null) return external;
 
     if (!state.isLoadingMore) return null;
@@ -242,9 +265,10 @@ class AnimatedSliverBlocxInfiniteListState<Entity extends BlocxBaseEntity>
       color: scheme.primary,
       child: Center(
         child: SizedBox(
-            height: 24,
-            width: 24,
-            child: CircularProgressIndicator(color: scheme.onPrimary)),
+          height: 24,
+          width: 24,
+          child: CircularProgressIndicator(color: scheme.onPrimary),
+        ),
       ),
     );
   }
@@ -269,19 +293,23 @@ class AnimatedSliverBlocxInfiniteListState<Entity extends BlocxBaseEntity>
     final c = effectiveController;
     if (c is! AutoScrollController) return child;
     return AutoScrollTag(
-        key: ValueKey(data.identifier),
-        controller: c,
-        index: index,
-        child: child);
+      key: ValueKey(data.identifier),
+      controller: c,
+      index: index,
+      child: child,
+    );
   }
 
   Widget _animatedItemWithOptionalSeparator(
-      BuildContext context, Entity data, BlocxInfiniteListState state) {
+    BuildContext context,
+    Entity data,
+    BlocxInfiniteListState state,
+  ) {
     final index = widget.items.indexOf(data);
 
     final isBottomLoadingTrigger =
         index == (widget.items.length - options.loadMoreTriggerItemDistance) &&
-            !state.hasReachedEnd;
+        !state.hasReachedEnd;
 
     Widget child = widget.itemBuilder(context, data);
 
@@ -304,7 +332,9 @@ class AnimatedSliverBlocxInfiniteListState<Entity extends BlocxBaseEntity>
   }
 
   Widget _buildAnimatedList(
-      BuildContext context, BlocxInfiniteListState state) {
+    BuildContext context,
+    BlocxInfiniteListState state,
+  ) {
     return SliverImplicitlyAnimatedList<Entity>(
       itemData: widget.items,
       itemBuilder: (c, data) =>

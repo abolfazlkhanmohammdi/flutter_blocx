@@ -36,8 +36,10 @@ class BlocxErrorWidget extends StatelessWidget {
     VoidCallback? onRetry,
     VoidCallback? onReport,
     String? title,
-    EdgeInsetsGeometry padding =
-        const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+    EdgeInsetsGeometry padding = const EdgeInsets.symmetric(
+      horizontal: 24,
+      vertical: 16,
+    ),
     bool expandDetails = false,
   }) {
     return BlocxErrorWidget(
@@ -63,15 +65,19 @@ class BlocxErrorWidget extends StatelessWidget {
           child: Card(
             color: scheme.errorContainer,
             surfaceTintColor: scheme.errorContainer,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.error_outline,
-                      size: 40, color: scheme.onErrorContainer),
+                  Icon(
+                    Icons.error_outline,
+                    size: 40,
+                    color: scheme.onErrorContainer,
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     error.title ?? loc.somethingWentWrong,
@@ -84,8 +90,9 @@ class BlocxErrorWidget extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     error.message,
-                    style: textTheme.bodyMedium
-                        ?.copyWith(color: scheme.onErrorContainer),
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: scheme.onErrorContainer,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
@@ -127,8 +134,10 @@ class BlocxErrorWidget extends StatelessWidget {
                         style: OutlinedButton.styleFrom(
                           foregroundColor: scheme.onErrorContainer,
                           side: BorderSide(
-                              color: scheme.onErrorContainer
-                                  .withValues(alpha: 0.4)),
+                            color: scheme.onErrorContainer.withValues(
+                              alpha: 0.4,
+                            ),
+                          ),
                         ),
                       ),
                       if (onReport != null)
@@ -137,7 +146,8 @@ class BlocxErrorWidget extends StatelessWidget {
                           icon: const Icon(Icons.bug_report_outlined),
                           label: Text(loc.report),
                           style: TextButton.styleFrom(
-                              foregroundColor: scheme.onErrorContainer),
+                            foregroundColor: scheme.onErrorContainer,
+                          ),
                         ),
                       OutlinedButton.icon(
                         onPressed: () => Navigator.of(context).pop(),
@@ -146,8 +156,10 @@ class BlocxErrorWidget extends StatelessWidget {
                         style: OutlinedButton.styleFrom(
                           foregroundColor: scheme.onErrorContainer,
                           side: BorderSide(
-                              color: scheme.onErrorContainer
-                                  .withValues(alpha: 0.4)),
+                            color: scheme.onErrorContainer.withValues(
+                              alpha: 0.4,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -178,8 +190,9 @@ class BlocxErrorWidget extends StatelessWidget {
     await Clipboard.setData(ClipboardData(text: buf.toString()));
 
     if (context.mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(loc.errorDetailsCopied)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(loc.errorDetailsCopied)));
     }
   }
 }
@@ -203,14 +216,17 @@ class _DetailsTile extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Theme(
-      data: Theme.of(context)
-          .copyWith(dividerColor: color.withValues(alpha: 0.2)),
+      data: Theme.of(
+        context,
+      ).copyWith(dividerColor: color.withValues(alpha: 0.2)),
       child: ExpansionTile(
         initiallyExpanded: expanded,
         tilePadding: EdgeInsets.zero,
         childrenPadding: EdgeInsets.zero,
-        title: Text(loc.details,
-            style: textTheme.titleSmall?.copyWith(color: color)),
+        title: Text(
+          loc.details,
+          style: textTheme.titleSmall?.copyWith(color: color),
+        ),
         children: [
           const SizedBox(height: 8),
           Container(

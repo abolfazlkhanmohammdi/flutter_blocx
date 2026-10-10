@@ -59,92 +59,95 @@ void main() {
     });
 
     testWidgets(
-        'errorWidget passes onRetry which calls managerCubit.clearError and onRetry hook',
-        (tester) async {
-      var retryCalled = false;
+      'errorWidget passes onRetry which calls managerCubit.clearError and onRetry hook',
+      (tester) async {
+        var retryCalled = false;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: TestScreenManagerScreen(
-              cubit: cubit,
-              onRetryCallback: () => retryCalled = true,
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: TestScreenManagerScreen(
+                cubit: cubit,
+                onRetryCallback: () => retryCalled = true,
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Main Content'), findsOneWidget);
+        expect(find.text('Main Content'), findsOneWidget);
 
-      // Trigger full-page error
-      cubit.displayErrorWidget(ReadableError(message: 'Server down'));
-      await tester.pumpAndSettle();
+        // Trigger full-page error
+        cubit.displayErrorWidget(ReadableError(message: 'Server down'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Main Content'), findsNothing);
-      expect(find.byType(BlocxErrorWidget), findsOneWidget);
-      expect(find.text('Try again'), findsOneWidget);
+        expect(find.text('Main Content'), findsNothing);
+        expect(find.byType(BlocxErrorWidget), findsOneWidget);
+        expect(find.text('Try again'), findsOneWidget);
 
-      // Tap 'Try again'
-      await tester.tap(find.text('Try again'));
-      await tester.pumpAndSettle();
+        // Tap 'Try again'
+        await tester.tap(find.text('Try again'));
+        await tester.pumpAndSettle();
 
-      // Main content should be restored and callback invoked
-      expect(retryCalled, isTrue);
-      expect(find.byType(BlocxErrorWidget), findsNothing);
-      expect(find.text('Main Content'), findsOneWidget);
-    });
+        // Main content should be restored and callback invoked
+        expect(retryCalled, isTrue);
+        expect(find.byType(BlocxErrorWidget), findsNothing);
+        expect(find.text('Main Content'), findsOneWidget);
+      },
+    );
 
     testWidgets(
-        'errorWidgetByErrorCode passes onRetry which clears error and restores main content',
-        (tester) async {
-      var retryCalled = false;
+      'errorWidgetByErrorCode passes onRetry which clears error and restores main content',
+      (tester) async {
+        var retryCalled = false;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: TestScreenManagerScreen(
-              cubit: cubit,
-              onRetryCallback: () => retryCalled = true,
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: TestScreenManagerScreen(
+                cubit: cubit,
+                onRetryCallback: () => retryCalled = true,
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      // Trigger error by error code
-      cubit.displayErrorWidgetByErrorCode(BlocXErrorCode.unknown);
-      await tester.pumpAndSettle();
+        // Trigger error by error code
+        cubit.displayErrorWidgetByErrorCode(BlocXErrorCode.unknown);
+        await tester.pumpAndSettle();
 
-      expect(find.byType(BlocxErrorWidget), findsOneWidget);
-      expect(find.text('Try again'), findsOneWidget);
+        expect(find.byType(BlocxErrorWidget), findsOneWidget);
+        expect(find.text('Try again'), findsOneWidget);
 
-      await tester.tap(find.text('Try again'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Try again'));
+        await tester.pumpAndSettle();
 
-      expect(retryCalled, isTrue);
-      expect(find.text('Main Content'), findsOneWidget);
-    });
+        expect(retryCalled, isTrue);
+        expect(find.text('Main Content'), findsOneWidget);
+      },
+    );
 
     testWidgets(
-        'L4: onPop hook is invoked when cubit emits ScreenManagerCubitStatePop',
-        (tester) async {
-      var popCalled = false;
+      'L4: onPop hook is invoked when cubit emits ScreenManagerCubitStatePop',
+      (tester) async {
+        var popCalled = false;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: TestScreenManagerScreen(
-              cubit: cubit,
-              onPopCallback: () => popCalled = true,
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: TestScreenManagerScreen(
+                cubit: cubit,
+                onPopCallback: () => popCalled = true,
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(popCalled, isFalse);
-      cubit.pop();
-      await tester.pumpAndSettle();
+        expect(popCalled, isFalse);
+        cubit.pop();
+        await tester.pumpAndSettle();
 
-      expect(popCalled, isTrue);
-    });
+        expect(popCalled, isTrue);
+      },
+    );
   });
 }

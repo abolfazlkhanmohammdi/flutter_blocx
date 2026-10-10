@@ -141,13 +141,18 @@ class TestLocalizedCollectionWidget extends BlocxCollectionWidget<void> {
       _TestLocalizedCollectionWidgetState();
 }
 
-class _TestLocalizedCollectionWidgetState extends BlocxCollectionWidgetState<
-    TestLocalizedCollectionWidget, TestItemEntity, void> {
+class _TestLocalizedCollectionWidgetState
+    extends
+        BlocxCollectionWidgetState<
+          TestLocalizedCollectionWidget,
+          TestItemEntity,
+          void
+        > {
   @override
   CollectionSettings get settings => CollectionSettings(
-        type: CollectionWidgetStateType.list,
-        options: const InfiniteListOptions(),
-      );
+    type: CollectionWidgetStateType.list,
+    options: const InfiniteListOptions(),
+  );
 
   @override
   Widget itemBuilder(BuildContext context, TestItemEntity item) =>
@@ -167,8 +172,9 @@ void main() {
       BlocXLocalizations.localizations = previousLoc;
     });
 
-    testWidgets('BlocxSearchField displays localized hintText by default',
-        (tester) async {
+    testWidgets('BlocxSearchField displays localized hintText by default', (
+      tester,
+    ) async {
       final bloc = FakeCollectionBloc();
       final controller = TextEditingController();
 
@@ -189,26 +195,25 @@ void main() {
     });
 
     testWidgets(
-        'BlocxCollectionWidgetState defaults searchingText to loc.searchingText',
-        (tester) async {
-      final bloc = FakeCollectionBloc(
-        initialItems: [const TestItemEntity(id: '1', title: 'Item 1')],
-      );
+      'BlocxCollectionWidgetState defaults searchingText to loc.searchingText',
+      (tester) async {
+        final bloc = FakeCollectionBloc(
+          initialItems: [const TestItemEntity(id: '1', title: 'Item 1')],
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: TestLocalizedCollectionWidget(bloc: bloc),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(body: TestLocalizedCollectionWidget(bloc: bloc)),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpAndSettle();
-      final state = tester.state<_TestLocalizedCollectionWidgetState>(
-        find.byType(TestLocalizedCollectionWidget),
-      );
-      expect(state.searchingText, equals('Recherche en cours...'));
-      bloc.close();
-    });
+        await tester.pumpAndSettle();
+        final state = tester.state<_TestLocalizedCollectionWidgetState>(
+          find.byType(TestLocalizedCollectionWidget),
+        );
+        expect(state.searchingText, equals('Recherche en cours...'));
+        bloc.close();
+      },
+    );
   });
 }

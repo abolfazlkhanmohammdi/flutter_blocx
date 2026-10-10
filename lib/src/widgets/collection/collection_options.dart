@@ -21,19 +21,21 @@ abstract class CollectionOptions {
 
   /// Handy defaults for callers that want a zero-arg super().
   const CollectionOptions.defaults()
-      : reverse = false,
-        scrollPhysics = null,
-        loadMoreTriggerItemDistance = 2,
-        scrollDirection = Axis.vertical,
-        scrollBehavior = null,
-        shrinkWrap = false;
+    : reverse = false,
+      scrollPhysics = null,
+      loadMoreTriggerItemDistance = 2,
+      scrollDirection = Axis.vertical,
+      scrollBehavior = null,
+      shrinkWrap = false;
 
   /// Runtime safety: ensure the options instance matches the widget state type.
   void assertCorrectType(CollectionWidgetStateType type) {
     switch (type) {
       case CollectionWidgetStateType.list:
-        assert(this is InfiniteListOptions,
-            'Expected InfiniteListOptions not ${runtimeType.toString()}');
+        assert(
+          this is InfiniteListOptions,
+          'Expected InfiniteListOptions not ${runtimeType.toString()}',
+        );
         break;
 
       case CollectionWidgetStateType.sliverList:
@@ -58,8 +60,10 @@ abstract class CollectionOptions {
         break;
 
       case CollectionWidgetStateType.grid:
-        assert(this is InfiniteGridOptions,
-            'Expected InfiniteGridOptions not ${runtimeType.toString()}');
+        assert(
+          this is InfiniteGridOptions,
+          'Expected InfiniteGridOptions not ${runtimeType.toString()}',
+        );
         break;
 
       case CollectionWidgetStateType.sliverGrid:
@@ -83,14 +87,16 @@ abstract class CollectionOptions {
 
     if (!ok) {
       throw ArgumentError(
-          'Wrong options type for "$type". Got ${runtimeType.toString()}.');
+        'Wrong options type for "$type". Got ${runtimeType.toString()}.',
+      );
     }
   }
 
   T asOrThrow<T extends CollectionOptions>() {
     if (this is! T) {
       throw ArgumentError(
-          'Expected ${T.toString()}, got ${runtimeType.toString()}.');
+        'Expected ${T.toString()}, got ${runtimeType.toString()}.',
+      );
     }
     return this as T;
   }
@@ -110,9 +116,7 @@ abstract class ListOptions extends CollectionOptions {
     super.shrinkWrap,
   });
 
-  const ListOptions.defaults()
-      : padding = null,
-        super.defaults();
+  const ListOptions.defaults() : padding = null, super.defaults();
 }
 
 /// Base options for grid-like widgets (GridView, SliverGrid).

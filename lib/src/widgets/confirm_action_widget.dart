@@ -17,7 +17,8 @@ class ConfirmActionWidget extends StatefulWidget {
       useSafeArea: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       builder: (context) => ConfirmActionWidget(options: options),
     );
   }
@@ -49,13 +50,14 @@ class _ConfirmDeleteSheetState extends State<ConfirmActionWidget> {
               width: 48,
               height: 48,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
+              errorBuilder: (_, _, _) => Container(
                 width: 48,
                 height: 48,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                    color: cs.errorContainer,
-                    borderRadius: BorderRadius.circular(12)),
+                  color: cs.errorContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: Icon(options.icon, color: cs.onErrorContainer),
               ),
             ),
@@ -63,8 +65,9 @@ class _ConfirmDeleteSheetState extends State<ConfirmActionWidget> {
         : Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-                color: cs.errorContainer,
-                borderRadius: BorderRadius.circular(12)),
+              color: cs.errorContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Icon(options.icon, color: cs.onErrorContainer),
           );
 
@@ -80,8 +83,9 @@ class _ConfirmDeleteSheetState extends State<ConfirmActionWidget> {
               height: 4,
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
-                  color: cs.outlineVariant,
-                  borderRadius: BorderRadius.circular(2)),
+                color: cs.outlineVariant,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
           ),
           Row(
@@ -93,15 +97,19 @@ class _ConfirmDeleteSheetState extends State<ConfirmActionWidget> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(options.title ?? loc.areYouSure,
-                        style: textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w700)),
+                    Text(
+                      options.title ?? loc.areYouSure,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     Text(
-                        options.question ??
-                            loc.areYouSureYouWantToDeleteThisItem,
-                        style: textTheme.bodyMedium
-                            ?.copyWith(color: cs.onSurfaceVariant)),
+                      options.question ?? loc.areYouSureYouWantToDeleteThisItem,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -157,8 +165,9 @@ class _ConfirmDeleteSheetState extends State<ConfirmActionWidget> {
                             width: 18,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(cs.onError),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                cs.onError,
+                              ),
                             ),
                           )
                         : Text(options.confirmText ?? loc.delete),

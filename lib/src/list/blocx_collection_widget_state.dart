@@ -20,9 +20,11 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 /// - [Entity]: The collection item entity type.
 /// - [Payload]: The optional payload type used during initial loading.
 abstract class BlocxCollectionWidgetState<
-    W extends BlocxCollectionWidget<Payload>,
-    Entity extends BlocxBaseEntity,
-    Payload> extends BlocxScreenManagerState<W> {
+  W extends BlocxCollectionWidget<Payload>,
+  Entity extends BlocxBaseEntity,
+  Payload
+>
+    extends BlocxScreenManagerState<W> {
   late final BlocxCollectionBloc<Entity, Payload> _bloc;
 
   /// The active scroll controller used by the rendered collection widget.
@@ -118,11 +120,11 @@ abstract class BlocxCollectionWidgetState<
     }
 
     final children = <Widget>[
-      if (top != null) top,
+      ?top,
       if (top != null) SizedBox(height: topBottomAndListSpacing),
       _collectionOptions.shrinkWrap ? coreBox : Expanded(child: coreBox),
       if (bottom != null) SizedBox(height: topBottomAndListSpacing),
-      if (bottom != null) bottom,
+      ?bottom,
     ];
 
     return Column(
@@ -140,20 +142,21 @@ abstract class BlocxCollectionWidgetState<
 
   /// Optional widget displayed below the collection.
   Widget? bottomWidget(
-          BuildContext context, BlocxCollectionState<Entity> state) =>
-      null;
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  ) => null;
 
   /// Optional sliver displayed above sliver collections.
   Widget? sliverTopWidget(
-          BuildContext context, BlocxCollectionState<Entity> state) =>
-      null;
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  ) => null;
 
   /// Optional sliver displayed below sliver collections.
   Widget? sliverBottomWidget(
     BuildContext context,
     BlocxCollectionState<Entity> state,
-  ) =>
-      null;
+  ) => null;
 
   /// Builds one visual item for [item].
   Widget itemBuilder(BuildContext context, Entity item);
@@ -178,7 +181,9 @@ abstract class BlocxCollectionWidgetState<
 
   /// Builds the loading widget.
   Widget loadingWidget(
-      BuildContext context, BlocxCollectionState<Entity> state) {
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  ) {
     return Column(
       spacing: 24,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -309,8 +314,9 @@ abstract class BlocxCollectionWidgetState<
         scrollController = providedController;
         _ownsScrollController = false;
       } else {
-        scrollController =
-            _bloc.isScrollable ? AutoScrollController() : ScrollController();
+        scrollController = _bloc.isScrollable
+            ? AutoScrollController()
+            : ScrollController();
         _ownsScrollController = true;
       }
     }
@@ -365,9 +371,9 @@ abstract class BlocxCollectionWidgetState<
 
   /// Collection rendering settings.
   CollectionSettings get settings => CollectionSettings(
-        type: CollectionWidgetStateType.animatedList,
-        options: AnimatedInfiniteListOptions(),
-      );
+    type: CollectionWidgetStateType.animatedList,
+    options: AnimatedInfiniteListOptions(),
+  );
 
   bool _isBlocFromContext = false;
 
@@ -395,7 +401,9 @@ abstract class BlocxCollectionWidgetState<
 
   /// Builds the concrete collection widget for [state].
   Widget collectionWidget(
-      BuildContext context, BlocxCollectionState<Entity> state) {
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  ) {
     final opts = _collectionOptions;
     opts.assertCorrectType(_collectionDisplayType);
 
@@ -542,8 +550,9 @@ abstract class BlocxCollectionWidgetState<
     bloc.add(BlocxCollectionEventFilter<Entity, Filter>(filter: filter));
   }
 
-  BlocxSearchField<Entity, Payload> searchField(
-      {BlocxSearchFieldOptions? options}) {
+  BlocxSearchField<Entity, Payload> searchField({
+    BlocxSearchFieldOptions? options,
+  }) {
     return BlocxSearchField(
       controller: searchController,
       bloc: bloc,
@@ -588,8 +597,5 @@ class CollectionSettings {
   final CollectionOptions options;
 
   /// Creates collection settings.
-  CollectionSettings({
-    required this.type,
-    required this.options,
-  });
+  CollectionSettings({required this.type, required this.options});
 }

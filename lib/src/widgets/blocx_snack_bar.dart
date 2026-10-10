@@ -5,11 +5,12 @@ class BlocxSnackBar extends StatelessWidget {
   final String message;
   final String? title;
   final BlocXSnackbarType snackbarType;
-  const BlocxSnackBar(
-      {super.key,
-      required this.message,
-      this.title,
-      required this.snackbarType});
+  const BlocxSnackBar({
+    super.key,
+    required this.message,
+    this.title,
+    required this.snackbarType,
+  });
 
   static void show(
     BuildContext context, {
@@ -26,12 +27,16 @@ class BlocxSnackBar extends StatelessWidget {
       backgroundColor: Colors.transparent, // we style our own container
       padding: EdgeInsets.zero, // let our content manage padding
       margin: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          bottom: 16 + MediaQuery.viewInsetsOf(context).bottom),
+        left: 16,
+        right: 16,
+        bottom: 16 + MediaQuery.viewInsetsOf(context).bottom,
+      ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      content:
-          BlocxSnackBar(message: message, title: title, snackbarType: type),
+      content: BlocxSnackBar(
+        message: message,
+        title: title,
+        snackbarType: type,
+      ),
     );
     final m = ScaffoldMessenger.of(context);
     m.clearSnackBars();
@@ -45,7 +50,9 @@ class BlocxSnackBar extends StatelessWidget {
     final mainWidget = Container(
       constraints: BoxConstraints(maxWidth: 800),
       decoration: BoxDecoration(
-          color: colors.bg, borderRadius: BorderRadius.circular(16)),
+        color: colors.bg,
+        borderRadius: BorderRadius.circular(16),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -67,7 +74,9 @@ class BlocxSnackBar extends StatelessWidget {
     final width = MediaQuery.sizeOf(context).width;
     if (width > 800) {
       return Row(
-          mainAxisAlignment: MainAxisAlignment.center, children: [mainWidget]);
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [mainWidget],
+      );
     }
     return mainWidget;
   }
@@ -90,8 +99,10 @@ class BlocxSnackBar extends StatelessWidget {
       children: [
         Text(
           title!,
-          style: textTheme.titleSmall
-              ?.copyWith(color: onBg, fontWeight: FontWeight.w600),
+          style: textTheme.titleSmall?.copyWith(
+            color: onBg,
+            fontWeight: FontWeight.w600,
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -121,8 +132,8 @@ _SnackColors _colorsFor(ColorScheme scheme, BlocXSnackbarType type) {
 
 extension on BlocXSnackbarType {
   IconData get icon => switch (this) {
-        BlocXSnackbarType.error => Icons.error_outline,
-        BlocXSnackbarType.info => Icons.info_outline,
-        BlocXSnackbarType.warning => Icons.warning_amber_outlined,
-      };
+    BlocXSnackbarType.error => Icons.error_outline,
+    BlocXSnackbarType.info => Icons.info_outline,
+    BlocXSnackbarType.warning => Icons.warning_amber_outlined,
+  };
 }

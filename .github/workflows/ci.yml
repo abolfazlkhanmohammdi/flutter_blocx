@@ -15,6 +15,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Checkout blocx_core for local resolution
+        uses: actions/checkout@v4
+        with:
+          repository: abolfazlkhanmohammdi/blocx_core
+          ref: develop
+          path: _blocx_core
+
+      - name: Setup local pubspec overrides for CI
+        run: |
+          echo "dependency_overrides:" > pubspec_overrides.yaml
+          echo "  blocx_core:" >> pubspec_overrides.yaml
+          echo "    path: ./_blocx_core" >> pubspec_overrides.yaml
+          echo "dependency_overrides:" > example/pubspec_overrides.yaml
+          echo "  blocx_core:" >> example/pubspec_overrides.yaml
+          echo "    path: ../_blocx_core" >> example/pubspec_overrides.yaml
+
       - uses: subosito/flutter-action@v2
         with:
           channel: ${{ matrix.channel }}
@@ -24,7 +40,7 @@ jobs:
         run: flutter pub get
 
       - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed .
+        run: dart format --output=none --set-exit-if-changed lib test example/lib
 
       - name: Analyze project source
         run: flutter analyze --fatal-infos
@@ -33,10 +49,11 @@ jobs:
         run: flutter test --coverage
 
       - name: Dry-run publish
+        # TODO(release): make blocking after core 1.1.0 is published
+        continue-on-error: true
         run: flutter pub publish --dry-run
 
       - name: Build example for web
-        continue-on-error: true
         run: |
           cd example
           flutter pub get

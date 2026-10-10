@@ -35,11 +35,9 @@ class AnimatedInfiniteList<Entity extends BlocxBaseEntity>
 
   final ScrollController? scrollController;
   final Widget? Function(BuildContext context, bool isLoadingMore)?
-      loadMoreWidgetBuilder;
-  final Widget? Function(
-    BuildContext context,
-    double swipeRefreshHeight,
-  )? refreshWidgetBuilder;
+  loadMoreWidgetBuilder;
+  final Widget? Function(BuildContext context, double swipeRefreshHeight)?
+  refreshWidgetBuilder;
 
   final bool isRefreshable;
 
@@ -108,11 +106,7 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
         builder: (context, state) {
           var core = _animatedList(context, state);
           core = maybeSetupRefresh(child: core);
-          core = putInExpandedIfNotShrunk(
-            context,
-            state,
-            core,
-          );
+          core = putInExpandedIfNotShrunk(context, state, core);
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -143,9 +137,7 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
     return Expanded(child: child);
   }
 
-  Widget maybeSetupRefresh({
-    required Widget child,
-  }) {
+  Widget maybeSetupRefresh({required Widget child}) {
     if (!widget.isRefreshable) {
       return child;
     }
@@ -173,9 +165,7 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
     _refreshDragStartY = event.position.dy;
 
     bloc.add(
-      BlocxInfiniteListEventVerticalDragStarted(
-        globalY: event.position.dy,
-      ),
+      BlocxInfiniteListEventVerticalDragStarted(globalY: event.position.dy),
     );
   }
 
@@ -195,18 +185,15 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
 
     // A normal list refreshes by pulling downward.
     // A reversed list refreshes from the opposite edge by pulling upward.
-    final isMovingTowardRefreshEdge =
-        options.reverse ? currentY <= startY : currentY >= startY;
+    final isMovingTowardRefreshEdge = options.reverse
+        ? currentY <= startY
+        : currentY >= startY;
 
     // Sending the original start coordinate collapses the indicator to zero
     // when the user moves in the wrong direction.
     final effectiveY = isMovingTowardRefreshEdge ? currentY : startY;
 
-    bloc.add(
-      BlocxInfiniteListEventVerticalDragUpdated(
-        globalY: effectiveY,
-      ),
-    );
+    bloc.add(BlocxInfiniteListEventVerticalDragUpdated(globalY: effectiveY));
   }
 
   void _onRefreshPointerUp(PointerUpEvent event) {
@@ -216,9 +203,7 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
 
     _cancelLocalRefreshTracking();
 
-    bloc.add(
-      BlocxInfiniteListEventVerticalDragEnded(),
-    );
+    bloc.add(BlocxInfiniteListEventVerticalDragEnded());
   }
 
   void _onRefreshPointerCancel(PointerCancelEvent event) {
@@ -315,10 +300,7 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
     return false;
   }
 
-  Widget loadMoreWidget(
-    BuildContext context,
-    BlocxInfiniteListState state,
-  ) {
+  Widget loadMoreWidget(BuildContext context, BlocxInfiniteListState state) {
     final external = widget.loadMoreWidgetBuilder?.call(
       context,
       state.isLoadingMore,
@@ -387,10 +369,7 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
     );
   }
 
-  void blocListener(
-    BuildContext context,
-    BlocxInfiniteListState state,
-  ) {
+  void blocListener(BuildContext context, BlocxInfiniteListState state) {
     if (state is! BlocxInfiniteListStateRefresh) {
       return;
     }
@@ -398,11 +377,7 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
     widget.refreshOnSwipe?.call();
   }
 
-  Widget wrapInAutoScrollTag(
-    Widget itemWidget,
-    Entity data,
-    int index,
-  ) {
+  Widget wrapInAutoScrollTag(Widget itemWidget, Entity data, int index) {
     return AutoScrollTag(
       key: ValueKey(data.identifier),
       controller: scrollController as AutoScrollController,
@@ -420,41 +395,28 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
 
     final isBottomLoadingTrigger =
         index == widget.items.length - options.loadMoreTriggerItemDistance &&
-            !state.hasReachedEnd;
+        !state.hasReachedEnd;
 
-    Widget itemWidget = widget.itemBuilder(
-      context,
-      data,
-    );
+    Widget itemWidget = widget.itemBuilder(context, data);
 
     if (isBottomLoadingTrigger) {
       return VisibilityDetector(
         key: Key('$uuid-LoadMore'),
         onVisibilityChanged: (visibility) {
-          onVisibilityChanged(
-            visibility,
-            state,
-          );
+          onVisibilityChanged(visibility, state);
         },
         child: itemWidget,
       );
     }
 
     if (scrollController is AutoScrollController) {
-      itemWidget = wrapInAutoScrollTag(
-        itemWidget,
-        data,
-        index,
-      );
+      itemWidget = wrapInAutoScrollTag(itemWidget, data, index);
     }
 
     return itemWidget;
   }
 
-  Widget _animatedList(
-    BuildContext context,
-    BlocxInfiniteListState state,
-  ) {
+  Widget _animatedList(BuildContext context, BlocxInfiniteListState state) {
     return ImplicitlyAnimatedList<Entity>(
       controller: scrollController,
       initialAnimation: options.animateAtStart,
@@ -466,16 +428,9 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
       insertAnimation: widget.insertAnimation ?? _defaultAnimation,
       deleteAnimation: widget.deleteAnimation ?? _defaultAnimation,
       itemBuilder: (context, item) {
-        return _itemBuilder(
-          context,
-          item,
-          state,
-        );
+        return _itemBuilder(context, item, state);
       },
-      itemEquality: (
-        BlocxBaseEntity first,
-        BlocxBaseEntity second,
-      ) {
+      itemEquality: (BlocxBaseEntity first, BlocxBaseEntity second) {
         return first.identifier == second.identifier;
       },
     );
@@ -490,24 +445,14 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
 
     return SizeTransition(
       sizeFactor: drivenAnimation,
-      child: FadeTransition(
-        opacity: drivenAnimation,
-        child: child,
-      ),
+      child: FadeTransition(opacity: drivenAnimation, child: child),
     );
   }
 
-  Animation<double> _driveDefaultAnimation(
-    Animation<double> parent,
-  ) {
+  Animation<double> _driveDefaultAnimation(Animation<double> parent) {
     return CurvedAnimation(
       parent: parent,
       curve: Curves.easeInOutQuad,
-    ).drive(
-      Tween<double>(
-        begin: 0,
-        end: 1,
-      ),
-    );
+    ).drive(Tween<double>(begin: 0, end: 1));
   }
 }

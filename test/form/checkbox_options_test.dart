@@ -37,14 +37,22 @@ class TestCheckboxWidget extends BlocxFormWidget<void> {
   State<TestCheckboxWidget> createState() => _TestCheckboxWidgetState();
 }
 
-class _TestCheckboxWidgetState extends BlocxFormWidgetState<TestCheckboxWidget,
-    TestCheckboxFormEntity, void, TestCheckboxField> {
+class _TestCheckboxWidgetState
+    extends
+        BlocxFormWidgetState<
+          TestCheckboxWidget,
+          TestCheckboxFormEntity,
+          void,
+          TestCheckboxField
+        > {
   @override
   List<TestCheckboxField> get keys => [TestCheckboxField.agree];
 
   @override
-  Widget formWidget(BuildContext context,
-      BlocxFormState<TestCheckboxFormEntity, TestCheckboxField> state) {
+  Widget formWidget(
+    BuildContext context,
+    BlocxFormState<TestCheckboxFormEntity, TestCheckboxField> state,
+  ) {
     return Column(
       children: [
         // 1. Without deprecated isChecked (options only)
@@ -57,10 +65,7 @@ class _TestCheckboxWidgetState extends BlocxFormWidgetState<TestCheckboxWidget,
         ),
         // 2. With deprecated isChecked only
         // ignore: deprecated_member_use_from_same_package
-        checkbox(
-          key: TestCheckboxField.agree,
-          isChecked: true,
-        ),
+        checkbox(key: TestCheckboxField.agree, isChecked: true),
         // 3. With both, isChecked overrides options.isChecked
         // ignore: deprecated_member_use_from_same_package
         checkbox(
@@ -77,22 +82,23 @@ class _TestCheckboxWidgetState extends BlocxFormWidgetState<TestCheckboxWidget,
 }
 
 void main() {
-  testWidgets('checkbox() works with options only, isChecked only, and both',
-      (tester) async {
+  testWidgets('checkbox() works with options only, isChecked only, and both', (
+    tester,
+  ) async {
     final bloc = FakeCheckboxFormBloc();
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(
-          body: TestCheckboxWidget(bloc: bloc),
-        ),
+        home: Scaffold(body: TestCheckboxWidget(bloc: bloc)),
       ),
     );
 
     expect(
-        find.byType(
-            BlocxFormCheckbox<TestCheckboxFormEntity, void, TestCheckboxField>),
-        findsNWidgets(3));
+      find.byType(
+        BlocxFormCheckbox<TestCheckboxFormEntity, void, TestCheckboxField>,
+      ),
+      findsNWidgets(3),
+    );
     expect(find.text('Option Only'), findsOneWidget);
     expect(find.text('Overridden Option'), findsOneWidget);
 

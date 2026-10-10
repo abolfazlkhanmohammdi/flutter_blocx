@@ -20,15 +20,15 @@ class TestFormEntity
 
   @override
   TestFormEntity updateByKey(TestFormField key, dynamic value) => switch (key) {
-        TestFormField.name => TestFormEntity(name: value as String, bio: bio),
-        TestFormField.bio => TestFormEntity(name: name, bio: value as String),
-      };
+    TestFormField.name => TestFormEntity(name: value as String, bio: bio),
+    TestFormField.bio => TestFormEntity(name: name, bio: value as String),
+  };
 
   @override
   dynamic getValueByKey(TestFormField key) => switch (key) {
-        TestFormField.name => name,
-        TestFormField.bio => bio,
-      };
+    TestFormField.name => name,
+    TestFormField.bio => bio,
+  };
 }
 
 class _DummySubmitUseCase extends BlocxBaseUseCase<Object?, Object?> {
@@ -55,14 +55,22 @@ class TestFormWidget extends BlocxFormWidget<void> {
   State<TestFormWidget> createState() => _TestFormWidgetState();
 }
 
-class _TestFormWidgetState extends BlocxFormWidgetState<TestFormWidget,
-    TestFormEntity, void, TestFormField> {
+class _TestFormWidgetState
+    extends
+        BlocxFormWidgetState<
+          TestFormWidget,
+          TestFormEntity,
+          void,
+          TestFormField
+        > {
   @override
   List<TestFormField> get keys => [TestFormField.name, TestFormField.bio];
 
   @override
-  Widget formWidget(BuildContext context,
-      BlocxFormState<TestFormEntity, TestFormField> state) {
+  Widget formWidget(
+    BuildContext context,
+    BlocxFormState<TestFormEntity, TestFormField> state,
+  ) {
     return Column(
       children: [
         textField(TestFormField.name),
@@ -81,62 +89,61 @@ void main() {
 
   group('U5 & U6: Form widget hydration & controller lifecycle', () {
     testWidgets(
-        'applyInitialDataToForm preserves cursor selection when text matches',
-        (tester) async {
-      final bloc = FakeFormBloc();
+      'applyInitialDataToForm preserves cursor selection when text matches',
+      (tester) async {
+        final bloc = FakeFormBloc();
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: TestFormWidget(bloc: bloc),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(body: TestFormWidget(bloc: bloc)),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      final state =
-          tester.state<_TestFormWidgetState>(find.byType(TestFormWidget));
-      final controller = state.getTextEditingController(TestFormField.name);
+        final state = tester.state<_TestFormWidgetState>(
+          find.byType(TestFormWidget),
+        );
+        final controller = state.getTextEditingController(TestFormField.name);
 
-      // User types and places cursor in the middle
-      controller.value = const TextEditingValue(
-        text: 'Antigravity',
-        selection: TextSelection.collapsed(offset: 4),
-      );
+        // User types and places cursor in the middle
+        controller.value = const TextEditingValue(
+          text: 'Antigravity',
+          selection: TextSelection.collapsed(offset: 4),
+        );
 
-      // Hydrate with identical text
-      state.applyInitialDataToForm(
-        const TestFormEntity(name: 'Antigravity', bio: 'Bio details'),
-      );
+        // Hydrate with identical text
+        state.applyInitialDataToForm(
+          const TestFormEntity(name: 'Antigravity', bio: 'Bio details'),
+        );
 
-      // Selection must remain intact (not reset to 0 or end)
-      expect(controller.text, equals('Antigravity'));
-      expect(controller.selection.baseOffset, equals(4));
+        // Selection must remain intact (not reset to 0 or end)
+        expect(controller.text, equals('Antigravity'));
+        expect(controller.selection.baseOffset, equals(4));
 
-      // Hydrate with updated text, cursor should be clamped and preserved
-      state.applyInitialDataToForm(
-        const TestFormEntity(name: 'Anti', bio: 'Bio details'),
-      );
-      expect(controller.text, equals('Anti'));
-      expect(controller.selection.baseOffset, equals(4));
+        // Hydrate with updated text, cursor should be clamped and preserved
+        state.applyInitialDataToForm(
+          const TestFormEntity(name: 'Anti', bio: 'Bio details'),
+        );
+        expect(controller.text, equals('Anti'));
+        expect(controller.selection.baseOffset, equals(4));
 
-      // Hydrate with shorter text, cursor clamped to end
-      state.applyInitialDataToForm(
-        const TestFormEntity(name: 'An', bio: 'Bio details'),
-      );
-      expect(controller.text, equals('An'));
-      expect(controller.selection.baseOffset, equals(2));
-    });
+        // Hydrate with shorter text, cursor clamped to end
+        state.applyInitialDataToForm(
+          const TestFormEntity(name: 'An', bio: 'Bio details'),
+        );
+        expect(controller.text, equals('An'));
+        expect(controller.selection.baseOffset, equals(2));
+      },
+    );
 
-    testWidgets('submitButton and formButtonRow accept snapshot formState',
-        (tester) async {
+    testWidgets('submitButton and formButtonRow accept snapshot formState', (
+      tester,
+    ) async {
       final bloc = FakeFormBloc(const TestFormEntity(name: 'Test Name'));
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: TestFormWidget(bloc: bloc),
-          ),
+          home: Scaffold(body: TestFormWidget(bloc: bloc)),
         ),
       );
       await tester.pumpAndSettle();

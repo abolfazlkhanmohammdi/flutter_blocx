@@ -14,9 +14,5 @@ abstract class BlocxFormWidget<P> extends StatefulWidget {
   final BlocxFormBloc<dynamic, P, dynamic>? bloc;
 
   /// Creates a form widget.
-  const BlocxFormWidget({
-    super.key,
-    this.payload,
-    this.bloc,
-  });
+  const BlocxFormWidget({super.key, this.payload, this.bloc});
 }

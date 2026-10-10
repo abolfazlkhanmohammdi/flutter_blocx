@@ -15,8 +15,11 @@ mixin HideOnScrollFabMixin<T> {
     return false;
   }
 
-  Widget getFloatingActionButton(BuildContext context,
-      {T? data, bool displayFab = true}) {
+  Widget getFloatingActionButton(
+    BuildContext context, {
+    T? data,
+    bool displayFab = true,
+  }) {
     return StreamBuilder(
       stream: scrollDirectionController.stream,
       builder: (context, snapshot) =>
@@ -24,8 +27,12 @@ mixin HideOnScrollFabMixin<T> {
     );
   }
 
-  Widget _builder(BuildContext context, AsyncSnapshot<bool> snapshot, T? data,
-      bool displayFab) {
+  Widget _builder(
+    BuildContext context,
+    AsyncSnapshot<bool> snapshot,
+    T? data,
+    bool displayFab,
+  ) {
     bool isScrollingUp = snapshot.hasData ? snapshot.data! : true;
     if (!displayFab) {
       return SizedBox(width: 0, height: 0);
@@ -44,7 +51,8 @@ mixin HideOnScrollFabMixin<T> {
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 shape: RoundedSuperellipseBorder(
-                    borderRadius: BorderRadius.circular(120)),
+                  borderRadius: BorderRadius.circular(120),
+                ),
                 child: Icon(Icons.add),
               )
             : SizedBox(width: 0, height: 0),

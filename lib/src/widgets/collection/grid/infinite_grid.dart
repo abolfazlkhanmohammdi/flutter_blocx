@@ -34,7 +34,7 @@ class InfiniteGrid<Entity extends BlocxBaseEntity> extends StatefulWidget {
   /// Grid-specific builder for a custom SliverGridDelegate.
   /// If null, a default delegate is created from [options].
   final SliverGridDelegate Function(InfiniteGridOptions options)?
-      gridDelegateBuilder;
+  gridDelegateBuilder;
 
   final BlocxInfiniteListBloc bloc;
   final void Function()? loadBottomData;
@@ -43,9 +43,9 @@ class InfiniteGrid<Entity extends BlocxBaseEntity> extends StatefulWidget {
   final List<Entity> items;
   final ScrollController? scrollController;
   final Widget? Function(BuildContext context, bool isLoadingMore)?
-      loadMoreWidgetBuilder;
+  loadMoreWidgetBuilder;
   final Widget? Function(BuildContext context, double swipeRefreshHeight)?
-      refreshWidgetBuilder;
+  refreshWidgetBuilder;
 
   const InfiniteGrid({
     super.key,
@@ -124,7 +124,8 @@ class InfiniteGridState<Entity extends BlocxBaseEntity>
     _refreshDragStartY = event.position.dy;
 
     bloc.add(
-        BlocxInfiniteListEventVerticalDragStarted(globalY: event.position.dy));
+      BlocxInfiniteListEventVerticalDragStarted(globalY: event.position.dy),
+    );
   }
 
   void _onPointerMove(PointerMoveEvent event) {
@@ -140,8 +141,9 @@ class InfiniteGridState<Entity extends BlocxBaseEntity>
 
     // A normal grid refreshes by pulling downward.
     // A reversed grid refreshes from the opposite edge by pulling upward.
-    final isMovingTowardRefreshEdge =
-        options.reverse ? currentY <= startY : currentY >= startY;
+    final isMovingTowardRefreshEdge = options.reverse
+        ? currentY <= startY
+        : currentY >= startY;
 
     // Sending the original start coordinate collapses the indicator to zero
     // when the user moves in the wrong direction.
@@ -240,7 +242,8 @@ class InfiniteGridState<Entity extends BlocxBaseEntity>
   }
 
   Widget gridWidget(BuildContext context, BlocxInfiniteListState state) {
-    final delegate = widget.gridDelegateBuilder?.call(options) ??
+    final delegate =
+        widget.gridDelegateBuilder?.call(options) ??
         SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: options.crossAxisCount,
           mainAxisSpacing: options.mainAxisSpacing,
@@ -260,11 +263,15 @@ class InfiniteGridState<Entity extends BlocxBaseEntity>
     );
   }
 
-  Widget _itemBuilder(BuildContext context, Entity data, int index,
-      BlocxInfiniteListState state) {
+  Widget _itemBuilder(
+    BuildContext context,
+    Entity data,
+    int index,
+    BlocxInfiniteListState state,
+  ) {
     final isBottomTrigger =
         index == (widget.items.length - options.loadMoreTriggerItemDistance) &&
-            !state.hasReachedEnd;
+        !state.hasReachedEnd;
 
     Widget child = widget.itemBuilder(context, data);
 
@@ -301,8 +308,10 @@ class InfiniteGridState<Entity extends BlocxBaseEntity>
   }
 
   Widget loadMoreWidget(BuildContext context, BlocxInfiniteListState state) {
-    final external =
-        widget.loadMoreWidgetBuilder?.call(context, state.isLoadingMore);
+    final external = widget.loadMoreWidgetBuilder?.call(
+      context,
+      state.isLoadingMore,
+    );
     if (external != null) return external;
     final scheme = Theme.of(context).colorScheme;
     return AnimatedSize(
@@ -324,12 +333,16 @@ class InfiniteGridState<Entity extends BlocxBaseEntity>
   }
 
   Widget swipeRefreshWidget(
-      BuildContext context, BlocxInfiniteListState state) {
+    BuildContext context,
+    BlocxInfiniteListState state,
+  ) {
     if (widget.refreshOnSwipe == null || state.swipeRefreshHeight <= 0) {
       return const SizedBox.shrink();
     }
-    final external =
-        widget.refreshWidgetBuilder?.call(context, state.swipeRefreshHeight);
+    final external = widget.refreshWidgetBuilder?.call(
+      context,
+      state.swipeRefreshHeight,
+    );
     if (external != null) return external;
     final primary = Theme.of(context).colorScheme.primary;
     return Container(
@@ -337,9 +350,10 @@ class InfiniteGridState<Entity extends BlocxBaseEntity>
       height: state.swipeRefreshHeight,
       child: const Center(
         child: SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(color: Colors.white)),
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
       ),
     );
   }

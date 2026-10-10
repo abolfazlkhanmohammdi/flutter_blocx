@@ -10,13 +10,17 @@ class BlocxFormCheckbox<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
   /// Non-function props live here (value, labels, styles, etc.).
   final BlocxCheckboxOptions options;
   final E formKey;
-  const BlocxFormCheckbox(
-      {super.key, required this.options, required this.formKey});
+  const BlocxFormCheckbox({
+    super.key,
+    required this.options,
+    required this.formKey,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final child =
-        options.hasText ? _buildListTile(context) : _buildCompact(context);
+    final child = options.hasText
+        ? _buildListTile(context)
+        : _buildCompact(context);
 
     return Padding(
       padding: options.padding ?? EdgeInsets.zero,
@@ -34,8 +38,9 @@ class BlocxFormCheckbox<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
   Widget _buildListTile(BuildContext context) {
     return CheckboxListTile.adaptive(
       value: options.isChecked,
-      onChanged: (value) => bloc(context)
-          .add(BlocxFormEventUpdateData(data: value, key: formKey)),
+      onChanged: (value) => bloc(
+        context,
+      ).add(BlocxFormEventUpdateData(data: value, key: formKey)),
       title: options.label != null
           ? Text(options.label!, style: options.labelStyle)
           : null,
@@ -57,8 +62,9 @@ class BlocxFormCheckbox<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
   Widget _buildCompact(BuildContext context) {
     return Checkbox.adaptive(
       value: options.isChecked,
-      onChanged: (value) => bloc(context)
-          .add(BlocxFormEventUpdateData(data: value, key: formKey)),
+      onChanged: (value) => bloc(
+        context,
+      ).add(BlocxFormEventUpdateData(data: value, key: formKey)),
       visualDensity: options.visualDensity,
       activeColor: options.activeColor,
       checkColor: options.checkColor,

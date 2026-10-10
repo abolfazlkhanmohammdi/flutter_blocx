@@ -21,16 +21,21 @@ class TestScrollCollectionWidget extends BlocxCollectionWidget<void> {
       _TestScrollCollectionWidgetState();
 }
 
-class _TestScrollCollectionWidgetState extends BlocxCollectionWidgetState<
-    TestScrollCollectionWidget, TestItemEntity, void> {
+class _TestScrollCollectionWidgetState
+    extends
+        BlocxCollectionWidgetState<
+          TestScrollCollectionWidget,
+          TestItemEntity,
+          void
+        > {
   @override
   @override
   CollectionSettings get settings => CollectionSettings(
-        type: widget.type,
-        options: widget.type == CollectionWidgetStateType.sliverList
-            ? const SliverInfiniteListOptions(loadMoreTriggerItemDistance: 1)
-            : const InfiniteListOptions(loadMoreTriggerItemDistance: 1),
-      );
+    type: widget.type,
+    options: widget.type == CollectionWidgetStateType.sliverList
+        ? const SliverInfiniteListOptions(loadMoreTriggerItemDistance: 1)
+        : const InfiniteListOptions(loadMoreTriggerItemDistance: 1),
+  );
 
   @override
   void loadNextPage() {
@@ -40,10 +45,7 @@ class _TestScrollCollectionWidgetState extends BlocxCollectionWidgetState<
 
   @override
   Widget itemBuilder(BuildContext context, TestItemEntity item) {
-    return SizedBox(
-      height: 60,
-      child: Text('Item: ${item.title}'),
-    );
+    return SizedBox(height: 60, child: Text('Item: ${item.title}'));
   }
 }
 
@@ -136,79 +138,82 @@ void main() {
   });
 
   group('U4: Scroll extent load more fallback', () {
-    testWidgets('InfiniteList triggers loadNextPage via scroll extent fallback',
-        (tester) async {
-      bool loadMoreTriggered = false;
-      final bloc = FakeCollectionBloc(
-        initialItems: List.generate(
-          30,
-          (i) => TestItemEntity(id: '$i', title: 'Row $i'),
-        ),
-      );
+    testWidgets(
+      'InfiniteList triggers loadNextPage via scroll extent fallback',
+      (tester) async {
+        bool loadMoreTriggered = false;
+        final bloc = FakeCollectionBloc(
+          initialItems: List.generate(
+            30,
+            (i) => TestItemEntity(id: '$i', title: 'Row $i'),
+          ),
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              height: 400,
-              child: TestScrollCollectionWidget(
-                bloc: bloc,
-                type: CollectionWidgetStateType.list,
-                onLoadMoreTriggered: () {
-                  loadMoreTriggered = true;
-                },
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                height: 400,
+                child: TestScrollCollectionWidget(
+                  bloc: bloc,
+                  type: CollectionWidgetStateType.list,
+                  onLoadMoreTriggered: () {
+                    loadMoreTriggered = true;
+                  },
+                ),
               ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(loadMoreTriggered, isFalse);
+        expect(loadMoreTriggered, isFalse);
 
-      // Scroll toward the bottom
-      await tester.drag(find.byType(ListView), const Offset(0, -900));
-      await tester.pumpAndSettle();
+        // Scroll toward the bottom
+        await tester.drag(find.byType(ListView), const Offset(0, -900));
+        await tester.pumpAndSettle();
 
-      expect(loadMoreTriggered, isTrue);
-    });
+        expect(loadMoreTriggered, isTrue);
+      },
+    );
 
     testWidgets(
-        'SliverInfiniteList triggers loadNextPage via scroll extent fallback',
-        (tester) async {
-      bool loadMoreTriggered = false;
-      final bloc = FakeCollectionBloc(
-        initialItems: List.generate(
-          30,
-          (i) => TestItemEntity(id: '$i', title: 'Row $i'),
-        ),
-      );
+      'SliverInfiniteList triggers loadNextPage via scroll extent fallback',
+      (tester) async {
+        bool loadMoreTriggered = false;
+        final bloc = FakeCollectionBloc(
+          initialItems: List.generate(
+            30,
+            (i) => TestItemEntity(id: '$i', title: 'Row $i'),
+          ),
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              height: 400,
-              child: TestScrollCollectionWidget(
-                bloc: bloc,
-                type: CollectionWidgetStateType.sliverList,
-                onLoadMoreTriggered: () {
-                  loadMoreTriggered = true;
-                },
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                height: 400,
+                child: TestScrollCollectionWidget(
+                  bloc: bloc,
+                  type: CollectionWidgetStateType.sliverList,
+                  onLoadMoreTriggered: () {
+                    loadMoreTriggered = true;
+                  },
+                ),
               ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(loadMoreTriggered, isFalse);
+        expect(loadMoreTriggered, isFalse);
 
-      // Scroll toward the bottom
-      await tester.drag(find.byType(CustomScrollView), const Offset(0, -900));
-      await tester.pumpAndSettle();
+        // Scroll toward the bottom
+        await tester.drag(find.byType(CustomScrollView), const Offset(0, -900));
+        await tester.pumpAndSettle();
 
-      expect(loadMoreTriggered, isTrue);
-    });
+        expect(loadMoreTriggered, isTrue);
+      },
+    );
   });
 }

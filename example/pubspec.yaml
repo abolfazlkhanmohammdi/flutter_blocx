@@ -30,7 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  blocx_core: ^1.0.1
+  blocx_core: ^1.1.0
   flutter_blocx:
     path: ../
 
@@ -40,10 +40,6 @@ dependencies:
   faker: ^2.2.0
   uuid: ^4.6.0
   flutter_bloc: ^9.1.1
-
-dependency_overrides:
-  blocx_core:
-    path: ../../blocx_core
 
 dev_dependencies:
   flutter_test:

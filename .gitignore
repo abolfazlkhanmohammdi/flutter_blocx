@@ -31,3 +31,7 @@ migrate_working_dir/
 build/
 changes.txt
 /blocx_flutter-lib.zip
+pubspec_overrides.yaml
+example/pubspec_overrides.yaml
+_blocx_core/
+coverage/

@@ -13,13 +13,18 @@ export 'src/form/widgets/blocx_form_register_button.dart';
 export 'src/form/widgets/blocx_form_text_field.dart';
 
 /// Typedef aliases for consistent `Blocx...` casing.
-typedef BlocxFormTextField<F extends BlocxBaseFormEntity<F, E>, P,
-        E extends Enum>
-    = BlocXFormTextField<F, P, E>;
+typedef BlocxFormTextField<
+  F extends BlocxBaseFormEntity<F, E>,
+  P,
+  E extends Enum
+> = BlocXFormTextField<F, P, E>;
 
-typedef BlocxFormDropdown<F extends BlocxBaseFormEntity<F, E>, P,
-        E extends Enum, T>
-    = BlocXFormDropdown<F, P, E, T>;
+typedef BlocxFormDropdown<
+  F extends BlocxBaseFormEntity<F, E>,
+  P,
+  E extends Enum,
+  T
+> = BlocXFormDropdown<F, P, E, T>;
 
 typedef BlocxTextFieldOptions = BlocXTextFieldOptions;
 typedef BlocxDropdownOptions = BlocXDropdownOptions;

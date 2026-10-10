@@ -13,11 +13,11 @@ class BlocxFormView<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
 
   /// Builds the form widgets based on current form state.
   final Widget Function(BuildContext context, BlocxFormState<F, E> state)
-      builder;
+  builder;
 
   /// Optional listener for custom side-effects.
   final void Function(BuildContext context, BlocxFormState<F, E> state)?
-      listener;
+  listener;
 
   /// Optional callback invoked when initial form data is applied.
   final void Function(F formData)? onApplyInitialData;
@@ -27,7 +27,7 @@ class BlocxFormView<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
 
   /// Optional callback invoked when any form field value changes.
   final void Function(F formData, E key, dynamic oldValue, dynamic newValue)?
-      onFormUpdated;
+  onFormUpdated;
 
   /// Creates a composable form view.
   const BlocxFormView({

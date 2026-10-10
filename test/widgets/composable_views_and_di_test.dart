@@ -20,13 +20,13 @@ class DemoFormEntity extends BlocxBaseFormEntity<DemoFormEntity, DemoField> {
 
   @override
   DemoFormEntity updateByKey(DemoField key, dynamic value) => switch (key) {
-        DemoField.title => DemoFormEntity(title: value as String),
-      };
+    DemoField.title => DemoFormEntity(title: value as String),
+  };
 
   @override
   dynamic getValueByKey(DemoField key) => switch (key) {
-        DemoField.title => title,
-      };
+    DemoField.title => title,
+  };
 }
 
 class _DummySubmitUseCase extends BlocxBaseUseCase<Object?, Object?> {
@@ -48,10 +48,7 @@ class DemoFormBloc extends BlocxFormBloc<DemoFormEntity, void, DemoField> {
 
 // Widget under test for DI collection widget with constructor bloc
 class ConstructorInjectedCollectionWidget extends BlocxCollectionWidget<void> {
-  const ConstructorInjectedCollectionWidget({
-    super.key,
-    super.bloc,
-  });
+  const ConstructorInjectedCollectionWidget({super.key, super.bloc});
 
   @override
   State<ConstructorInjectedCollectionWidget> createState() =>
@@ -59,13 +56,17 @@ class ConstructorInjectedCollectionWidget extends BlocxCollectionWidget<void> {
 }
 
 class _ConstructorInjectedCollectionWidgetState
-    extends BlocxCollectionWidgetState<ConstructorInjectedCollectionWidget,
-        TestItemEntity, void> {
+    extends
+        BlocxCollectionWidgetState<
+          ConstructorInjectedCollectionWidget,
+          TestItemEntity,
+          void
+        > {
   @override
   CollectionSettings get settings => CollectionSettings(
-        type: CollectionWidgetStateType.list,
-        options: const InfiniteListOptions(),
-      );
+    type: CollectionWidgetStateType.list,
+    options: const InfiniteListOptions(),
+  );
 
   @override
   Widget itemBuilder(BuildContext context, TestItemEntity item) =>
@@ -81,13 +82,18 @@ class ContextInjectedCollectionWidget extends BlocxCollectionWidget<void> {
       _ContextInjectedCollectionWidgetState();
 }
 
-class _ContextInjectedCollectionWidgetState extends BlocxCollectionWidgetState<
-    ContextInjectedCollectionWidget, TestItemEntity, void> {
+class _ContextInjectedCollectionWidgetState
+    extends
+        BlocxCollectionWidgetState<
+          ContextInjectedCollectionWidget,
+          TestItemEntity,
+          void
+        > {
   @override
   CollectionSettings get settings => CollectionSettings(
-        type: CollectionWidgetStateType.list,
-        options: const InfiniteListOptions(),
-      );
+    type: CollectionWidgetStateType.list,
+    options: const InfiniteListOptions(),
+  );
 
   @override
   Widget itemBuilder(BuildContext context, TestItemEntity item) =>
@@ -96,24 +102,29 @@ class _ContextInjectedCollectionWidgetState extends BlocxCollectionWidgetState<
 
 // Widget under test for DI form widget with constructor bloc
 class ConstructorInjectedFormWidget extends BlocxFormWidget<void> {
-  const ConstructorInjectedFormWidget({
-    super.key,
-    super.bloc,
-  });
+  const ConstructorInjectedFormWidget({super.key, super.bloc});
 
   @override
   State<ConstructorInjectedFormWidget> createState() =>
       _ConstructorInjectedFormWidgetState();
 }
 
-class _ConstructorInjectedFormWidgetState extends BlocxFormWidgetState<
-    ConstructorInjectedFormWidget, DemoFormEntity, void, DemoField> {
+class _ConstructorInjectedFormWidgetState
+    extends
+        BlocxFormWidgetState<
+          ConstructorInjectedFormWidget,
+          DemoFormEntity,
+          void,
+          DemoField
+        > {
   @override
   List<DemoField> get keys => DemoField.values;
 
   @override
   Widget formWidget(
-      BuildContext context, BlocxFormState<DemoFormEntity, DemoField> state) {
+    BuildContext context,
+    BlocxFormState<DemoFormEntity, DemoField> state,
+  ) {
     return Text('Form initialized: ${state.formData.title}');
   }
 }
@@ -127,14 +138,22 @@ class ContextInjectedFormWidget extends BlocxFormWidget<void> {
       _ContextInjectedFormWidgetState();
 }
 
-class _ContextInjectedFormWidgetState extends BlocxFormWidgetState<
-    ContextInjectedFormWidget, DemoFormEntity, void, DemoField> {
+class _ContextInjectedFormWidgetState
+    extends
+        BlocxFormWidgetState<
+          ContextInjectedFormWidget,
+          DemoFormEntity,
+          void,
+          DemoField
+        > {
   @override
   List<DemoField> get keys => DemoField.values;
 
   @override
   Widget formWidget(
-      BuildContext context, BlocxFormState<DemoFormEntity, DemoField> state) {
+    BuildContext context,
+    BlocxFormState<DemoFormEntity, DemoField> state,
+  ) {
     return Text('Form initialized: ${state.formData.title}');
   }
 }
@@ -229,52 +248,50 @@ void main() {
 
   group('L2: Composable BlocxCollectionView & BlocxFormView', () {
     testWidgets(
-        'BlocxCollectionView renders items standalone without BlocxCollectionWidgetState',
-        (tester) async {
-      final bloc = FakeCollectionBloc(
-        initialItems: const [
-          TestItemEntity(id: '1', title: 'First Item'),
-          TestItemEntity(id: '2', title: 'Second Item'),
-        ],
-      );
-      bloc.add(
-        BlocxCollectionEventLoadInitialPage<TestItemEntity, void>(
-          payload: null,
-        ),
-      );
+      'BlocxCollectionView renders items standalone without BlocxCollectionWidgetState',
+      (tester) async {
+        final bloc = FakeCollectionBloc(
+          initialItems: const [
+            TestItemEntity(id: '1', title: 'First Item'),
+            TestItemEntity(id: '2', title: 'Second Item'),
+          ],
+        );
+        bloc.add(
+          BlocxCollectionEventLoadInitialPage<TestItemEntity, void>(
+            payload: null,
+          ),
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BlocxCollectionView<TestItemEntity, void>(
-              bloc: bloc,
-              settings: CollectionSettings(
-                type: CollectionWidgetStateType.list,
-                options: const InfiniteListOptions(),
-              ),
-              itemBuilder: (context, item) => ListTile(
-                key: ValueKey(item.id),
-                title: Text(item.title),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: BlocxCollectionView<TestItemEntity, void>(
+                bloc: bloc,
+                settings: CollectionSettings(
+                  type: CollectionWidgetStateType.list,
+                  options: const InfiniteListOptions(),
+                ),
+                itemBuilder: (context, item) =>
+                    ListTile(key: ValueKey(item.id), title: Text(item.title)),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpAndSettle();
-      expect(find.text('First Item'), findsOneWidget);
-      expect(find.text('Second Item'), findsOneWidget);
+        await tester.pumpAndSettle();
+        expect(find.text('First Item'), findsOneWidget);
+        expect(find.text('Second Item'), findsOneWidget);
 
-      await tester.pumpWidget(const SizedBox());
-      bloc.close();
-    });
+        await tester.pumpWidget(const SizedBox());
+        bloc.close();
+      },
+    );
 
-    testWidgets('BlocxCollectionView renders topWidget and bottomWidget',
-        (tester) async {
+    testWidgets('BlocxCollectionView renders topWidget and bottomWidget', (
+      tester,
+    ) async {
       final bloc = FakeCollectionBloc(
-        initialItems: const [
-          TestItemEntity(id: '1', title: 'Item 1'),
-        ],
+        initialItems: const [TestItemEntity(id: '1', title: 'Item 1')],
       );
       bloc.add(
         BlocxCollectionEventLoadInitialPage<TestItemEntity, void>(
@@ -308,8 +325,9 @@ void main() {
       bloc.close();
     });
 
-    testWidgets('BlocxCollectionView renders empty widget when list is empty',
-        (tester) async {
+    testWidgets('BlocxCollectionView renders empty widget when list is empty', (
+      tester,
+    ) async {
       final bloc = FakeCollectionBloc(initialItems: const []);
       bloc.add(
         BlocxCollectionEventLoadInitialPage<TestItemEntity, void>(
@@ -340,137 +358,147 @@ void main() {
       bloc.close();
     });
 
-    testWidgets('BlocxFormView renders standalone without BlocxFormWidgetState',
-        (tester) async {
-      final formBloc =
-          DemoFormBloc(const DemoFormEntity(title: 'Standalone Profile'));
+    testWidgets(
+      'BlocxFormView renders standalone without BlocxFormWidgetState',
+      (tester) async {
+        final formBloc = DemoFormBloc(
+          const DemoFormEntity(title: 'Standalone Profile'),
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BlocxFormView<DemoFormEntity, void, DemoField>(
-              bloc: formBloc,
-              builder: (context, state) {
-                return Text('Value: ${state.formData.title}');
-              },
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: BlocxFormView<DemoFormEntity, void, DemoField>(
+                bloc: formBloc,
+                builder: (context, state) {
+                  return Text('Value: ${state.formData.title}');
+                },
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpAndSettle();
-      expect(find.text('Value: Standalone Profile'), findsOneWidget);
+        await tester.pumpAndSettle();
+        expect(find.text('Value: Standalone Profile'), findsOneWidget);
 
-      await tester.pumpWidget(const SizedBox());
-      formBloc.close();
-    });
+        await tester.pumpWidget(const SizedBox());
+        formBloc.close();
+      },
+    );
   });
 
   group('L3: DI-friendly construction for Collection and Form widgets', () {
     testWidgets(
-        'BlocxCollectionWidget resolves bloc from constructor widget.bloc without subclass generateBloc override',
-        (tester) async {
-      final bloc = FakeCollectionBloc(
-        initialItems: const [
-          TestItemEntity(id: '1', title: 'Constructor DI Item'),
-        ],
-      );
+      'BlocxCollectionWidget resolves bloc from constructor widget.bloc without subclass generateBloc override',
+      (tester) async {
+        final bloc = FakeCollectionBloc(
+          initialItems: const [
+            TestItemEntity(id: '1', title: 'Constructor DI Item'),
+          ],
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ConstructorInjectedCollectionWidget(bloc: bloc),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-      expect(find.text('Constructor DI Item'), findsOneWidget);
-
-      // Verify that when widget is disposed, bloc is not automatically closed because it was externally provided
-      await tester.pumpWidget(const MaterialApp(home: SizedBox()));
-      expect(bloc.isClosed, isFalse);
-
-      bloc.close();
-    });
-
-    testWidgets(
-        'BlocxCollectionWidget resolves bloc from ancestor context.read without subclass generateBloc override',
-        (tester) async {
-      final bloc = FakeCollectionBloc(
-        initialItems: const [
-          TestItemEntity(id: '1', title: 'Context DI Item'),
-        ],
-      );
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BlocProvider<BlocxCollectionBloc<TestItemEntity, void>>.value(
-              value: bloc,
-              child: const ContextInjectedCollectionWidget(),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: ConstructorInjectedCollectionWidget(bloc: bloc),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpAndSettle();
-      expect(find.text('Context DI Item'), findsOneWidget);
+        await tester.pumpAndSettle();
+        expect(find.text('Constructor DI Item'), findsOneWidget);
 
-      await tester.pumpWidget(const MaterialApp(home: SizedBox()));
-      expect(bloc.isClosed, isFalse);
+        // Verify that when widget is disposed, bloc is not automatically closed because it was externally provided
+        await tester.pumpWidget(const MaterialApp(home: SizedBox()));
+        expect(bloc.isClosed, isFalse);
 
-      bloc.close();
-    });
-
-    testWidgets(
-        'BlocxFormWidget resolves bloc from constructor widget.bloc without subclass generateBloc override',
-        (tester) async {
-      final formBloc =
-          DemoFormBloc(const DemoFormEntity(title: 'Injected Form'));
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ConstructorInjectedFormWidget(bloc: formBloc),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-      expect(find.text('Form initialized: Injected Form'), findsOneWidget);
-
-      await tester.pumpWidget(const MaterialApp(home: SizedBox()));
-      expect(formBloc.isClosed, isFalse);
-
-      formBloc.close();
-    });
+        bloc.close();
+      },
+    );
 
     testWidgets(
-        'BlocxFormWidget resolves bloc from ancestor context.read without subclass generateBloc override',
-        (tester) async {
-      final formBloc =
-          DemoFormBloc(const DemoFormEntity(title: 'Context Form'));
+      'BlocxCollectionWidget resolves bloc from ancestor context.read without subclass generateBloc override',
+      (tester) async {
+        final bloc = FakeCollectionBloc(
+          initialItems: const [
+            TestItemEntity(id: '1', title: 'Context DI Item'),
+          ],
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: BlocProvider<
-                BlocxFormBloc<DemoFormEntity, void, DemoField>>.value(
-              value: formBloc,
-              child: const ContextInjectedFormWidget(),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body:
+                  BlocProvider<BlocxCollectionBloc<TestItemEntity, void>>.value(
+                    value: bloc,
+                    child: const ContextInjectedCollectionWidget(),
+                  ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpAndSettle();
-      expect(find.text('Form initialized: Context Form'), findsOneWidget);
+        await tester.pumpAndSettle();
+        expect(find.text('Context DI Item'), findsOneWidget);
 
-      await tester.pumpWidget(const MaterialApp(home: SizedBox()));
-      expect(formBloc.isClosed, isFalse);
+        await tester.pumpWidget(const MaterialApp(home: SizedBox()));
+        expect(bloc.isClosed, isFalse);
 
-      formBloc.close();
-    });
+        bloc.close();
+      },
+    );
+
+    testWidgets(
+      'BlocxFormWidget resolves bloc from constructor widget.bloc without subclass generateBloc override',
+      (tester) async {
+        final formBloc = DemoFormBloc(
+          const DemoFormEntity(title: 'Injected Form'),
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(body: ConstructorInjectedFormWidget(bloc: formBloc)),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(find.text('Form initialized: Injected Form'), findsOneWidget);
+
+        await tester.pumpWidget(const MaterialApp(home: SizedBox()));
+        expect(formBloc.isClosed, isFalse);
+
+        formBloc.close();
+      },
+    );
+
+    testWidgets(
+      'BlocxFormWidget resolves bloc from ancestor context.read without subclass generateBloc override',
+      (tester) async {
+        final formBloc = DemoFormBloc(
+          const DemoFormEntity(title: 'Context Form'),
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body:
+                  BlocProvider<
+                    BlocxFormBloc<DemoFormEntity, void, DemoField>
+                  >.value(
+                    value: formBloc,
+                    child: const ContextInjectedFormWidget(),
+                  ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(find.text('Form initialized: Context Form'), findsOneWidget);
+
+        await tester.pumpWidget(const MaterialApp(home: SizedBox()));
+        expect(formBloc.isClosed, isFalse);
+
+        formBloc.close();
+      },
+    );
   });
 }

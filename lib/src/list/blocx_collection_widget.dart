@@ -15,9 +15,5 @@ abstract class BlocxCollectionWidget<Payload> extends StatefulWidget {
   final BlocxCollectionBloc<BlocxBaseEntity, Payload>? bloc;
 
   /// Creates a collection widget.
-  const BlocxCollectionWidget({
-    super.key,
-    this.payload,
-    this.bloc,
-  });
+  const BlocxCollectionWidget({super.key, this.payload, this.bloc});
 }

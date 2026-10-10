@@ -17,7 +17,7 @@ class TestRowItem extends BlocxCollectionItem<TestItemEntity, void> {
 
 class TestItemCollectionWidget extends BlocxCollectionWidget<void> {
   final Widget Function(BuildContext context, TestItemEntity item)?
-      customItemBuilder;
+  customItemBuilder;
 
   const TestItemCollectionWidget({
     super.key,
@@ -30,13 +30,18 @@ class TestItemCollectionWidget extends BlocxCollectionWidget<void> {
       _TestItemCollectionWidgetState();
 }
 
-class _TestItemCollectionWidgetState extends BlocxCollectionWidgetState<
-    TestItemCollectionWidget, TestItemEntity, void> {
+class _TestItemCollectionWidgetState
+    extends
+        BlocxCollectionWidgetState<
+          TestItemCollectionWidget,
+          TestItemEntity,
+          void
+        > {
   @override
   CollectionSettings get settings => CollectionSettings(
-        type: CollectionWidgetStateType.list,
-        options: const InfiniteListOptions(),
-      );
+    type: CollectionWidgetStateType.list,
+    options: const InfiniteListOptions(),
+  );
 
   @override
   Widget itemBuilder(BuildContext context, TestItemEntity item) {
@@ -137,69 +142,70 @@ void main() {
 
   group('U3: Direct index passing and identifier-based index lookup', () {
     testWidgets(
-        'BlocxCollectionItem.index matches by identifier even for modified copies',
-        (tester) async {
-      final bloc = FakeCollectionBloc(
-        initialItems: [
-          const TestItemEntity(id: '0', title: 'Zero'),
-          const TestItemEntity(id: '1', title: 'One'),
-          const TestItemEntity(id: '2', title: 'Two'),
-        ],
-      );
+      'BlocxCollectionItem.index matches by identifier even for modified copies',
+      (tester) async {
+        final bloc = FakeCollectionBloc(
+          initialItems: [
+            const TestItemEntity(id: '0', title: 'Zero'),
+            const TestItemEntity(id: '1', title: 'One'),
+            const TestItemEntity(id: '2', title: 'Two'),
+          ],
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: TestItemCollectionWidget(
-              bloc: bloc,
-              customItemBuilder: (context, item) {
-                // Pass a modified copy with distinct memory reference
-                final copyWithModifiedTitle = TestItemEntity(
-                  id: item.identifier,
-                  title: '${item.title} Modified',
-                );
-                return TestRowItem(item: copyWithModifiedTitle);
-              },
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: TestItemCollectionWidget(
+                bloc: bloc,
+                customItemBuilder: (context, item) {
+                  // Pass a modified copy with distinct memory reference
+                  final copyWithModifiedTitle = TestItemEntity(
+                    id: item.identifier,
+                    title: '${item.title} Modified',
+                  );
+                  return TestRowItem(item: copyWithModifiedTitle);
+                },
+              ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Row: Zero Modified at 0'), findsOneWidget);
-      expect(find.text('Row: One Modified at 1'), findsOneWidget);
-      expect(find.text('Row: Two Modified at 2'), findsOneWidget);
-    });
+        expect(find.text('Row: Zero Modified at 0'), findsOneWidget);
+        expect(find.text('Row: One Modified at 1'), findsOneWidget);
+        expect(find.text('Row: Two Modified at 2'), findsOneWidget);
+      },
+    );
 
-    testWidgets('InfiniteList builds items passing direct index to itemBuilder',
-        (tester) async {
-      final bloc = FakeCollectionBloc(
-        initialItems: [
-          const TestItemEntity(id: 'a', title: 'Alpha'),
-          const TestItemEntity(id: 'b', title: 'Beta'),
-          const TestItemEntity(id: 'c', title: 'Gamma'),
-        ],
-      );
+    testWidgets(
+      'InfiniteList builds items passing direct index to itemBuilder',
+      (tester) async {
+        final bloc = FakeCollectionBloc(
+          initialItems: [
+            const TestItemEntity(id: 'a', title: 'Alpha'),
+            const TestItemEntity(id: 'b', title: 'Beta'),
+            const TestItemEntity(id: 'c', title: 'Gamma'),
+          ],
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: TestItemCollectionWidget(
-              bloc: bloc,
-              customItemBuilder: (context, item) {
-                return ListTile(
-                  title: Text('Item: ${item.title}'),
-                );
-              },
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: TestItemCollectionWidget(
+                bloc: bloc,
+                customItemBuilder: (context, item) {
+                  return ListTile(title: Text('Item: ${item.title}'));
+                },
+              ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Item: Alpha'), findsOneWidget);
-      expect(find.text('Item: Beta'), findsOneWidget);
-      expect(find.text('Item: Gamma'), findsOneWidget);
-    });
+        expect(find.text('Item: Alpha'), findsOneWidget);
+        expect(find.text('Item: Beta'), findsOneWidget);
+        expect(find.text('Item: Gamma'), findsOneWidget);
+      },
+    );
   });
 }

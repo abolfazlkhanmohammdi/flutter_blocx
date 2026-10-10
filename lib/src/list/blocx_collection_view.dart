@@ -33,34 +33,52 @@ class BlocxCollectionView<Entity extends BlocxBaseEntity, Payload>
 
   /// Optional widget displayed above the collection.
   final Widget? Function(
-      BuildContext context, BlocxCollectionState<Entity> state)? topWidget;
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  )?
+  topWidget;
 
   /// Optional widget displayed below the collection.
   final Widget? Function(
-      BuildContext context, BlocxCollectionState<Entity> state)? bottomWidget;
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  )?
+  bottomWidget;
 
   /// Optional sliver displayed above sliver collections.
   final Widget? Function(
-          BuildContext context, BlocxCollectionState<Entity> state)?
-      sliverTopWidget;
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  )?
+  sliverTopWidget;
 
   /// Optional sliver displayed below sliver collections.
   final Widget? Function(
-          BuildContext context, BlocxCollectionState<Entity> state)?
-      sliverBottomWidget;
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  )?
+  sliverBottomWidget;
 
   /// Builder for the loading state.
   final Widget Function(
-      BuildContext context, BlocxCollectionState<Entity> state)? loadingWidget;
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  )?
+  loadingWidget;
 
   /// Builder for the empty state.
   final Widget Function(
-      BuildContext context, BlocxCollectionState<Entity> state)? emptyWidget;
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  )?
+  emptyWidget;
 
   /// Builder for the initial-load error state.
   final Widget Function(
-          BuildContext context, BlocxCollectionStateError<Entity> state)?
-      errorWidget;
+    BuildContext context,
+    BlocxCollectionStateError<Entity> state,
+  )?
+  errorWidget;
 
   /// Builds a separator between list items.
   final Widget Function(BuildContext context, int index)? separatorBuilder;
@@ -73,29 +91,36 @@ class BlocxCollectionView<Entity extends BlocxBaseEntity, Payload>
 
   /// Builds a custom refresh indicator.
   final Widget? Function(BuildContext context, double swipeRefreshHeight)?
-      refreshWidgetBuilder;
+  refreshWidgetBuilder;
 
   /// Builds a custom load-more indicator.
   final Widget? Function(BuildContext context, bool isLoadingMore)?
-      loadMoreWidgetBuilder;
+  loadMoreWidgetBuilder;
 
   /// Callback invoked when item selection changes.
   final void Function(
-          BuildContext context, SelectionChangedData<Entity> selectionData)?
-      onSelectionChanged;
+    BuildContext context,
+    SelectionChangedData<Entity> selectionData,
+  )?
+  onSelectionChanged;
 
   /// Optional custom listener for listen-only states.
   final void Function(BuildContext context, BlocxCollectionState<Entity> state)?
-      listener;
+  listener;
 
   /// Optional override for the concrete collection widget builder.
   final Widget Function(
-          BuildContext context, BlocxCollectionState<Entity> state)?
-      collectionWidgetBuilder;
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  )?
+  collectionWidgetBuilder;
 
   /// Optional override for the outer wrapper builder surrounding the collection.
   final Widget Function(
-      BuildContext context, BlocxCollectionState<Entity> state)? wrapperBuilder;
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  )?
+  wrapperBuilder;
 
   /// Callback invoked when the user taps retry on the default error widget.
   final VoidCallback? onRetry;
@@ -157,7 +182,8 @@ class _BlocxCollectionViewState<Entity extends BlocxBaseEntity, Payload>
 
   @override
   void didUpdateWidget(
-      covariant BlocxCollectionView<Entity, Payload> oldWidget) {
+    covariant BlocxCollectionView<Entity, Payload> oldWidget,
+  ) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.scrollController != widget.scrollController) {
       _detachAutoScrollListener();
@@ -220,7 +246,9 @@ class _BlocxCollectionViewState<Entity extends BlocxBaseEntity, Payload>
   }
 
   void _handleListener(
-      BuildContext context, BlocxCollectionState<Entity> state) {
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  ) {
     if (state is BlocxCollectionStateScrollToItem<Entity>) {
       final controller = _activeScrollController;
       if (controller is AutoScrollController) {
@@ -257,7 +285,9 @@ class _BlocxCollectionViewState<Entity extends BlocxBaseEntity, Payload>
   }
 
   Widget _defaultLoadingWidget(
-      BuildContext context, BlocxCollectionState<Entity> state) {
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  ) {
     final theme = Theme.of(context);
     final loc = widget.bloc.localizations;
     return Column(
@@ -278,7 +308,9 @@ class _BlocxCollectionViewState<Entity extends BlocxBaseEntity, Payload>
   }
 
   Widget _defaultEmptyWidget(
-      BuildContext context, BlocxCollectionState<Entity> state) {
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  ) {
     final theme = Theme.of(context);
     final loc = widget.bloc.localizations;
     return Column(
@@ -301,7 +333,9 @@ class _BlocxCollectionViewState<Entity extends BlocxBaseEntity, Payload>
   }
 
   Widget _defaultErrorWidget(
-      BuildContext context, BlocxCollectionStateError<Entity> state) {
+    BuildContext context,
+    BlocxCollectionStateError<Entity> state,
+  ) {
     return Center(
       child: BlocxErrorWidget(
         error: ReadableError(message: state.message),
@@ -311,7 +345,9 @@ class _BlocxCollectionViewState<Entity extends BlocxBaseEntity, Payload>
   }
 
   Widget _buildCollectionWidget(
-      BuildContext context, BlocxCollectionState<Entity> state) {
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  ) {
     if (widget.collectionWidgetBuilder != null) {
       return widget.collectionWidgetBuilder!(context, state);
     }
@@ -322,7 +358,7 @@ class _BlocxCollectionViewState<Entity extends BlocxBaseEntity, Payload>
     final bloc = widget.bloc;
     final scrollCtrl = _activeScrollController;
     final separator =
-        widget.separatorBuilder ?? (_, __) => const SizedBox.shrink();
+        widget.separatorBuilder ?? (_, _) => const SizedBox.shrink();
 
     switch (settings.type) {
       case CollectionWidgetStateType.list:
@@ -351,9 +387,11 @@ class _BlocxCollectionViewState<Entity extends BlocxBaseEntity, Payload>
           loadBottomData: bloc.isInfinite ? _loadNextPage : null,
           loadMoreWidgetBuilder: widget.loadMoreWidgetBuilder,
           refreshWidgetBuilder: widget.refreshWidgetBuilder,
-          loading: widget.loadingWidget?.call(context, state) ??
+          loading:
+              widget.loadingWidget?.call(context, state) ??
               _defaultLoadingWidget(context, state),
-          empty: widget.emptyWidget?.call(context, state) ??
+          empty:
+              widget.emptyWidget?.call(context, state) ??
               _defaultEmptyWidget(context, state),
           isEmpty: state.list.isEmpty,
           isLoading: state is BlocxCollectionStateLoading<Entity>,
@@ -396,9 +434,11 @@ class _BlocxCollectionViewState<Entity extends BlocxBaseEntity, Payload>
           sliverBottom: widget.sliverBottomWidget?.call(context, state),
           loadMoreWidgetBuilder: widget.loadMoreWidgetBuilder,
           refreshWidgetBuilder: widget.refreshWidgetBuilder,
-          loading: widget.loadingWidget?.call(context, state) ??
+          loading:
+              widget.loadingWidget?.call(context, state) ??
               _defaultLoadingWidget(context, state),
-          empty: widget.emptyWidget?.call(context, state) ??
+          empty:
+              widget.emptyWidget?.call(context, state) ??
               _defaultEmptyWidget(context, state),
         );
 
@@ -431,7 +471,9 @@ class _BlocxCollectionViewState<Entity extends BlocxBaseEntity, Payload>
   }
 
   Widget _buildWrapper(
-      BuildContext context, BlocxCollectionState<Entity> state) {
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  ) {
     final top = widget.topWidget?.call(context, state);
     final bottom = widget.bottomWidget?.call(context, state);
     final isErrorState = state is BlocxCollectionStateError<Entity>;
@@ -442,13 +484,16 @@ class _BlocxCollectionViewState<Entity extends BlocxBaseEntity, Payload>
 
     final Widget coreBox;
     if (isErrorState && state.list.isEmpty) {
-      coreBox = widget.errorWidget?.call(context, state) ??
+      coreBox =
+          widget.errorWidget?.call(context, state) ??
           _defaultErrorWidget(context, state);
     } else if (isLoadingOrSearching) {
-      coreBox = widget.loadingWidget?.call(context, state) ??
+      coreBox =
+          widget.loadingWidget?.call(context, state) ??
           _defaultLoadingWidget(context, state);
     } else if (isEmpty) {
-      coreBox = widget.emptyWidget?.call(context, state) ??
+      coreBox =
+          widget.emptyWidget?.call(context, state) ??
           _defaultEmptyWidget(context, state);
     } else {
       coreBox = _buildCollectionWidget(context, state);
@@ -456,11 +501,11 @@ class _BlocxCollectionViewState<Entity extends BlocxBaseEntity, Payload>
 
     final settings = _effectiveSettings;
     final children = <Widget>[
-      if (top != null) top,
+      ?top,
       if (top != null) SizedBox(height: widget.topBottomAndListSpacing),
       settings.options.shrinkWrap ? coreBox : Expanded(child: coreBox),
       if (bottom != null) SizedBox(height: widget.topBottomAndListSpacing),
-      if (bottom != null) bottom,
+      ?bottom,
     ];
 
     return Column(
@@ -473,13 +518,16 @@ class _BlocxCollectionViewState<Entity extends BlocxBaseEntity, Payload>
   Widget build(BuildContext context) {
     return BlocProvider<BlocxCollectionBloc<Entity, Payload>>.value(
       value: widget.bloc,
-      child: BlocConsumer<BlocxCollectionBloc<Entity, Payload>,
-          BlocxCollectionState<Entity>>(
-        buildWhen: (_, current) => current.shouldRebuild,
-        listenWhen: (_, current) => current.shouldListen,
-        listener: _handleListener,
-        builder: widget.wrapperBuilder ?? _buildWrapper,
-      ),
+      child:
+          BlocConsumer<
+            BlocxCollectionBloc<Entity, Payload>,
+            BlocxCollectionState<Entity>
+          >(
+            buildWhen: (_, current) => current.shouldRebuild,
+            listenWhen: (_, current) => current.shouldListen,
+            listener: _handleListener,
+            builder: widget.wrapperBuilder ?? _buildWrapper,
+          ),
     );
   }
 }

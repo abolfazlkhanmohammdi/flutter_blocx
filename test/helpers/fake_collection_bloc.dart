@@ -34,15 +34,15 @@ class FakeCollectionBloc extends BlocxCollectionBloc<TestItemEntity, void>
 
   @override
   BlocxPaginatedUseCaseTask<BlocxPaginatedInput, TestItemEntity>?
-      get paginationTask => BlocxPaginatedUseCaseTask(
-            useCase: _FakePaginatedUseCase(
-              initialItems,
-              shouldFail: () => shouldFail,
-              failureError: () => failureError,
-            ),
-            inputBuilder: (offset, limit) =>
-                BlocxPaginatedInput(offset: offset, limit: limit),
-          );
+  get paginationTask => BlocxPaginatedUseCaseTask(
+    useCase: _FakePaginatedUseCase(
+      initialItems,
+      shouldFail: () => shouldFail,
+      failureError: () => failureError,
+    ),
+    inputBuilder: (offset, limit) =>
+        BlocxPaginatedInput(offset: offset, limit: limit),
+  );
 }
 
 class _FakePaginatedUseCase
@@ -59,16 +59,19 @@ class _FakePaginatedUseCase
 
   @override
   Future<BlocxUseCaseResult<BlocxPage<TestItemEntity>>> perform(
-      BlocxPaginatedInput input) async {
+    BlocxPaginatedInput input,
+  ) async {
     if (shouldFail()) {
       throw failureError() ?? Exception('Server connection failed');
     }
     final start = input.offset.clamp(0, items.length);
     final end = (start + input.limit).clamp(0, items.length);
-    return success(BlocxPage(
-      items: items.sublist(start, end),
-      offset: start,
-      limit: input.limit,
-    ));
+    return success(
+      BlocxPage(
+        items: items.sublist(start, end),
+        offset: start,
+        limit: input.limit,
+      ),
+    );
   }
 }

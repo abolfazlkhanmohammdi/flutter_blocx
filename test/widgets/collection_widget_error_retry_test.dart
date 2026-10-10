@@ -12,20 +12,18 @@ class TestCollectionWidget extends BlocxCollectionWidget<void> {
   State<TestCollectionWidget> createState() => _TestCollectionWidgetState();
 }
 
-class _TestCollectionWidgetState extends BlocxCollectionWidgetState<
-    TestCollectionWidget, TestItemEntity, void> {
+class _TestCollectionWidgetState
+    extends
+        BlocxCollectionWidgetState<TestCollectionWidget, TestItemEntity, void> {
   @override
   CollectionSettings get settings => CollectionSettings(
-        type: CollectionWidgetStateType.list,
-        options: const InfiniteListOptions(),
-      );
+    type: CollectionWidgetStateType.list,
+    options: const InfiniteListOptions(),
+  );
 
   @override
   Widget itemBuilder(BuildContext context, TestItemEntity item) {
-    return ListTile(
-      key: ValueKey(item.id),
-      title: Text(item.title),
-    );
+    return ListTile(key: ValueKey(item.id), title: Text(item.title));
   }
 }
 
@@ -119,41 +117,40 @@ void main() {
 
   group('U1: Collection error state and retry UI', () {
     testWidgets(
-        'renders BlocxErrorWidget with retry button when initial page fails, and retrying loads data',
-        (tester) async {
-      final bloc = FakeCollectionBloc(
-        initialItems: [
-          const TestItemEntity(id: '1', title: 'Product 1'),
-          const TestItemEntity(id: '2', title: 'Product 2'),
-        ],
-        shouldFail: true,
-      );
+      'renders BlocxErrorWidget with retry button when initial page fails, and retrying loads data',
+      (tester) async {
+        final bloc = FakeCollectionBloc(
+          initialItems: [
+            const TestItemEntity(id: '1', title: 'Product 1'),
+            const TestItemEntity(id: '2', title: 'Product 2'),
+          ],
+          shouldFail: true,
+        );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: TestCollectionWidget(bloc: bloc),
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(body: TestCollectionWidget(bloc: bloc)),
           ),
-        ),
-      );
+        );
 
-      // Wait for initial async load failure
-      await tester.pumpAndSettle();
+        // Wait for initial async load failure
+        await tester.pumpAndSettle();
 
-      // Prior to fix, it renders emptyWidget or loadingWidget, NOT BlocxErrorWidget
-      expect(find.byType(BlocxErrorWidget), findsOneWidget);
-      expect(find.text('Try again'), findsOneWidget);
-      expect(find.text('No items available'), findsNothing);
+        // Prior to fix, it renders emptyWidget or loadingWidget, NOT BlocxErrorWidget
+        expect(find.byType(BlocxErrorWidget), findsOneWidget);
+        expect(find.text('Try again'), findsOneWidget);
+        expect(find.text('No items available'), findsNothing);
 
-      // Tap 'Try again' after fixing server issue
-      bloc.shouldFail = false;
-      await tester.tap(find.text('Try again'));
-      await tester.pumpAndSettle();
+        // Tap 'Try again' after fixing server issue
+        bloc.shouldFail = false;
+        await tester.tap(find.text('Try again'));
+        await tester.pumpAndSettle();
 
-      // Now items should be rendered
-      expect(find.byType(BlocxErrorWidget), findsNothing);
-      expect(find.text('Product 1'), findsOneWidget);
-      expect(find.text('Product 2'), findsOneWidget);
-    });
+        // Now items should be rendered
+        expect(find.byType(BlocxErrorWidget), findsNothing);
+        expect(find.text('Product 1'), findsOneWidget);
+        expect(find.text('Product 2'), findsOneWidget);
+      },
+    );
   });
 }

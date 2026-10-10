@@ -5,7 +5,8 @@ repository: https://github.com/abolfazlkhanmohammdi/flutter_blocx
 issue_tracker: https://github.com/abolfazlkhanmohammdi/flutter_blocx/issues
 topics: [bloc, architecture, lists, forms, flutter]
 environment:
-  sdk: ">=3.5.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
+  flutter: ">=3.32.0"
 
 dependencies:
   flutter:
@@ -23,6 +24,3 @@ dev_dependencies:
   bloc_test: ^10.0.0
   mocktail: ^1.0.5
 
-dependency_overrides:
-  blocx_core:
-    path: ../blocx_core

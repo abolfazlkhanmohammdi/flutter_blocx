@@ -17,10 +17,12 @@ import 'package:flutter_blocx/src/screen_manager/blocx_screen_manager_state.dart
 /// - [P]: The optional payload type for edit/update forms.
 /// - [E]: The form field enum type.
 abstract class BlocxFormWidgetState<
-    W extends BlocxFormWidget<P>,
-    F extends BlocxBaseFormEntity<F, E>,
-    P,
-    E extends Enum> extends BlocxScreenManagerState<W> {
+  W extends BlocxFormWidget<P>,
+  F extends BlocxBaseFormEntity<F, E>,
+  P,
+  E extends Enum
+>
+    extends BlocxScreenManagerState<W> {
   /// The form bloc that drives this screen.
   ///
   /// Initialised in [initState] by [generateBloc].
@@ -80,7 +82,11 @@ abstract class BlocxFormWidgetState<
       onFormSubmitted(state);
     } else if (state is BlocxFormStateFormUpdated<F, E>) {
       onFormUpdated(
-          state.formData, state.updatedKey, state.oldValue, state.newValue);
+        state.formData,
+        state.updatedKey,
+        state.oldValue,
+        state.newValue,
+      );
     }
   }
 
@@ -103,51 +109,55 @@ abstract class BlocxFormWidgetState<
   ///   here. When a parent [FormState.validate] executes, an error returned by
   ///   this hook takes visual precedence in [FormFieldState]. If this hook returns
   ///   `null`, any active bloc-level error for [key] remains displayed.
-  BlocXFormTextField<F, P, E> textField(E key,
-      {BlocXTextFieldOptions? options,
-      FormFieldValidator<String>? validator,
-      TextFieldType? type,
-      String? labelText,
-      String? hintText,
-      String? helperText,
-      Widget? prefix,
-      Widget? suffix,
-      TextInputType? keyboardType,
-      TextInputAction? textInputAction,
-      bool? obscureText,
-      bool? enabled,
-      bool? autofocus,
-      bool? showClearButton,
-      int? maxLines,
-      int? errorMaxLines,
-      int? minLines,
-      int? maxLength,
-      TypeConverter? converter}) {
+  BlocXFormTextField<F, P, E> textField(
+    E key, {
+    BlocXTextFieldOptions? options,
+    FormFieldValidator<String>? validator,
+    TextFieldType? type,
+    String? labelText,
+    String? hintText,
+    String? helperText,
+    Widget? prefix,
+    Widget? suffix,
+    TextInputType? keyboardType,
+    TextInputAction? textInputAction,
+    bool? obscureText,
+    bool? enabled,
+    bool? autofocus,
+    bool? showClearButton,
+    int? maxLines,
+    int? errorMaxLines,
+    int? minLines,
+    int? maxLength,
+    TypeConverter? converter,
+  }) {
     final resolvedOptions = (options ?? const BlocXTextFieldOptions()).copyWith(
-        labelText: labelText,
-        hintText: hintText,
-        helperText: helperText,
-        prefix: prefix,
-        suffix: suffix,
-        keyboardType: keyboardType,
-        textInputAction: textInputAction,
-        obscureText: obscureText,
-        enabled: enabled,
-        autofocus: autofocus,
-        showClearButton: showClearButton,
-        maxLines: maxLines,
-        minLines: minLines,
-        maxLength: maxLength,
-        errorMaxLines: errorMaxLines);
+      labelText: labelText,
+      hintText: hintText,
+      helperText: helperText,
+      prefix: prefix,
+      suffix: suffix,
+      keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      obscureText: obscureText,
+      enabled: enabled,
+      autofocus: autofocus,
+      showClearButton: showClearButton,
+      maxLines: maxLines,
+      minLines: minLines,
+      maxLength: maxLength,
+      errorMaxLines: errorMaxLines,
+    );
 
     return BlocXFormTextField<F, P, E>(
-        key: ValueKey<E>(key),
-        formKey: key,
-        textFieldOptions: resolvedOptions,
-        controller: getTextEditingController(key),
-        validator: validator,
-        textFieldType: type ?? defaultTextFieldType,
-        typeConverter: converter);
+      key: ValueKey<E>(key),
+      formKey: key,
+      textFieldOptions: resolvedOptions,
+      controller: getTextEditingController(key),
+      validator: validator,
+      textFieldType: type ?? defaultTextFieldType,
+      typeConverter: converter,
+    );
   }
 
   /// Builds a [BlocxFormRegisterButton] connected to the current form [state].
@@ -230,10 +240,7 @@ abstract class BlocxFormWidgetState<
         ? (isChecked != null ? options.copyWith(isChecked: isChecked) : options)
         : BlocxCheckboxOptions(isChecked: isChecked ?? false);
 
-    return BlocxFormCheckbox<F, P, E>(
-      formKey: key,
-      options: effectiveOptions,
-    );
+    return BlocxFormCheckbox<F, P, E>(formKey: key, options: effectiveOptions);
   }
 
   /// Returns the managed [TextEditingController] for [key].
