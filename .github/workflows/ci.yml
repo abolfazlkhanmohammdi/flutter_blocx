@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [ develop, main ]
+  pull_request:
+    branches: [ develop, main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        channel: [stable]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout blocx_core for local resolution
+        uses: actions/checkout@v4
+        with:
+          repository: abolfazlkhanmohammdi/blocx_core
+          ref: develop
+          path: _blocx_core
+
+      - name: Setup local pubspec overrides for CI
+        run: |
+          echo "dependency_overrides:" > pubspec_overrides.yaml
+          echo "  blocx_core:" >> pubspec_overrides.yaml
+          echo "    path: ./_blocx_core" >> pubspec_overrides.yaml
+          echo "dependency_overrides:" > example/pubspec_overrides.yaml
+          echo "  blocx_core:" >> example/pubspec_overrides.yaml
+          echo "    path: ../_blocx_core" >> example/pubspec_overrides.yaml
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ matrix.channel }}
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed lib test example/lib
+
+      - name: Analyze project source
+        run: flutter analyze --fatal-infos
+
+      - name: Run tests with coverage
+        run: flutter test --coverage
+
+      - name: Build example for web
+        run: |
+          cd example
+          flutter pub get
+          flutter build web
+
+  publish:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Publish to pub.dev
+        run: flutter pub publish --force
+

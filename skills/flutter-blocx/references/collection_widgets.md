@@ -66,6 +66,8 @@ abstract class BlocxCollectionWidgetState<
   - Rendered when `isLoading || isSearching` is true. Defaults to a centered `CircularProgressIndicator` + `state.isSearching ? searchingText : loc.loadingText`.
 - `Widget emptyWidget(BuildContext context, BlocxCollectionState<Entity> state)`
   - Rendered when `!isLoading && state.list.isEmpty`. Defaults to an icon + `loc.emptyListText`.
+- `Widget collectionErrorWidget(BuildContext context, BlocxCollectionStateError<Entity> state)`
+  - Rendered when initial page load fails (`state is BlocxCollectionStateError<Entity>`). Defaults to a centered `BlocxErrorWidget` with a retry callback triggering `refreshData()`. Override to present a custom error and retry screen.
 - `Widget separatorBuilder(BuildContext context, int index) => const SizedBox.shrink();`
   - Separator between items in `list`, `animatedList`, `sliverList`, and `animatedSliverList`.
 - `Widget? loadMoreWidgetBuilder(BuildContext context, bool isLoadingMore) => null;`
@@ -132,6 +134,9 @@ CollectionSettings get settings => CollectionSettings(
 | `CollectionWidgetStateType.sliverGrid` | `SliverInfiniteGridOptions` | **`required int crossAxisCount`**, `childAspectRatio = 1.0`, `mainAxisSpacing = 0.0`, `crossAxisSpacing = 0.0`, `gridPadding`, `primary`, `cacheExtent`, `anchor = 0.0`, `clipBehavior = Clip.hardEdge`, `keyboardDismissBehavior`, `addAutomaticKeepAlives = true`, `addRepaintBoundaries = true`, `addSemanticIndexes = true` |
 
 All 6 option classes also provide a `.copyWith(...)` method.
+
+> **Pagination Triggering & Scroll Fallback**:
+> In addition to item-visibility detection via `loadMoreTriggerItemDistance` (default: 2 items from end), `InfiniteList` and `SliverInfiniteList` monitor scroll notifications with a 150px threshold from the bottom edge (`notification.metrics.extentAfter < 150`). This provides a seamless fallback for rapid scrolling, variable item heights, or small datasets, while debouncing duplicate triggers during active gestures.
 
 ---
 
@@ -263,7 +268,7 @@ class OrderCard extends BlocxCollectionItem<OrderEntity, void> {
 
 ### Reactive State Getters on `BlocxCollectionItem<T, P>` (require `BuildContext context`)
 - `BlocxCollectionBloc<T, P> bloc(BuildContext context)`
-- `int index(BuildContext context)`
+- `int index(BuildContext context)` — returns the item index via `state.indexOfId(item.identifier)` (resolved by identifier rather than reference equality). `InfiniteList` and `SliverInfiniteList` build delegates pass the item index directly, avoiding $O(n^2)$ searches during list construction.
 - `bool isSelected(BuildContext context)`
 - `bool isHighlighted(BuildContext context)`
 - `bool isBeingRemoved(BuildContext context)`

@@ -30,9 +30,9 @@ class InfiniteList<Entity extends BlocxBaseEntity> extends StatefulWidget {
 
   final ScrollController? scrollController;
   final Widget? Function(BuildContext context, bool isLoadingMore)?
-      loadMoreWidgetBuilder;
+  loadMoreWidgetBuilder;
   final Widget? Function(BuildContext context, double swipeRefreshHeight)?
-      refreshWidgetBuilder;
+  refreshWidgetBuilder;
 
   const InfiniteList({
     super.key,
@@ -110,31 +110,77 @@ class InfiniteListWidgetState<Entity extends BlocxBaseEntity>
   }
 
   Widget putInExpandedIfNotShrunk(
-      BuildContext context, BlocxInfiniteListState state, Widget child) {
+    BuildContext context,
+    BlocxInfiniteListState state,
+    Widget child,
+  ) {
     if (options.shrinkWrap) return child;
     return Expanded(child: child);
   }
 
-  Widget maybeSetupRefresh(BlocxInfiniteListState state,
-      {required Widget child}) {
+  Widget maybeSetupRefresh(
+    BlocxInfiniteListState state, {
+    required Widget child,
+  }) {
     if (!widget.isRefreshable) return child;
-    return NotificationListener<UserScrollNotification>(
-      onNotification: onScroll,
-      child: Listener(
-        onPointerDown: (d) => bloc.add(
-            BlocxInfiniteListEventVerticalDragStarted(globalY: d.position.dy)),
-        onPointerUp: (d) => bloc.add(BlocxInfiniteListEventVerticalDragEnded()),
-        onPointerMove: maySwipe
-            ? (d) => bloc.add(BlocxInfiniteListEventVerticalDragUpdated(
-                globalY: d.position.dy))
-            : null,
-        onPointerCancel: maySwipe
-            ? (_) => bloc
-                .add(BlocxInfiniteListEventVerticalDragUpdated(globalY: null))
-            : null,
-        child: child,
+    return Listener(
+      onPointerDown: (d) => bloc.add(
+        BlocxInfiniteListEventVerticalDragStarted(globalY: d.position.dy),
       ),
+      onPointerUp: (d) => bloc.add(BlocxInfiniteListEventVerticalDragEnded()),
+      onPointerMove: maySwipe
+          ? (d) => bloc.add(
+              BlocxInfiniteListEventVerticalDragUpdated(globalY: d.position.dy),
+            )
+          : null,
+      onPointerCancel: maySwipe
+          ? (_) => bloc.add(
+              BlocxInfiniteListEventVerticalDragUpdated(globalY: null),
+            )
+          : null,
+      child: child,
     );
+  }
+
+  bool _handleScrollNotification(
+    ScrollNotification n,
+    BlocxInfiniteListState state,
+  ) {
+    if (n is UserScrollNotification) {
+      onScroll(n);
+    }
+    _checkScrollExtentLoadMore(n.metrics, state);
+    return false;
+  }
+
+  bool _isTriggeringLoadMore = false;
+
+  void _checkScrollExtentLoadMore(
+    ScrollMetrics metrics,
+    BlocxInfiniteListState state,
+  ) {
+    if (!state.isLoadingMore && !bloc.state.isLoadingMore) {
+      _isTriggeringLoadMore = false;
+    }
+
+    if (_isTriggeringLoadMore ||
+        state.isLoadingMore ||
+        bloc.state.isLoadingMore ||
+        state.hasReachedEnd ||
+        state.isScrollingUp ||
+        widget.loadBottomData == null) {
+      return;
+    }
+
+    final nearBottom = options.reverse
+        ? metrics.extentBefore <= 150.0
+        : metrics.extentAfter <= 150.0;
+
+    if (nearBottom && metrics.maxScrollExtent > 0) {
+      _isTriggeringLoadMore = true;
+      bloc.setLoadingBottomStatus(true);
+      widget.loadBottomData!();
+    }
   }
 
   bool get _atTopByController =>
@@ -192,8 +238,10 @@ class InfiniteListWidgetState<Entity extends BlocxBaseEntity>
   }
 
   Widget loadMoreWidget(BuildContext context, BlocxInfiniteListState state) {
-    final external =
-        widget.loadMoreWidgetBuilder?.call(context, state.isLoadingMore);
+    final external = widget.loadMoreWidgetBuilder?.call(
+      context,
+      state.isLoadingMore,
+    );
     if (external != null) return external;
     final scheme = Theme.of(context).colorScheme;
     return AnimatedSize(
@@ -215,12 +263,16 @@ class InfiniteListWidgetState<Entity extends BlocxBaseEntity>
   }
 
   Widget swipeRefreshWidget(
-      BuildContext context, BlocxInfiniteListState state) {
+    BuildContext context,
+    BlocxInfiniteListState state,
+  ) {
     if (!widget.isRefreshable || state.swipeRefreshHeight == 0) {
       return const SizedBox.square(dimension: 0);
     }
-    final external =
-        widget.refreshWidgetBuilder?.call(context, state.swipeRefreshHeight);
+    final external = widget.refreshWidgetBuilder?.call(
+      context,
+      state.swipeRefreshHeight,
+    );
     if (external != null) return external;
     final primary = Theme.of(context).colorScheme.primary;
     return Container(
@@ -228,9 +280,10 @@ class InfiniteListWidgetState<Entity extends BlocxBaseEntity>
       height: state.swipeRefreshHeight,
       child: const Center(
         child: SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(color: Colors.white)),
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
       ),
     );
   }
@@ -251,11 +304,14 @@ class InfiniteListWidgetState<Entity extends BlocxBaseEntity>
   }
 
   Widget _itemBuilder(
-      BuildContext context, Entity data, BlocxInfiniteListState state) {
-    final index = widget.items.indexOf(data);
+    BuildContext context,
+    Entity data,
+    int index,
+    BlocxInfiniteListState state,
+  ) {
     final isBottomLoadingTrigger =
         index == (widget.items.length - options.loadMoreTriggerItemDistance) &&
-            !state.hasReachedEnd;
+        !state.hasReachedEnd;
 
     Widget itemWidget = widget.itemBuilder(context, data);
 
@@ -275,16 +331,19 @@ class InfiniteListWidgetState<Entity extends BlocxBaseEntity>
   }
 
   Widget _plainList(BuildContext context, BlocxInfiniteListState state) {
-    return ListView.separated(
-      controller: widget.scrollController ?? effectiveController,
-      physics: options.scrollPhysics ?? const AlwaysScrollableScrollPhysics(),
-      shrinkWrap: options.shrinkWrap,
-      itemCount: widget.items.length,
-      padding: options.padding,
-      reverse: options.reverse,
-      separatorBuilder:
-          widget.separatorBuilder ?? (_, __) => const SizedBox(height: 8),
-      itemBuilder: (c, i) => _itemBuilder(c, widget.items[i], state),
+    return NotificationListener<ScrollNotification>(
+      onNotification: (n) => _handleScrollNotification(n, state),
+      child: ListView.separated(
+        controller: widget.scrollController ?? effectiveController,
+        physics: options.scrollPhysics ?? const AlwaysScrollableScrollPhysics(),
+        shrinkWrap: options.shrinkWrap,
+        itemCount: widget.items.length,
+        padding: options.padding,
+        reverse: options.reverse,
+        separatorBuilder:
+            widget.separatorBuilder ?? (_, _) => const SizedBox(height: 8),
+        itemBuilder: (c, i) => _itemBuilder(c, widget.items[i], i, state),
+      ),
     );
   }
 }

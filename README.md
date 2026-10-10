@@ -118,8 +118,8 @@ Add both **`blocx_core`** and **`flutter_blocx`** to your `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  blocx_core: ^1.0.0
-  flutter_blocx: ^1.0.0
+  blocx_core: ^1.1.0
+  flutter_blocx: ^1.1.0
 ```
 
 Or run:
@@ -255,7 +255,49 @@ class _ProductsScreenState
 | `CollectionWidgetStateType.animatedSliverList` | `AnimatedSliverInfiniteListOptions` | Animated sliver infinite list |
 | `CollectionWidgetStateType.sliverGrid` | `SliverInfiniteGridOptions(crossAxisCount: ...)` | Sliver infinite grid (`CustomScrollView`) |
 
-### 2. Collection Item Widgets (`BlocxCollectionItem` & `BlocxStatefulCollectionItem`)
+### 2. Standalone Composable Views (`BlocxCollectionView` & `BlocxFormView`)
+
+Need to embed a collection list or a form inside a custom layout, tab view, dialog, or multi-pane desktop screen without subclassing `BlocxCollectionWidgetState` or `BlocxFormWidgetState`? Use the standalone composable views:
+
+```dart
+// Standalone collection list view
+BlocxCollectionView<ProductEntity, void>(
+  bloc: productsBloc,
+  itemBuilder: (context, item) => ProductCard(item: item),
+  emptyBuilder: (context) => const Center(child: Text('No products available')),
+  errorBuilder: (context, error) => BlocxErrorWidget(
+    error: error,
+    onRetry: () => productsBloc.loadInitialPage(),
+  ),
+);
+
+// Standalone form view
+BlocxFormView<ProfileFormEntity, UserProfileEntity, ProfileFormField>(
+  bloc: profileBloc,
+  formBuilder: (context, state) => Column(children: [...]),
+  loadingBuilder: (context) => const Center(child: CircularProgressIndicator()),
+);
+```
+
+### 3. DI-Friendly BLoC Construction
+
+`BlocxCollectionWidget` and `BlocxFormWidget` support three flexible dependency-injection patterns:
+1. **Direct constructor injection**: Pass `bloc: myBloc` directly to `BlocxCollectionWidget(bloc: myBloc)` or `BlocxFormWidget(bloc: myBloc)`.
+2. **Inherited Provider**: Provide the BLoC typed as the base class, e.g. `BlocProvider<BlocxCollectionBloc<ProductEntity, void>>.value(...)` or `BlocProvider<BlocxFormBloc<ProfileForm, User, ProfileField>>.value(...)`. When `generateBloc` is not overridden in your state subclass, it automatically resolves `context.read<BlocxCollectionBloc<Entity, Payload>>()` (or `BlocxFormBloc<F, P, E>()`). If provided under a concrete subtype, pass it directly via constructor `MyWidget(bloc: myBloc)` or override `get generateBloc => myBloc`.
+3. **Internal instantiation**: Subclass and override `get generateBloc => MyBloc()`.
+
+*When a BLoC is injected via constructor or context, `autoDisposeBloc` / `autoCloseBloc` default to `false` so ancestor providers retain full lifecycle ownership.*
+
+### 4. Automatic Payload Reload (`shouldReloadOnPayloadChange`)
+
+Both `BlocxCollectionWidgetState` and `BlocxFormWidgetState` listen for incoming widget updates via `didUpdateWidget`. When `widget.payload` changes, `reload()` is automatically called to refresh the collection or re-initialize the form. To disable automatic reloads upon payload changes, override:
+
+```dart
+@override
+bool get shouldReloadOnPayloadChange => false;
+```
+
+### 5. Collection Item Widgets (`BlocxCollectionItem` & `BlocxStatefulCollectionItem`)
 
 #### Stateless Item (`BlocxCollectionItem<Entity, Payload>`)
 
@@ -431,6 +473,24 @@ class _ProfileFormScreenState extends BlocxFormWidgetState<
 | `submitButton(...)` / `BlocxFormRegisterButton` | Reacts to `isSubmitting`, `isCheckingUniqueField`, and `isLoadingRequiredFields` with an inline progress indicator |
 | `formButtonRow(...)` / `BlocxFormButtonRow` | Primary `BlocxFormRegisterButton` paired with a secondary cancel/back button (`Navigator.maybePop()`) |
 
+#### Form Validation Precedence
+
+`flutter_blocx` supports two complementary validation mechanisms:
+
+1. **BlocX Reactive Validation (Recommended):** Configured on the bloc via `BlocxFormValidator` rules, async uniqueness checks (`BlocxUniqueFieldValidatorMixin`), and step validation. Errors are reactively streamed into `bloc.state.errors` and rendered via `InputDecoration.errorText`.
+2. **Flutter `validator:` Hook:** An optional standard `FormFieldValidator<String>` passed to `textField(..., validator: ...)`.
+
+**Precedence Rules:**
+- When Flutter's `FormState.validate()` runs, any non-null error string returned by Flutter's `validator` hook takes visual precedence in `FormFieldState`.
+- When the Flutter validator returns `null` (passes), any active bloc-level error for that field in `bloc.state.errors` remains rendered on screen.
+- **Guideline:** Place domain validation rules and asynchronous checks in your `BlocxFormBloc` using pure-Dart `BlocxFieldValidator` classes. Use Flutter's `validator:` hook for local UI formatting or when interoperating with third-party form wrappers.
+
+#### Automatic Focus Management & `requestFocusOnError`
+
+`BlocxFormWidgetState` manages `FocusNode` instances for all fields declared in `keys`:
+- Calling `textField(key)` or `dropdown(key)` automatically attaches the managed focus node from `getFocusNode(key)`. You can also supply a custom `focusNode:` if needed.
+- Calling `requestFocusOnError(state)` focuses the first field with an active error, traversing fields in the declaration order of `keys` (rather than arbitrary map iteration order).
+
 ---
 
 ## Screen Management & Shared UX
@@ -518,6 +578,15 @@ void main() {
 ## Included AI Coding Skill
 
 This repository includes an AI agent skill at [`skills/flutter-blocx/SKILL.md`](skills/flutter-blocx/SKILL.md) (compatible with Claude Code, Antigravity, and Cursor) containing full widget rules, type-signature tables, blueprints, and progressive-disclosure reference guides for `flutter_blocx`.
+
+---
+
+## Limitations
+
+1. **BLoC Instance Immutability**: Dynamically mutating or replacing `widget.bloc` on an existing widget state is not supported. `didUpdateWidget` asserts `widget.bloc == oldWidget.bloc`. To switch BLoCs, re-create the widget subtree or provide the bloc via an ancestor `BlocProvider`.
+2. **Inherited Provider Typing**: When resolving BLoCs from `BuildContext` (`context.read`), the provider must be typed as the base class (`BlocProvider<BlocxCollectionBloc<Entity, Payload>>` or `BlocProvider<BlocxFormBloc<F, P, E>>`). If provided under a concrete subtype, pass it directly via constructor `MyWidget(bloc: myBloc)` or override `get generateBloc => myBloc`.
+3. **Sliver Context Requirement**: Sliver collection display types (`CollectionWidgetStateType.sliverList`, `sliverGrid`, `animatedSliverList`, `animatedSliverGrid`) must be placed inside a `CustomScrollView` or sliver viewport.
+4. **Form Key Ordering**: `requestFocusOnError` resolves error focus using the declaration order of `keys`. Ensure your `keys` getter defines fields in the visual top-to-bottom layout order of your form.
 
 ---
 

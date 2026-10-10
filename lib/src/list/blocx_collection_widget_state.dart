@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blocx/list_widget.dart';
 import 'package:flutter_blocx/src/core/localizations/loc_provider.dart';
+import 'package:flutter_blocx/src/screen_manager/blocx_error_widget.dart';
 import 'package:flutter_blocx/src/screen_manager/blocx_screen_manager_state.dart';
 import 'package:implicitly_animated_list/implicitly_animated_list.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -19,9 +20,11 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 /// - [Entity]: The collection item entity type.
 /// - [Payload]: The optional payload type used during initial loading.
 abstract class BlocxCollectionWidgetState<
-    W extends BlocxCollectionWidget<Payload>,
-    Entity extends BlocxBaseEntity,
-    Payload> extends BlocxScreenManagerState<W> {
+  W extends BlocxCollectionWidget<Payload>,
+  Entity extends BlocxBaseEntity,
+  Payload
+>
+    extends BlocxScreenManagerState<W> {
   late final BlocxCollectionBloc<Entity, Payload> _bloc;
 
   /// The active scroll controller used by the rendered collection widget.
@@ -34,7 +37,8 @@ abstract class BlocxCollectionWidgetState<
   @override
   void initState() {
     searchController = TextEditingController();
-    _bloc = generateBloc;
+    _bloc =
+        (widget.bloc as BlocxCollectionBloc<Entity, Payload>?) ?? generateBloc;
     setScrollController();
 
     if (loadOnInit) {
@@ -49,16 +53,63 @@ abstract class BlocxCollectionWidgetState<
   }
 
   @override
-  Widget mainWidget(BuildContext context, ScreenManagerCubitState state) {
-    return BlocProvider<BlocxCollectionBloc<Entity, Payload>>.value(
-      value: _bloc,
-      child: BlocConsumer<BlocxCollectionBloc<Entity, Payload>,
-          BlocxCollectionState<Entity>>(
-        buildWhen: (_, current) => current.shouldRebuild,
-        listenWhen: (_, current) => current.shouldListen,
-        listener: _listListener,
-        builder: collectionWrapperBuilder,
+  void onRetry(BuildContext context) {
+    super.onRetry(context);
+    reload();
+  }
+
+  /// Whether to reload the initial collection page when [widget.payload] changes.
+  ///
+  /// Defaults to `true`. Override to return `false` to disable automatic reloading.
+  bool get shouldReloadOnPayloadChange => true;
+
+  @override
+  void didUpdateWidget(covariant W oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    assert(
+      widget.bloc == oldWidget.bloc,
+      'Dynamically mutating widget.bloc is not supported. '
+      'Recreate the widget tree or use an ancestor BlocProvider instead.',
+    );
+    if (shouldReloadOnPayloadChange && widget.payload != oldWidget.payload) {
+      reload();
+    }
+  }
+
+  /// Triggers a reload of the initial collection page using [widget.payload].
+  void reload() {
+    _bloc.add(
+      BlocxCollectionEventLoadInitialPage<Entity, Payload>(
+        payload: widget.payload,
       ),
+    );
+  }
+
+  @override
+  Widget mainWidget(BuildContext context, ScreenManagerCubitState state) {
+    return BlocxCollectionView<Entity, Payload>(
+      bloc: _bloc,
+      settings: settings,
+      scrollController: scrollController,
+      topBottomAndListSpacing: topBottomAndListSpacing,
+      topWidget: topWidget,
+      bottomWidget: bottomWidget,
+      sliverTopWidget: sliverTopWidget,
+      sliverBottomWidget: sliverBottomWidget,
+      itemBuilder: itemBuilder,
+      separatorBuilder: separatorBuilder,
+      loadingWidget: loadingWidget,
+      emptyWidget: emptyWidget,
+      errorWidget: collectionErrorWidget,
+      refreshWidgetBuilder: refreshWidgetBuilder,
+      loadMoreWidgetBuilder: loadMoreWidgetBuilder,
+      deleteAnimation: deleteAnimation,
+      insertAnimation: insertAnimation,
+      onSelectionChanged: onSelectionChanged,
+      listener: blocListener,
+      collectionWidgetBuilder: collectionWidget,
+      wrapperBuilder: collectionWrapperBuilder,
+      onRetry: retryInitialPage,
     );
   }
 
@@ -69,21 +120,29 @@ abstract class BlocxCollectionWidgetState<
   ) {
     final top = topWidget(context, state);
     final bottom = bottomWidget(context, state);
-    final isLoadingOrSearching = isLoading || isSearching;
-    final isEmpty = !isLoading && state.list.isEmpty;
+    final isErrorState = state is BlocxCollectionStateError<Entity>;
+    final isLoadingOrSearching =
+        (state is BlocxCollectionStateLoading<Entity>) || state.isSearching;
+    final isEmpty =
+        !isLoadingOrSearching && !isErrorState && state.list.isEmpty;
 
-    final coreBox = isLoadingOrSearching || isEmpty
-        ? isLoadingOrSearching
-            ? loadingWidget(context, state)
-            : emptyWidget(context, state)
-        : collectionWidget(context, state);
+    final Widget coreBox;
+    if (state is BlocxCollectionStateError<Entity> && state.list.isEmpty) {
+      coreBox = collectionErrorWidget(context, state);
+    } else if (isLoadingOrSearching) {
+      coreBox = loadingWidget(context, state);
+    } else if (isEmpty) {
+      coreBox = emptyWidget(context, state);
+    } else {
+      coreBox = collectionWidget(context, state);
+    }
 
     final children = <Widget>[
-      if (top != null) top,
+      ?top,
       if (top != null) SizedBox(height: topBottomAndListSpacing),
       _collectionOptions.shrinkWrap ? coreBox : Expanded(child: coreBox),
       if (bottom != null) SizedBox(height: topBottomAndListSpacing),
-      if (bottom != null) bottom,
+      ?bottom,
     ];
 
     return Column(
@@ -101,38 +160,24 @@ abstract class BlocxCollectionWidgetState<
 
   /// Optional widget displayed below the collection.
   Widget? bottomWidget(
-          BuildContext context, BlocxCollectionState<Entity> state) =>
-      null;
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  ) => null;
 
   /// Optional sliver displayed above sliver collections.
   Widget? sliverTopWidget(
-          BuildContext context, BlocxCollectionState<Entity> state) =>
-      null;
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  ) => null;
 
   /// Optional sliver displayed below sliver collections.
   Widget? sliverBottomWidget(
     BuildContext context,
     BlocxCollectionState<Entity> state,
-  ) =>
-      null;
+  ) => null;
 
   /// Builds one visual item for [item].
   Widget itemBuilder(BuildContext context, Entity item);
-
-  void _listListener(BuildContext context, BlocxCollectionState<Entity> state) {
-    if (state is BlocxCollectionStateScrollToItem<Entity>) {
-      final controller = scrollController;
-
-      if (controller is AutoScrollController) {
-        controller.scrollToIndex(
-          state.index,
-          preferPosition: AutoScrollPosition.middle,
-        );
-      }
-    }
-
-    blocListener(context, state);
-  }
 
   /// Reacts to listen-only collection states.
   void blocListener(BuildContext context, BlocxCollectionState<Entity> state) {
@@ -154,7 +199,9 @@ abstract class BlocxCollectionWidgetState<
 
   /// Builds the loading widget.
   Widget loadingWidget(
-      BuildContext context, BlocxCollectionState<Entity> state) {
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  ) {
     return Column(
       spacing: 24,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -197,7 +244,9 @@ abstract class BlocxCollectionWidgetState<
   Payload? get payload => widget.payload;
 
   /// Text shown while search is running.
-  String get searchingText => 'Searching data, please wait';
+  ///
+  /// Defaults to [loc.searchingText]. Override to customize per screen.
+  String get searchingText => loc.searchingText;
 
   /// Builds the empty-state widget.
   Widget emptyWidget(BuildContext context, BlocxCollectionState<Entity> state) {
@@ -217,6 +266,34 @@ abstract class BlocxCollectionWidgetState<
           textAlign: TextAlign.center,
         ),
       ],
+    );
+  }
+
+  /// Whether the collection is currently in an error state.
+  bool get isError => _bloc.state is BlocxCollectionStateError;
+
+  /// Builds the error widget displayed when initial page loading fails.
+  ///
+  /// By default, renders a centered [BlocxErrorWidget] with a "Try again"
+  /// button that triggers [retryInitialPage].
+  Widget collectionErrorWidget(
+    BuildContext context,
+    BlocxCollectionStateError<Entity> state,
+  ) {
+    return Center(
+      child: BlocxErrorWidget(
+        error: ReadableError(message: state.message),
+        onRetry: retryInitialPage,
+      ),
+    );
+  }
+
+  /// Retries loading the initial page after an error.
+  void retryInitialPage() {
+    _bloc.add(
+      BlocxCollectionEventLoadInitialPage<Entity, Payload>(
+        payload: widget.payload,
+      ),
     );
   }
 
@@ -255,8 +332,9 @@ abstract class BlocxCollectionWidgetState<
         scrollController = providedController;
         _ownsScrollController = false;
       } else {
-        scrollController =
-            _bloc.isScrollable ? AutoScrollController() : ScrollController();
+        scrollController = _bloc.isScrollable
+            ? AutoScrollController()
+            : ScrollController();
         _ownsScrollController = true;
       }
     }
@@ -311,25 +389,57 @@ abstract class BlocxCollectionWidgetState<
 
   /// Collection rendering settings.
   CollectionSettings get settings => CollectionSettings(
-        type: CollectionWidgetStateType.animatedList,
-        options: AnimatedInfiniteListOptions(),
-      );
+    type: CollectionWidgetStateType.animatedList,
+    options: AnimatedInfiniteListOptions(),
+  );
+
+  bool _isBlocFromContext = false;
 
   /// Whether [_bloc] is closed when this state is disposed.
-  bool get autoDisposeBloc => true;
+  ///
+  /// Defaults to `false` when [widget.bloc] was provided externally or resolved
+  /// from ancestor context, and `true` when instantiated internally.
+  bool get autoDisposeBloc => widget.bloc == null && !_isBlocFromContext;
 
   /// Whether initial data should be loaded during [initState].
   bool get loadOnInit => true;
 
-  /// Creates the collection bloc for this state.
-  BlocxCollectionBloc<Entity, Payload> get generateBloc;
+  /// Creates or resolves the collection bloc for this state.
+  ///
+  /// Defaults to resolving [BlocxCollectionBloc] from the nearest ancestor
+  /// [BuildContext] via [context.read]. Override this getter to instantiate a
+  /// specific bloc subtype manually.
+  BlocxCollectionBloc<Entity, Payload> get generateBloc {
+    _isBlocFromContext = true;
+    try {
+      return context.read<BlocxCollectionBloc<Entity, Payload>>();
+    } on ProviderNotFoundException catch (e) {
+      throw FlutterError(
+        'Error: Could not find BlocxCollectionBloc<$Entity, $Payload> in BuildContext.\n\n'
+        'When relying on Inherited Provider lookup, ensure the bloc is provided above '
+        'this widget typed as the base class:\n'
+        '  BlocProvider<BlocxCollectionBloc<$Entity, $Payload>>.value(\n'
+        '    value: myBloc,\n'
+        '    child: MyCollectionWidget(),\n'
+        '  )\n\n'
+        'Alternatively, pass the bloc explicitly to the widget constructor:\n'
+        '  MyCollectionWidget(bloc: myBloc)\n\n'
+        'Or override generateBloc in your State subclass:\n'
+        '  @override\n'
+        '  BlocxCollectionBloc<$Entity, $Payload> get generateBloc => myBloc;\n\n'
+        'Original error: $e',
+      );
+    }
+  }
 
   /// The collection bloc that drives this screen.
   BlocxCollectionBloc<Entity, Payload> get bloc => _bloc;
 
   /// Builds the concrete collection widget for [state].
   Widget collectionWidget(
-      BuildContext context, BlocxCollectionState<Entity> state) {
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  ) {
     final opts = _collectionOptions;
     opts.assertCorrectType(_collectionDisplayType);
 
@@ -363,7 +473,7 @@ abstract class BlocxCollectionWidgetState<
           loading: loadingWidget(context, state),
           empty: emptyWidget(context, state),
           isEmpty: state.list.isEmpty,
-          isLoading: isLoading,
+          isLoading: state is BlocxCollectionStateLoading<Entity>,
           sliverBottom: sliverBottomWidget(context, state),
           sliverTop: sliverTopWidget(context, state),
         );
@@ -396,7 +506,7 @@ abstract class BlocxCollectionWidgetState<
           refreshOnSwipe: _bloc.isRefreshable ? refreshData : null,
           loadBottomData: _bloc.isInfinite ? loadNextPage : null,
           loadTopData: null,
-          isLoading: isLoading,
+          isLoading: state is BlocxCollectionStateLoading<Entity>,
           isEmpty: state.list.isEmpty,
           scrollController: scrollController,
           sliverTop: sliverTopWidget(context, state),
@@ -476,8 +586,9 @@ abstract class BlocxCollectionWidgetState<
     bloc.add(BlocxCollectionEventFilter<Entity, Filter>(filter: filter));
   }
 
-  BlocxSearchField<Entity, Payload> searchField(
-      {BlocxSearchFieldOptions? options}) {
+  BlocxSearchField<Entity, Payload> searchField({
+    BlocxSearchFieldOptions? options,
+  }) {
     return BlocxSearchField(
       controller: searchController,
       bloc: bloc,
@@ -522,8 +633,5 @@ class CollectionSettings {
   final CollectionOptions options;
 
   /// Creates collection settings.
-  CollectionSettings({
-    required this.type,
-    required this.options,
-  });
+  CollectionSettings({required this.type, required this.options});
 }

@@ -1,5 +1,46 @@
 # Changelog
 
+## [1.1.0] - 2026-10-10
+
+### Added
+* Added composable `BlocxCollectionView` and `BlocxFormView` standalone view widgets with builder fallbacks (`emptyBuilder`, `errorBuilder`, `loadingBuilder`), allowing collection lists and forms to be embedded directly into custom widget trees without subclassing full screen state classes.
+* Added DI-friendly construction to `BlocxCollectionWidget` and `BlocxFormWidget`: added optional `bloc` constructor argument, automatic fallback to `context.read<B>()` in `generateBloc()`, and non-destructive lifecycle management (`autoDisposeBloc` / `autoCloseBloc` default to `false` when externally provided).
+* Added retry support to default `errorWidget` and `errorWidgetByErrorCode` in `BlocxScreenManagerState`, invoking `managerCubit.clearError()` to dismiss full-page errors followed by the `onRetry(BuildContext)` hook (overridden in `BlocxCollectionWidgetState` and `BlocxFormWidgetState` to automatically reload data).
+* Added `onPop(BuildContext)` hook in `BlocxScreenManagerState` (defaulting to `Navigator.of(context).maybePop()`) to enable custom navigation handling for declarative routing solutions (`go_router`, `auto_route`).
+* Added `shouldReloadOnPayloadChange` getter in `BlocxCollectionWidgetState` and `BlocxFormWidgetState` (defaulting to `true`) controlling whether updating `widget.payload` triggers an automatic reload / re-initialization.
+* Added optional `focusNode` parameter to `BlocXFormTextField` and `BlocXFormDropdown`, forwarding to underlying Flutter form fields.
+* Added optional `focusNode` parameter to `BlocxFormWidgetState.textField` and `BlocxFormWidgetState.dropdown` helpers, defaulting to `getFocusNode(key)`.
+* Updated `BlocxCollectionWidgetState.searchingText` and `BlocxSearchField` default hint to use `loc.searchingText` and `loc.searchHint` from `BlocXLocalizations`.
+* Deprecated redundant `isChecked` argument in `BlocxFormWidgetState.checkbox(...)` in favor of specifying `isChecked` in `BlocxCheckboxOptions`, keeping both functional for backward compatibility.
+* Documented `validator:` parameter precedence vs pure-Dart BlocX field validation in `README.md` and dartdoc comments.
+
+### Changed
+* Raised SDK floor to `sdk: ">=3.8.0 <4.0.0"` and Flutter floor to `flutter: ">=3.32.0"`, aligning with `blocx_core 1.1.0`.
+* Dropped committed `dependency_overrides` from repository, using gitignored local `pubspec_overrides.yaml` and checking out `blocx_core` from develop branch in CI.
+
+### Fixed
+* Hardened Inherited Provider DI lookup in `BlocxCollectionWidgetState.generateBloc` and `BlocxFormWidgetState.generateBloc`: catches `ProviderNotFoundException` and throws a descriptive `FlutterError` explaining that context-provided blocs must be typed as base classes `BlocProvider<BlocxCollectionBloc<...>>` / `BlocProvider<BlocxFormBloc<...>>` or passed via constructor.
+* Added `didUpdateWidget` in `BlocxCollectionWidgetState` and `BlocxFormWidgetState` to automatically reload hosts when `widget.payload` changes (when `shouldReloadOnPayloadChange` is enabled) and asserted that `widget.bloc` is not mutated dynamically.
+* Fixed form error focus ordering in `BlocxFormWidgetState.requestFocusOnError`: now iterates `keys` to find and focus the first error in declaration order rather than arbitrary map key iteration order.
+* Automatically attached managed `FocusNode` instances from `getFocusNode(key)` to text fields and dropdowns so `requestFocusOnError` properly focuses the corresponding input.
+
+## [1.0.1] - 2026-10-09
+
+### Documentation
+* Recorded baseline test and analysis results in `docs/fix-notes.md`.
+
+### Infrastructure
+* Added GitHub Actions CI workflow (`.github/workflows/ci.yml`) covering formatting, static analysis (`--fatal-infos`), tests with coverage, dry-run publishing, and example web build.
+* Added `bloc_test` and `mocktail` dev dependencies and created `FakeCollectionBloc` test helper in `test/helpers/`.
+
+### Fixed
+* Handled `BlocxCollectionStateError` in `BlocxCollectionWidgetState`, displaying `collectionErrorWidget` (`BlocxErrorWidget` with "Try again" action) on initial load failure rather than leaving the screen in an endless loading spinner or empty view.
+* Aligned `collectionWrapperBuilder` to read `isLoading` and `isSearching` directly from incoming state snapshots rather than polling internal mutable bloc fields.
+* Eliminated $O(n^2)$ `indexOf` lookups during collection list building by directly passing the delegate item index in `InfiniteList` and `SliverInfiniteList`, and updated `BlocxCollectionItem.index(context)` to resolve indices by `identifier` via `state.indexOfId` instead of reference equality.
+* Added scroll extent threshold checks in `InfiniteList` and `SliverInfiniteList` as a robust fallback for triggering next-page loading (`loadBottomData`) when scrolled near the list edge, guarded by an internal triggering flag to prevent duplicate event dispatches during active drag notifications.
+* Updated `applyInitialDataToForm` in `BlocxFormWidgetState` to only update controller text when changed and preserve the active cursor position (clamped to the new text length).
+* Added optional `BlocxFormState<F, E>? formState` parameter to `submitButton` and `formButtonRow` helpers in `BlocxFormWidgetState`, enabling direct snapshot reading and avoiding reliance on internal mutable bloc fields.
+
 ## [1.0.0]
 
 ### Added

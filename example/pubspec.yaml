@@ -30,7 +30,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  blocx_core: ^1.0.0
+  blocx_core: ^1.1.0
   flutter_blocx:
     path: ../
 

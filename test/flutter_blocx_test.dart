@@ -12,8 +12,10 @@ class TestStatelessWidget extends BlocxStatelessWidget {
       children: [
         Text('Width: ${width(context)}', textDirection: TextDirection.ltr),
         Text('Height: ${height(context)}', textDirection: TextDirection.ltr),
-        Text('ThemePrimary: ${colorScheme(context).primary}',
-            textDirection: TextDirection.ltr),
+        Text(
+          'ThemePrimary: ${colorScheme(context).primary}',
+          textDirection: TextDirection.ltr,
+        ),
       ],
     );
   }
@@ -150,14 +152,11 @@ void main() {
   });
 
   group('BlocxStatelessWidget', () {
-    testWidgets('provides context helpers for theme and screen dimensions',
-        (tester) async {
+    testWidgets('provides context helpers for theme and screen dimensions', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: TestStatelessWidget(),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: TestStatelessWidget())),
       );
 
       expect(find.textContaining('Width: 800.0'), findsOneWidget);
@@ -167,8 +166,9 @@ void main() {
   });
 
   group('BlocxErrorWidget', () {
-    testWidgets('renders readable error details and triggers callbacks',
-        (tester) async {
+    testWidgets('renders readable error details and triggers callbacks', (
+      tester,
+    ) async {
       bool retried = false;
       bool reported = false;
 
@@ -208,8 +208,9 @@ void main() {
   });
 
   group('BlocxSnackBar', () {
-    testWidgets('shows floating snackbar with title and message',
-        (tester) async {
+    testWidgets('shows floating snackbar with title and message', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(

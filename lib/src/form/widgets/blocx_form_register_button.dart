@@ -19,8 +19,12 @@ import 'package:flutter_blocx/src/core/widgets/blocx_stateless_widget.dart';
 ///
 /// Set [BlocxFormRegisterButtonOptions.disableWhenInvalid] to `true` if the
 /// button should be disabled when [BlocxFormState.errors] is not empty.
-class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P,
-    E extends Enum> extends BlocxStatelessWidget {
+class BlocxFormRegisterButton<
+  F extends BlocxBaseFormEntity<F, E>,
+  P,
+  E extends Enum
+>
+    extends BlocxStatelessWidget {
   /// The current form state.
   ///
   /// Used to determine the loading state, disabled state, and label text.
@@ -94,30 +98,30 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P,
 
     var widget = switch (type) {
       RegisterButtonType.elevated => buildElevatedButton(
-          context,
-          label: label,
-          disabled: disabled,
-        ),
+        context,
+        label: label,
+        disabled: disabled,
+      ),
       RegisterButtonType.filled => buildFilledButton(
-          context,
-          label: label,
-          disabled: disabled,
-        ),
+        context,
+        label: label,
+        disabled: disabled,
+      ),
       RegisterButtonType.text => buildTextButton(
-          context,
-          label: label,
-          disabled: disabled,
-        ),
+        context,
+        label: label,
+        disabled: disabled,
+      ),
       RegisterButtonType.outlined => buildOutlinedButton(
-          context,
-          label: label,
-          disabled: disabled,
-        ),
+        context,
+        label: label,
+        disabled: disabled,
+      ),
       RegisterButtonType.other => buildOtherButton(
-          context,
-          label: label,
-          disabled: disabled,
-        ),
+        context,
+        label: label,
+        disabled: disabled,
+      ),
     };
 
     return Tooltip(message: state.errors.values.join(".\n"), child: widget);
@@ -210,8 +214,10 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P,
   BlocxFormWidgetState<BlocxFormWidget<P>, F, P, E> getState(
     BuildContext context,
   ) {
-    final formState = context.findAncestorStateOfType<
-        BlocxFormWidgetState<BlocxFormWidget<P>, F, P, E>>();
+    final formState = context
+        .findAncestorStateOfType<
+          BlocxFormWidgetState<BlocxFormWidget<P>, F, P, E>
+        >();
 
     if (formState == null) {
       throw FlutterError(
@@ -224,10 +230,7 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P,
   }
 
   /// Resolves the effective button callback.
-  VoidCallback? _resolveOnPressed(
-    BuildContext context,
-    bool disabled,
-  ) {
+  VoidCallback? _resolveOnPressed(BuildContext context, bool disabled) {
     if (disabled) return null;
 
     return onPressed ?? getState(context).submit;
@@ -236,27 +239,19 @@ class BlocxFormRegisterButton<F extends BlocxBaseFormEntity<F, E>, P,
   /// Builds the shared button content.
   ///
   /// The loading indicator is only displayed while [isBusy] is `true`.
-  Widget _buildContent(
-    BuildContext context, {
-    required String label,
-  }) {
-    final text = Text(
-      label,
-      style: buttonOptions.labelTextStyle,
-    );
+  Widget _buildContent(BuildContext context, {required String label}) {
+    final text = Text(label, style: buttonOptions.labelTextStyle);
 
     if (!isBusy) return text;
 
-    final indicator = buttonOptions.loadingIndicatorBuilder?.call(context) ??
+    final indicator =
+        buttonOptions.loadingIndicatorBuilder?.call(context) ??
         _defaultLoadingIndicator(context);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox.square(
-          dimension: 16,
-          child: Center(child: indicator),
-        ),
+        SizedBox.square(dimension: 16, child: Center(child: indicator)),
         SizedBox(width: buttonOptions.spacing),
         text,
       ],

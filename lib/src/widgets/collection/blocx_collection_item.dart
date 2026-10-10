@@ -57,7 +57,8 @@ abstract class BlocxCollectionItem<T extends BlocxBaseEntity, P>
     } catch (_) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary(
-            'BlocxListItem could not find ListBloc<$T, $P> in the widget tree.'),
+          'BlocxListItem could not find ListBloc<$T, $P> in the widget tree.',
+        ),
         ErrorDescription(
           'Ensure you wrap your list screen (or a parent widget) with '
           'BlocProvider<ListBloc<$T, $P>>.',
@@ -148,7 +149,8 @@ abstract class BlocxCollectionItem<T extends BlocxBaseEntity, P>
   // Dispatch helpers (validated)
   // ---------------------------------------------------------------------------
 
-  int index(BuildContext context) => bloc(context).list.indexOf(item);
+  int index(BuildContext context) =>
+      bloc(context).state.indexOfId(item.identifier);
 
   @protected
   void removeItem(BuildContext context) {
@@ -202,13 +204,16 @@ abstract class BlocxCollectionItem<T extends BlocxBaseEntity, P>
 
   ConfirmActionOptions get confirmDeleteOptions => ConfirmActionOptions();
 
-  Future<void> confirmThenDelete(BuildContext context,
-      {ConfirmActionOptions? confirmDeleteOptions}) async {
+  Future<void> confirmThenDelete(
+    BuildContext context, {
+    ConfirmActionOptions? confirmDeleteOptions,
+  }) async {
     var result = await showModalBottomSheet(
       context: context,
       builder: (_) {
         return ConfirmActionWidget(
-            options: confirmDeleteOptions ?? this.confirmDeleteOptions);
+          options: confirmDeleteOptions ?? this.confirmDeleteOptions,
+        );
       },
     );
     if (result == null || !result || !context.mounted) return;
@@ -253,9 +258,11 @@ abstract class BlocxCollectionItem<T extends BlocxBaseEntity, P>
     blocc.add(
       areAlreadySelected
           ? BlocxCollectionEventDeselectMultipleItems(
-              items: selectionTargetItems)
+              items: selectionTargetItems,
+            )
           : BlocxCollectionEventSelectMultipleItems(
-              items: selectionTargetItems),
+              items: selectionTargetItems,
+            ),
     );
   }
 }

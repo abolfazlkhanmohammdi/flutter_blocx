@@ -30,9 +30,11 @@ abstract class BlocxStatefulCollectionItem<T extends BlocxBaseEntity>
 /// This provides the same convenience helpers as the stateless version,
 /// but without needing to pass `BuildContext` into each method.
 abstract class BlocxCollectionItemState<
-    W extends BlocxStatefulCollectionItem<T>,
-    T extends BlocxBaseEntity,
-    P> extends BlocXWidgetState<W> {
+  W extends BlocxStatefulCollectionItem<T>,
+  T extends BlocxBaseEntity,
+  P
+>
+    extends BlocXWidgetState<W> {
   /// Provide the item this row represents.
   ///
   /// Default implementation tries to read `widget.item`. If your widget uses a
@@ -67,7 +69,8 @@ abstract class BlocxCollectionItemState<
     } catch (_) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary(
-            'BlocxCollectionItemState could not find ListBloc<$T, $P> in the widget tree.'),
+          'BlocxCollectionItemState could not find ListBloc<$T, $P> in the widget tree.',
+        ),
         ErrorDescription(
           'Ensure you wrap your list screen (or a parent widget) with '
           'BlocProvider<ListBloc<$T, $P>>.',

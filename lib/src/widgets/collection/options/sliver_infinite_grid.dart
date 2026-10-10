@@ -70,7 +70,7 @@ class SliverInfiniteGridOptions extends GridOptions {
       scrollPhysics: scrollPhysics ?? this.scrollPhysics,
       loadMoreTriggerItemDistance:
           (bottomLoadingTriggerItemDistance ?? loadMoreTriggerItemDistance) ??
-              this.loadMoreTriggerItemDistance,
+          this.loadMoreTriggerItemDistance,
       crossAxisCount: crossAxisCount ?? this.crossAxisCount,
       childAspectRatio: childAspectRatio ?? this.childAspectRatio,
       mainAxisSpacing: mainAxisSpacing ?? this.mainAxisSpacing,

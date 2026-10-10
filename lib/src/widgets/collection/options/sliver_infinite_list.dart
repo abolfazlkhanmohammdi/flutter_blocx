@@ -40,7 +40,7 @@ class SliverInfiniteListOptions extends ListOptions {
       padding: padding ?? this.padding,
       loadMoreTriggerItemDistance:
           (bottomLoadingTriggerItemDistance ?? loadMoreTriggerItemDistance) ??
-              this.loadMoreTriggerItemDistance,
+          this.loadMoreTriggerItemDistance,
       scrollPhysics: scrollPhysics ?? this.scrollPhysics,
       addAutomaticKeepAlives:
           addAutomaticKeepAlives ?? this.addAutomaticKeepAlives,

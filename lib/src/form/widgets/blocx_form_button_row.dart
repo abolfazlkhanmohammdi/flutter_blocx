@@ -86,10 +86,7 @@ class BlocxFormButtonRow<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
       ],
     );
 
-    return SizedBox(
-      height: options.height,
-      child: row,
-    );
+    return SizedBox(height: options.height, child: row);
   }
 
   /// Builds the left-side [BlocxFormRegisterButton].
@@ -169,76 +166,62 @@ class BlocxFormButtonRow<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
 
     return switch (registerType) {
       RegisterButtonType.elevated => ButtonStyle(
-          backgroundColor: WidgetStateProperty.resolveWith<Color?>(
-            (states) {
-              if (states.contains(WidgetState.disabled)) {
-                return disabledBackground;
-              }
+        backgroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return disabledBackground;
+          }
 
-              return scheme.primary;
-            },
-          ),
-          foregroundColor: WidgetStateProperty.resolveWith<Color?>(
-            (states) {
-              if (states.contains(WidgetState.disabled)) {
-                return disabledForeground;
-              }
+          return scheme.primary;
+        }),
+        foregroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return disabledForeground;
+          }
 
-              return scheme.onPrimary;
-            },
-          ),
-        ),
+          return scheme.onPrimary;
+        }),
+      ),
       RegisterButtonType.filled => ButtonStyle(
-          backgroundColor: WidgetStateProperty.resolveWith<Color?>(
-            (states) {
-              if (states.contains(WidgetState.disabled)) {
-                return disabledBackground;
-              }
+        backgroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return disabledBackground;
+          }
 
-              return scheme.primary;
-            },
-          ),
-          foregroundColor: WidgetStateProperty.resolveWith<Color?>(
-            (states) {
-              if (states.contains(WidgetState.disabled)) {
-                return disabledForeground;
-              }
+          return scheme.primary;
+        }),
+        foregroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return disabledForeground;
+          }
 
-              return scheme.onPrimary;
-            },
-          ),
-        ),
+          return scheme.onPrimary;
+        }),
+      ),
       RegisterButtonType.text => ButtonStyle(
-          foregroundColor: WidgetStateProperty.resolveWith<Color?>(
-            (states) {
-              if (states.contains(WidgetState.disabled)) {
-                return disabledForeground;
-              }
+        foregroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return disabledForeground;
+          }
 
-              return scheme.primary;
-            },
-          ),
-        ),
+          return scheme.primary;
+        }),
+      ),
       RegisterButtonType.outlined => ButtonStyle(
-          foregroundColor: WidgetStateProperty.resolveWith<Color?>(
-            (states) {
-              if (states.contains(WidgetState.disabled)) {
-                return disabledForeground;
-              }
+        foregroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return disabledForeground;
+          }
 
-              return scheme.primary;
-            },
-          ),
-          side: WidgetStateProperty.resolveWith<BorderSide?>(
-            (states) {
-              if (states.contains(WidgetState.disabled)) {
-                return disabledSide;
-              }
+          return scheme.primary;
+        }),
+        side: WidgetStateProperty.resolveWith<BorderSide?>((states) {
+          if (states.contains(WidgetState.disabled)) {
+            return disabledSide;
+          }
 
-              return BorderSide(color: scheme.outline);
-            },
-          ),
-        ),
+          return BorderSide(color: scheme.outline);
+        }),
+      ),
       RegisterButtonType.other => null,
     };
   }
@@ -282,10 +265,7 @@ class BlocxFormButtonRow<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
         disabledForeground,
       ),
       side: hasSide
-          ? _withDisabledFallback<BorderSide>(
-              style.side,
-              disabledSide,
-            )
+          ? _withDisabledFallback<BorderSide>(style.side, disabledSide)
           : style.side,
     );
   }
@@ -298,22 +278,20 @@ class BlocxFormButtonRow<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
     WidgetStateProperty<T?>? property,
     T disabledFallback,
   ) {
-    return WidgetStateProperty.resolveWith<T?>(
-      (states) {
-        if (!states.contains(WidgetState.disabled)) {
-          return property?.resolve(states);
-        }
+    return WidgetStateProperty.resolveWith<T?>((states) {
+      if (!states.contains(WidgetState.disabled)) {
+        return property?.resolve(states);
+      }
 
-        final enabledValue = property?.resolve(const <WidgetState>{});
-        final disabledValue = property?.resolve(states);
+      final enabledValue = property?.resolve(const <WidgetState>{});
+      final disabledValue = property?.resolve(states);
 
-        if (disabledValue != null && disabledValue != enabledValue) {
-          return disabledValue;
-        }
+      if (disabledValue != null && disabledValue != enabledValue) {
+        return disabledValue;
+      }
 
-        return disabledFallback;
-      },
-    );
+      return disabledFallback;
+    });
   }
 
   /// Builds the right-side secondary button.
@@ -338,9 +316,9 @@ class BlocxFormButtonRow<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
       onPressed: disabled
           ? null
           : onSecondButtonPressed ??
-              () async {
-                await Navigator.of(context).maybePop();
-              },
+                () async {
+                  await Navigator.of(context).maybePop();
+                },
       child: Builder(
         builder: (buttonContext) {
           return Text(
@@ -368,9 +346,7 @@ class BlocxFormButtonRow<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
     }
 
     if (customStyle.foreground != null) {
-      return customStyle.copyWith(
-        foreground: Paint()..color = inheritedColor,
-      );
+      return customStyle.copyWith(foreground: Paint()..color = inheritedColor);
     }
 
     return customStyle.copyWith(color: inheritedColor);
@@ -385,24 +361,20 @@ class BlocxFormButtonRow<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
     );
 
     return ButtonStyle(
-      foregroundColor: WidgetStateProperty.resolveWith<Color?>(
-        (states) {
-          if (states.contains(WidgetState.disabled)) {
-            return disabledForeground;
-          }
+      foregroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.disabled)) {
+          return disabledForeground;
+        }
 
-          return scheme.primary;
-        },
-      ),
-      side: WidgetStateProperty.resolveWith<BorderSide?>(
-        (states) {
-          if (states.contains(WidgetState.disabled)) {
-            return disabledSide;
-          }
+        return scheme.primary;
+      }),
+      side: WidgetStateProperty.resolveWith<BorderSide?>((states) {
+        if (states.contains(WidgetState.disabled)) {
+          return disabledSide;
+        }
 
-          return BorderSide(color: scheme.outline);
-        },
-      ),
+        return BorderSide(color: scheme.outline);
+      }),
     );
   }
 }

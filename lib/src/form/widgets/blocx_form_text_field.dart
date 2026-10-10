@@ -37,10 +37,17 @@ class BlocXFormTextField<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
   /// automatically.
   final TextEditingController? controller;
 
-  /// Standard [TextFormField] validator.
+  /// Optional focus node connected to this field.
+  final FocusNode? focusNode;
+
+  /// Optional standard [FormFieldValidator] for integration with Flutter's [FormState.validate].
   ///
-  /// Runs on the raw string value. Bloc-driven validation errors are displayed
-  /// through the field decoration.
+  /// ### Validation Precedence
+  /// - Errors produced by pure-Dart bloc validators ([BlocxFormValidator]) are
+  ///   reactively streamed into `state.errors` and rendered via [InputDecoration.errorText].
+  /// - When Flutter's [Form.validate] is called, any error returned by this [validator]
+  ///   takes visual precedence in [FormFieldState]. If this validator returns `null`,
+  ///   any underlying bloc-level error for [formKey] remains visible.
   final FormFieldValidator<String>? validator;
 
   /// Visual and behavioural options for the text field.
@@ -53,6 +60,7 @@ class BlocXFormTextField<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
     required this.textFieldType,
     this.textFieldOptions = const BlocXTextFieldOptions(),
     this.controller,
+    this.focusNode,
     this.validator,
     this.typeConverter,
   });
@@ -63,8 +71,12 @@ class BlocXFormTextField<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
 }
 
 /// State for [BlocXFormTextField].
-class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P,
-    E extends Enum> extends BlocXWidgetState<BlocXFormTextField<F, P, E>> {
+class BlocXFormTextFieldState<
+  F extends BlocxBaseFormEntity<F, E>,
+  P,
+  E extends Enum
+>
+    extends BlocXWidgetState<BlocXFormTextField<F, P, E>> {
   TextEditingController? _internalController;
 
   /// Whether this state owns and should dispose the active controller.
@@ -106,6 +118,7 @@ class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P,
     return TextFormField(
       validator: widget.validator,
       controller: _controller,
+      focusNode: widget.focusNode,
       autofocus: options.autofocus,
       style: options.style,
       inputFormatters: options.inputFormatters,
@@ -217,14 +230,12 @@ class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P,
     final borderRadius = options.borderRadius ?? BorderRadius.circular(12);
 
     return switch (widget.textFieldType) {
-      TextFieldType.outlined => OutlineInputBorder(
-          borderRadius: borderRadius,
-        ),
+      TextFieldType.outlined => OutlineInputBorder(borderRadius: borderRadius),
       TextFieldType.underlined => const UnderlineInputBorder(),
       TextFieldType.filled => OutlineInputBorder(
-          borderRadius: borderRadius,
-          borderSide: BorderSide.none,
-        ),
+        borderRadius: borderRadius,
+        borderSide: BorderSide.none,
+      ),
     };
   }
 
@@ -261,7 +272,8 @@ class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P,
 
     if (options.suffix != null) return options.suffix;
 
-    final canShowClear = options.showClearButton &&
+    final canShowClear =
+        options.showClearButton &&
         !options.obscureText &&
         _controller.text.isNotEmpty;
 
@@ -275,12 +287,7 @@ class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P,
           ? null
           : () {
               _controller.clear();
-              bloc.add(
-                BlocxFormEventUpdateData(
-                  data: '',
-                  key: widget.formKey,
-                ),
-              );
+              bloc.add(BlocxFormEventUpdateData(data: '', key: widget.formKey));
               setState(() {});
             },
     );
@@ -291,9 +298,9 @@ class BlocXFormTextFieldState<F extends BlocxBaseFormEntity<F, E>, P,
   /// Falls back to [BlocXTextFieldOptions.errorText] when the bloc has no error
   /// for [widget.formKey].
   String? getErrorText(BlocXTextFieldOptions options) {
-    final index = bloc.state.errors.keys
-        .toList()
-        .indexWhere((key) => key == widget.formKey);
+    final index = bloc.state.errors.keys.toList().indexWhere(
+      (key) => key == widget.formKey,
+    );
 
     if (index >= 0) {
       return bloc.state.errors.values.toList()[index].first;
@@ -547,43 +554,44 @@ extension BlocXTextFieldOptionsCopyWith on BlocXTextFieldOptions {
     BoxConstraints? constraints,
   }) {
     return BlocXTextFieldOptions(
-        decoration: decoration ?? this.decoration,
-        style: style ?? this.style,
-        errorMaxLines: errorMaxLines ?? this.errorMaxLines,
-        keyboardType: keyboardType ?? this.keyboardType,
-        textDirection: textDirection ?? this.textDirection,
-        textCapitalization: textCapitalization ?? this.textCapitalization,
-        textInputAction: textInputAction ?? this.textInputAction,
-        textAlign: textAlign ?? this.textAlign,
-        maxLines: maxLines ?? this.maxLines,
-        minLines: minLines ?? this.minLines,
-        maxLength: maxLength ?? this.maxLength,
-        minLength: minLength ?? this.minLength,
-        autofocus: autofocus ?? this.autofocus,
-        enabled: enabled ?? this.enabled,
-        obscureText: obscureText ?? this.obscureText,
-        inputFormatters: inputFormatters ?? this.inputFormatters,
-        labelText: labelText ?? this.labelText,
-        labelStyle: labelStyle ?? this.labelStyle,
-        hintText: hintText ?? this.hintText,
-        hintStyle: hintStyle ?? this.hintStyle,
-        helperText: helperText ?? this.helperText,
-        helperStyle: helperStyle ?? this.helperStyle,
-        errorText: errorText ?? this.errorText,
-        errorStyle: errorStyle ?? this.errorStyle,
-        prefix: prefix ?? this.prefix,
-        prefixText: prefixText ?? this.prefixText,
-        prefixStyle: prefixStyle ?? this.prefixStyle,
-        suffix: suffix ?? this.suffix,
-        showClearButton: showClearButton ?? this.showClearButton,
-        filled: filled ?? this.filled,
-        fillColor: fillColor ?? this.fillColor,
-        borderRadius: borderRadius ?? this.borderRadius,
-        contentPadding: contentPadding ?? this.contentPadding,
-        isDense: isDense ?? this.isDense,
-        constraints: constraints ?? this.constraints,
-        suffixText: suffixText ?? this.suffixText,
-        suffixStyle: suffixStyle ?? this.suffixStyle);
+      decoration: decoration ?? this.decoration,
+      style: style ?? this.style,
+      errorMaxLines: errorMaxLines ?? this.errorMaxLines,
+      keyboardType: keyboardType ?? this.keyboardType,
+      textDirection: textDirection ?? this.textDirection,
+      textCapitalization: textCapitalization ?? this.textCapitalization,
+      textInputAction: textInputAction ?? this.textInputAction,
+      textAlign: textAlign ?? this.textAlign,
+      maxLines: maxLines ?? this.maxLines,
+      minLines: minLines ?? this.minLines,
+      maxLength: maxLength ?? this.maxLength,
+      minLength: minLength ?? this.minLength,
+      autofocus: autofocus ?? this.autofocus,
+      enabled: enabled ?? this.enabled,
+      obscureText: obscureText ?? this.obscureText,
+      inputFormatters: inputFormatters ?? this.inputFormatters,
+      labelText: labelText ?? this.labelText,
+      labelStyle: labelStyle ?? this.labelStyle,
+      hintText: hintText ?? this.hintText,
+      hintStyle: hintStyle ?? this.hintStyle,
+      helperText: helperText ?? this.helperText,
+      helperStyle: helperStyle ?? this.helperStyle,
+      errorText: errorText ?? this.errorText,
+      errorStyle: errorStyle ?? this.errorStyle,
+      prefix: prefix ?? this.prefix,
+      prefixText: prefixText ?? this.prefixText,
+      prefixStyle: prefixStyle ?? this.prefixStyle,
+      suffix: suffix ?? this.suffix,
+      showClearButton: showClearButton ?? this.showClearButton,
+      filled: filled ?? this.filled,
+      fillColor: fillColor ?? this.fillColor,
+      borderRadius: borderRadius ?? this.borderRadius,
+      contentPadding: contentPadding ?? this.contentPadding,
+      isDense: isDense ?? this.isDense,
+      constraints: constraints ?? this.constraints,
+      suffixText: suffixText ?? this.suffixText,
+      suffixStyle: suffixStyle ?? this.suffixStyle,
+    );
   }
 }
 
