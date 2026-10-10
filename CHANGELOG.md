@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.2.0] - 2026-10-10
+
+### Fixed
+* Fixed late field hydration in `BlocxFormWidgetState` (F8 / U1): `getTextEditingController(key)` now pre-hydrates newly created controllers with existing values from `bloc.formData` if already present, ensuring conditionally mounted or multi-step form fields display their data immediately.
+* Fixed `AutoScrollTag` wrapping order on bottom loading trigger items in infinite collection widgets (F9 / U2): in `InfiniteList`, `SliverInfiniteList`, `InfiniteGrid`, `SliverInfiniteGrid`, `AnimatedInfiniteList`, and `AnimatedSliverInfiniteList`, items are wrapped in `AutoScrollTag` before `VisibilityDetector`, ensuring index targeting and auto-scrolling work correctly on the trigger item.
+* Prevented stale state checks in visibility callbacks (F10 / U3): `onVisibilityChanged` in all infinite list and grid widgets now reads current `bloc.state` rather than closing over a potentially stale build-time snapshot.
+
+### Infrastructure & Testing
+* Added widget test verifying that concurrent pull-to-refresh during an active load-more request cleanly resets pagination flags and collection states.
+* Configured GitHub Actions CI/CD workflows (`ci.yml`, `release.yml`, `publish.yml`) supporting OIDC automated pub.dev publishing on release tag push.
+
 ## [1.1.0] - 2026-10-10
 
 ### Added

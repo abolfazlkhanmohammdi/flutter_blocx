@@ -46,3 +46,4 @@ graphify-out/.needs_update
 graphify-out/.graphify_*.json
 !graphify-out/.graphify_labels.json
 graphify-out/.graphify_uncached.txt
+graphify-out/.rebuild.lock
