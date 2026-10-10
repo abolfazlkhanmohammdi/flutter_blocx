@@ -58,6 +58,24 @@ abstract class BlocxCollectionWidgetState<
     reload();
   }
 
+  /// Whether to reload the initial collection page when [widget.payload] changes.
+  ///
+  /// Defaults to `true`. Override to return `false` to disable automatic reloading.
+  bool get shouldReloadOnPayloadChange => true;
+
+  @override
+  void didUpdateWidget(covariant W oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    assert(
+      widget.bloc == oldWidget.bloc,
+      'Dynamically mutating widget.bloc is not supported. '
+      'Recreate the widget tree or use an ancestor BlocProvider instead.',
+    );
+    if (shouldReloadOnPayloadChange && widget.payload != oldWidget.payload) {
+      reload();
+    }
+  }
+
   /// Triggers a reload of the initial collection page using [widget.payload].
   void reload() {
     _bloc.add(

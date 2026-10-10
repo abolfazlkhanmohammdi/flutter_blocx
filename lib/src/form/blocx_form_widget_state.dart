@@ -44,6 +44,24 @@ abstract class BlocxFormWidgetState<
     reload();
   }
 
+  /// Whether to re-initialize the form when [widget.payload] changes.
+  ///
+  /// Defaults to `true`. Override to return `false` to disable automatic reloading.
+  bool get shouldReloadOnPayloadChange => true;
+
+  @override
+  void didUpdateWidget(covariant W oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    assert(
+      widget.bloc == oldWidget.bloc,
+      'Dynamically mutating widget.bloc is not supported. '
+      'Recreate the widget tree or use an ancestor BlocProvider instead.',
+    );
+    if (shouldReloadOnPayloadChange && widget.payload != oldWidget.payload) {
+      reload();
+    }
+  }
+
   /// Re-initializes the form with [widget.payload].
   void reload() {
     bloc.add(BlocxFormEventInit(payload: widget.payload));
