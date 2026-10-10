@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.0] - Unreleased
+## [1.1.0] - 2026-10-10
 
 ### Added
 * Added composable `BlocxCollectionView` and `BlocxFormView` standalone view widgets with builder fallbacks (`emptyBuilder`, `errorBuilder`, `loadingBuilder`), allowing collection lists and forms to be embedded directly into custom widget trees without subclassing full screen state classes.

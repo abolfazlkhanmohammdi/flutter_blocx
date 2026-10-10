@@ -158,6 +158,36 @@ When `BlocxFormEventInit(payload: widget.payload)` runs in `BlocxFormWidgetState
 - **Snapshot Reading in Form Helpers**: Always pass `formState: state` when calling `submitButton(..., formState: state)` or `formButtonRow(..., formState: state)` within `formWidget(context, state)`. This guarantees busy/disabled button states evaluate the immutable snapshot rather than reading live mutable bloc fields.
 - **Identifier-Based Item Indexing**: `BlocxCollectionItem.index(context)` resolves indices via `state.indexOfId(item.identifier)` rather than reference equality, ensuring resilient lookup across state emissions. Lists also pass builder indices directly to avoid $O(n^2)$ lookup passes.
 
+### Rule 9: Composable Standalone Views (`BlocxCollectionView` & `BlocxFormView`)
+For embedded widget trees, multi-pane dashboards, or modal sheets where you don't want a full `BlocxScreenManagerState` subclass:
+- Use `BlocxCollectionView<Entity, Payload>` directly with your existing collection BLoC:
+  ```dart
+  BlocxCollectionView<ProductEntity, void>(
+    bloc: productsBloc,
+    itemBuilder: (context, item) => ProductCard(product: item),
+    emptyBuilder: (context) => const Text('No products available'),
+    errorBuilder: (context, error) => BlocxErrorWidget(
+      error: error,
+      onRetry: () => productsBloc.loadInitialPage(),
+    ),
+  )
+  ```
+- Use `BlocxFormView<F, P, E>` directly with your form BLoC:
+  ```dart
+  BlocxFormView<ProfileFormEntity, UserProfileEntity, ProfileFormField>(
+    bloc: profileBloc,
+    formBuilder: (context, state) => Column(children: [...]),
+    loadingBuilder: (context) => const CircularProgressIndicator(),
+  )
+  ```
+
+### Rule 10: DI-Friendly Construction & Lifecycle Management
+`BlocxCollectionWidget` and `BlocxFormWidget` support three ways to acquire their BLoC:
+1. **Direct constructor injection**: Pass `bloc: myBloc` directly to the widget constructor.
+2. **Inherited Provider**: Provide a BLoC above the widget with `BlocProvider<MyBloc>.value(...)`. When `generateBloc` is not overridden, it automatically resolves `context.read<B>()`.
+3. **Internal instantiation**: Subclass and override `get generateBloc => MyBloc()`.
+- **Non-destructive lifecycle**: When a BLoC is injected via constructor or resolved from context, `autoDisposeBloc` / `autoCloseBloc` default to `false`, ensuring ancestor providers retain ownership and the bloc is not prematurely closed.
+
 ---
 
 ## 3. Complete End-to-End Blueprints
