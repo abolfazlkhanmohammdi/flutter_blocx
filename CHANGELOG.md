@@ -7,9 +7,22 @@
 * Added DI-friendly construction to `BlocxCollectionWidget` and `BlocxFormWidget`: added optional `bloc` constructor argument, automatic fallback to `context.read<B>()` in `generateBloc()`, and non-destructive lifecycle management (`autoDisposeBloc` / `autoCloseBloc` default to `false` when externally provided).
 * Added retry support to default `errorWidget` and `errorWidgetByErrorCode` in `BlocxScreenManagerState`, invoking `managerCubit.clearError()` to dismiss full-page errors followed by the `onRetry(BuildContext)` hook (overridden in `BlocxCollectionWidgetState` and `BlocxFormWidgetState` to automatically reload data).
 * Added `onPop(BuildContext)` hook in `BlocxScreenManagerState` (defaulting to `Navigator.of(context).maybePop()`) to enable custom navigation handling for declarative routing solutions (`go_router`, `auto_route`).
+* Added `shouldReloadOnPayloadChange` getter in `BlocxCollectionWidgetState` and `BlocxFormWidgetState` (defaulting to `true`) controlling whether updating `widget.payload` triggers an automatic reload / re-initialization.
+* Added optional `focusNode` parameter to `BlocXFormTextField` and `BlocXFormDropdown`, forwarding to underlying Flutter form fields.
+* Added optional `focusNode` parameter to `BlocxFormWidgetState.textField` and `BlocxFormWidgetState.dropdown` helpers, defaulting to `getFocusNode(key)`.
 * Updated `BlocxCollectionWidgetState.searchingText` and `BlocxSearchField` default hint to use `loc.searchingText` and `loc.searchHint` from `BlocXLocalizations`.
 * Deprecated redundant `isChecked` argument in `BlocxFormWidgetState.checkbox(...)` in favor of specifying `isChecked` in `BlocxCheckboxOptions`, keeping both functional for backward compatibility.
 * Documented `validator:` parameter precedence vs pure-Dart BlocX field validation in `README.md` and dartdoc comments.
+
+### Changed
+* Raised SDK floor to `sdk: ">=3.8.0 <4.0.0"` and Flutter floor to `flutter: ">=3.32.0"`, aligning with `blocx_core 1.1.0`.
+* Dropped committed `dependency_overrides` from repository, using gitignored local `pubspec_overrides.yaml` and checking out `blocx_core` from develop branch in CI.
+
+### Fixed
+* Hardened Inherited Provider DI lookup in `BlocxCollectionWidgetState.generateBloc` and `BlocxFormWidgetState.generateBloc`: catches `ProviderNotFoundException` and throws a descriptive `FlutterError` explaining that context-provided blocs must be typed as base classes `BlocProvider<BlocxCollectionBloc<...>>` / `BlocProvider<BlocxFormBloc<...>>` or passed via constructor.
+* Added `didUpdateWidget` in `BlocxCollectionWidgetState` and `BlocxFormWidgetState` to automatically reload hosts when `widget.payload` changes (when `shouldReloadOnPayloadChange` is enabled) and asserted that `widget.bloc` is not mutated dynamically.
+* Fixed form error focus ordering in `BlocxFormWidgetState.requestFocusOnError`: now iterates `keys` to find and focus the first error in declaration order rather than arbitrary map key iteration order.
+* Automatically attached managed `FocusNode` instances from `getFocusNode(key)` to text fields and dropdowns so `requestFocusOnError` properly focuses the corresponding input.
 
 ## [1.0.1] - 2026-10-09
 

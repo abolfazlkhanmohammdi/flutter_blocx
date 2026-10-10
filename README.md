@@ -288,7 +288,16 @@ BlocxFormView<ProfileFormEntity, UserProfileEntity, ProfileFormField>(
 
 *When a BLoC is injected via constructor or context, `autoDisposeBloc` / `autoCloseBloc` default to `false` so ancestor providers retain full lifecycle ownership.*
 
-### 4. Collection Item Widgets (`BlocxCollectionItem` & `BlocxStatefulCollectionItem`)
+### 4. Automatic Payload Reload (`shouldReloadOnPayloadChange`)
+
+Both `BlocxCollectionWidgetState` and `BlocxFormWidgetState` listen for incoming widget updates via `didUpdateWidget`. When `widget.payload` changes, `reload()` is automatically called to refresh the collection or re-initialize the form. To disable automatic reloads upon payload changes, override:
+
+```dart
+@override
+bool get shouldReloadOnPayloadChange => false;
+```
+
+### 5. Collection Item Widgets (`BlocxCollectionItem` & `BlocxStatefulCollectionItem`)
 
 #### Stateless Item (`BlocxCollectionItem<Entity, Payload>`)
 
@@ -476,6 +485,12 @@ class _ProfileFormScreenState extends BlocxFormWidgetState<
 - When the Flutter validator returns `null` (passes), any active bloc-level error for that field in `bloc.state.errors` remains rendered on screen.
 - **Guideline:** Place domain validation rules and asynchronous checks in your `BlocxFormBloc` using pure-Dart `BlocxFieldValidator` classes. Use Flutter's `validator:` hook for local UI formatting or when interoperating with third-party form wrappers.
 
+#### Automatic Focus Management & `requestFocusOnError`
+
+`BlocxFormWidgetState` manages `FocusNode` instances for all fields declared in `keys`:
+- Calling `textField(key)` or `dropdown(key)` automatically attaches the managed focus node from `getFocusNode(key)`. You can also supply a custom `focusNode:` if needed.
+- Calling `requestFocusOnError(state)` focuses the first field with an active error, traversing fields in the declaration order of `keys` (rather than arbitrary map iteration order).
+
 ---
 
 ## Screen Management & Shared UX
@@ -563,6 +578,15 @@ void main() {
 ## Included AI Coding Skill
 
 This repository includes an AI agent skill at [`skills/flutter-blocx/SKILL.md`](skills/flutter-blocx/SKILL.md) (compatible with Claude Code, Antigravity, and Cursor) containing full widget rules, type-signature tables, blueprints, and progressive-disclosure reference guides for `flutter_blocx`.
+
+---
+
+## Limitations
+
+1. **BLoC Instance Immutability**: Dynamically mutating or replacing `widget.bloc` on an existing widget state is not supported. `didUpdateWidget` asserts `widget.bloc == oldWidget.bloc`. To switch BLoCs, re-create the widget subtree or provide the bloc via an ancestor `BlocProvider`.
+2. **Inherited Provider Typing**: When resolving BLoCs from `BuildContext` (`context.read`), the provider must be typed as the base class (`BlocProvider<BlocxCollectionBloc<Entity, Payload>>` or `BlocProvider<BlocxFormBloc<F, P, E>>`). If provided under a concrete subtype, pass it directly via constructor `MyWidget(bloc: myBloc)` or override `get generateBloc => myBloc`.
+3. **Sliver Context Requirement**: Sliver collection display types (`CollectionWidgetStateType.sliverList`, `sliverGrid`, `animatedSliverList`, `animatedSliverGrid`) must be placed inside a `CustomScrollView` or sliver viewport.
+4. **Form Key Ordering**: `requestFocusOnError` resolves error focus using the declaration order of `keys`. Ensure your `keys` getter defines fields in the visual top-to-bottom layout order of your form.
 
 ---
 
