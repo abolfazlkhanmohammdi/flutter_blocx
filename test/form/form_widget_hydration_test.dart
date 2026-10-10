@@ -151,5 +151,29 @@ void main() {
       expect(find.text('Save'), findsOneWidget);
       expect(find.text('Save Row'), findsOneWidget);
     });
+
+    testWidgets(
+      'getTextEditingController hydrates value from current form data when requested late',
+      (tester) async {
+        final bloc = FakeFormBloc(
+          const TestFormEntity(name: 'Initial Name', bio: 'Hydrated Bio'),
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(body: TestFormWidget(bloc: bloc)),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final state = tester.state<_TestFormWidgetState>(
+          find.byType(TestFormWidget),
+        );
+
+        // Controller for bio was created and pre-hydrated from bloc.formData
+        final bioController = state.getTextEditingController(TestFormField.bio);
+        expect(bioController.text, equals('Hydrated Bio'));
+      },
+    );
   });
 }
