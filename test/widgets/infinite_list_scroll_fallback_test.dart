@@ -215,5 +215,48 @@ void main() {
         expect(loadMoreTriggered, isTrue);
       },
     );
+
+    testWidgets(
+      'refresh during load-more cancels/supercedes in-flight pagination cleanly',
+      (tester) async {
+        final bloc = FakeCollectionBloc(
+          initialItems: List.generate(
+            10,
+            (i) => TestItemEntity(id: '$i', title: 'Initial $i'),
+          ),
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                height: 400,
+                child: TestScrollCollectionWidget(
+                  bloc: bloc,
+                  type: CollectionWidgetStateType.list,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Item: Initial 0'), findsOneWidget);
+
+        final widgetState = tester.state<_TestScrollCollectionWidgetState>(
+          find.byType(TestScrollCollectionWidget),
+        );
+
+        // Initiate loadNextPage
+        widgetState.loadNextPage();
+        // Concurrently initiate refreshData
+        widgetState.refreshData();
+        await tester.pumpAndSettle();
+
+        // State after settled refresh must have isRefreshing == false and isLoadingNextPage == false
+        expect(bloc.state.isRefreshing, isFalse);
+        expect(bloc.state.isLoadingNextPage, isFalse);
+      },
+    );
   });
 }
