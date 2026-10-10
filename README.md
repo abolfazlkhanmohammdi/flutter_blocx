@@ -118,8 +118,8 @@ Add both **`blocx_core`** and **`flutter_blocx`** to your `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  blocx_core: ^1.0.0
-  flutter_blocx: ^1.0.0
+  blocx_core: ^1.1.0
+  flutter_blocx: ^1.1.0
 ```
 
 Or run:
@@ -255,7 +255,40 @@ class _ProductsScreenState
 | `CollectionWidgetStateType.animatedSliverList` | `AnimatedSliverInfiniteListOptions` | Animated sliver infinite list |
 | `CollectionWidgetStateType.sliverGrid` | `SliverInfiniteGridOptions(crossAxisCount: ...)` | Sliver infinite grid (`CustomScrollView`) |
 
-### 2. Collection Item Widgets (`BlocxCollectionItem` & `BlocxStatefulCollectionItem`)
+### 2. Standalone Composable Views (`BlocxCollectionView` & `BlocxFormView`)
+
+Need to embed a collection list or a form inside a custom layout, tab view, dialog, or multi-pane desktop screen without subclassing `BlocxCollectionWidgetState` or `BlocxFormWidgetState`? Use the standalone composable views:
+
+```dart
+// Standalone collection list view
+BlocxCollectionView<ProductEntity, void>(
+  bloc: productsBloc,
+  itemBuilder: (context, item) => ProductCard(item: item),
+  emptyBuilder: (context) => const Center(child: Text('No products available')),
+  errorBuilder: (context, error) => BlocxErrorWidget(
+    error: error,
+    onRetry: () => productsBloc.loadInitialPage(),
+  ),
+);
+
+// Standalone form view
+BlocxFormView<ProfileFormEntity, UserProfileEntity, ProfileFormField>(
+  bloc: profileBloc,
+  formBuilder: (context, state) => Column(children: [...]),
+  loadingBuilder: (context) => const Center(child: CircularProgressIndicator()),
+);
+```
+
+### 3. DI-Friendly BLoC Construction
+
+`BlocxCollectionWidget` and `BlocxFormWidget` support three flexible dependency-injection patterns:
+1. **Direct constructor injection**: Pass `bloc: myBloc` directly to `BlocxCollectionWidget(bloc: myBloc)` or `BlocxFormWidget(bloc: myBloc)`.
+2. **Inherited Provider**: Provide the BLoC with `BlocProvider<MyBloc>.value(...)`. When `generateBloc` is not overridden in your state subclass, it automatically resolves `context.read<MyBloc>()`.
+3. **Internal instantiation**: Subclass and override `get generateBloc => MyBloc()`.
+
+*When a BLoC is injected via constructor or context, `autoDisposeBloc` / `autoCloseBloc` default to `false` so ancestor providers retain full lifecycle ownership.*
+
+### 4. Collection Item Widgets (`BlocxCollectionItem` & `BlocxStatefulCollectionItem`)
 
 #### Stateless Item (`BlocxCollectionItem<Entity, Payload>`)
 
