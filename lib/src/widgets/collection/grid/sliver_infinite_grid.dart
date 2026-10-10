@@ -175,10 +175,11 @@ class SliverInfiniteGridState<Entity extends BlocxBaseEntity>
   }
 
   void onVisibilityChanged(VisibilityInfo c, BlocxInfiniteListState state) {
+    final currentState = bloc.state;
     if (c.visibleFraction < 0.5 ||
-        state.isLoadingMore ||
+        currentState.isLoadingMore ||
         widget.loadBottomData == null ||
-        state.isScrollingUp) {
+        currentState.isScrollingUp) {
       return;
     }
     bloc.setLoadingBottomStatus(true);
