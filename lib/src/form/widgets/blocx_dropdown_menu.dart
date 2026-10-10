@@ -50,12 +50,16 @@ class BlocXFormDropdown<
   /// [BlocXDropdownOptions] with sensible defaults.
   final BlocXDropdownOptions options;
 
+  /// Optional focus node connected to this dropdown.
+  final FocusNode? focusNode;
+
   const BlocXFormDropdown({
     super.key,
     required this.formKey,
     required this.items,
     this.value,
     this.options = const BlocXDropdownOptions(),
+    this.focusNode,
   });
 
   @override
@@ -84,6 +88,7 @@ class _BlocXFormDropdownState<
     final errorText = getErrorText();
 
     return DropdownButtonFormField<T>(
+      focusNode: widget.focusNode,
       style: o.textStyle,
       initialValue: _selectedValue,
       selectedItemBuilder: o.selectedItemBuilder,

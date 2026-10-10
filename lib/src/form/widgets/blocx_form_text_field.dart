@@ -37,6 +37,9 @@ class BlocXFormTextField<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
   /// automatically.
   final TextEditingController? controller;
 
+  /// Optional focus node connected to this field.
+  final FocusNode? focusNode;
+
   /// Optional standard [FormFieldValidator] for integration with Flutter's [FormState.validate].
   ///
   /// ### Validation Precedence
@@ -57,6 +60,7 @@ class BlocXFormTextField<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
     required this.textFieldType,
     this.textFieldOptions = const BlocXTextFieldOptions(),
     this.controller,
+    this.focusNode,
     this.validator,
     this.typeConverter,
   });
@@ -114,6 +118,7 @@ class BlocXFormTextFieldState<
     return TextFormField(
       validator: widget.validator,
       controller: _controller,
+      focusNode: widget.focusNode,
       autofocus: options.autofocus,
       style: options.style,
       inputFormatters: options.inputFormatters,

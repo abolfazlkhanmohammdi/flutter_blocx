@@ -150,6 +150,7 @@ abstract class BlocxFormWidgetState<
     BlocXTextFieldOptions? options,
     FormFieldValidator<String>? validator,
     TextFieldType? type,
+    FocusNode? focusNode,
     String? labelText,
     String? hintText,
     String? helperText,
@@ -190,6 +191,7 @@ abstract class BlocxFormWidgetState<
       formKey: key,
       textFieldOptions: resolvedOptions,
       controller: getTextEditingController(key),
+      focusNode: focusNode ?? getFocusNode(key),
       validator: validator,
       textFieldType: type ?? defaultTextFieldType,
       typeConverter: converter,
@@ -251,11 +253,13 @@ abstract class BlocxFormWidgetState<
     E key, {
     BlocXDropdownOptions? options,
     required List<DropdownMenuItem<T>> items,
+    FocusNode? focusNode,
   }) {
     return BlocXFormDropdown<F, P, E, T>(
       formKey: key,
       items: items,
       options: options ?? const BlocXDropdownOptions(),
+      focusNode: focusNode ?? getFocusNode(key),
     );
   }
 
@@ -416,12 +420,18 @@ abstract class BlocxFormWidgetState<
     return _focusNodes.putIfAbsent(key, FocusNode.new);
   }
 
-  /// Focuses the first form field that currently has an error.
+  /// Focuses the first form field that currently has an error, following the
+  /// declaration order of [keys].
   void requestFocusOnError(BlocxFormState<F, E> state) {
     if (state.errors.isEmpty) return;
 
-    final firstErrorKey = state.errors.keys.first;
-    _focusNodes[firstErrorKey]?.requestFocus();
+    for (final key in keys) {
+      final keyErrors = state.errors[key];
+      if (keyErrors != null && keyErrors.isNotEmpty) {
+        _focusNodes[key]?.requestFocus();
+        return;
+      }
+    }
   }
 
   /// The current form state.
