@@ -48,13 +48,29 @@ jobs:
       - name: Run tests with coverage
         run: flutter test --coverage
 
-      - name: Dry-run publish
-        # TODO(release): make blocking after core 1.1.0 is published
-        continue-on-error: true
-        run: flutter pub publish --dry-run
-
       - name: Build example for web
         run: |
           cd example
           flutter pub get
           flutter build web
+
+  publish:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Publish to pub.dev
+        run: flutter pub publish --force
+
