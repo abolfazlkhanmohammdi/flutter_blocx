@@ -393,7 +393,25 @@ abstract class BlocxCollectionWidgetState<
   /// specific bloc subtype manually.
   BlocxCollectionBloc<Entity, Payload> get generateBloc {
     _isBlocFromContext = true;
-    return context.read<BlocxCollectionBloc<Entity, Payload>>();
+    try {
+      return context.read<BlocxCollectionBloc<Entity, Payload>>();
+    } on ProviderNotFoundException catch (e) {
+      throw FlutterError(
+        'Error: Could not find BlocxCollectionBloc<$Entity, $Payload> in BuildContext.\n\n'
+        'When relying on Inherited Provider lookup, ensure the bloc is provided above '
+        'this widget typed as the base class:\n'
+        '  BlocProvider<BlocxCollectionBloc<$Entity, $Payload>>.value(\n'
+        '    value: myBloc,\n'
+        '    child: MyCollectionWidget(),\n'
+        '  )\n\n'
+        'Alternatively, pass the bloc explicitly to the widget constructor:\n'
+        '  MyCollectionWidget(bloc: myBloc)\n\n'
+        'Or override generateBloc in your State subclass:\n'
+        '  @override\n'
+        '  BlocxCollectionBloc<$Entity, $Payload> get generateBloc => myBloc;\n\n'
+        'Original error: $e',
+      );
+    }
   }
 
   /// The collection bloc that drives this screen.

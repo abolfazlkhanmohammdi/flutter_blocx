@@ -283,7 +283,7 @@ BlocxFormView<ProfileFormEntity, UserProfileEntity, ProfileFormField>(
 
 `BlocxCollectionWidget` and `BlocxFormWidget` support three flexible dependency-injection patterns:
 1. **Direct constructor injection**: Pass `bloc: myBloc` directly to `BlocxCollectionWidget(bloc: myBloc)` or `BlocxFormWidget(bloc: myBloc)`.
-2. **Inherited Provider**: Provide the BLoC with `BlocProvider<MyBloc>.value(...)`. When `generateBloc` is not overridden in your state subclass, it automatically resolves `context.read<MyBloc>()`.
+2. **Inherited Provider**: Provide the BLoC typed as the base class, e.g. `BlocProvider<BlocxCollectionBloc<ProductEntity, void>>.value(...)` or `BlocProvider<BlocxFormBloc<ProfileForm, User, ProfileField>>.value(...)`. When `generateBloc` is not overridden in your state subclass, it automatically resolves `context.read<BlocxCollectionBloc<Entity, Payload>>()` (or `BlocxFormBloc<F, P, E>()`). If provided under a concrete subtype, pass it directly via constructor `MyWidget(bloc: myBloc)` or override `get generateBloc => myBloc`.
 3. **Internal instantiation**: Subclass and override `get generateBloc => MyBloc()`.
 
 *When a BLoC is injected via constructor or context, `autoDisposeBloc` / `autoCloseBloc` default to `false` so ancestor providers retain full lifecycle ownership.*

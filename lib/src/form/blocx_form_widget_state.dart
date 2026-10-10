@@ -58,7 +58,25 @@ abstract class BlocxFormWidgetState<
   /// specific bloc subtype manually.
   BlocxFormBloc<F, P, E> get generateBloc {
     _isBlocFromContext = true;
-    return context.read<BlocxFormBloc<F, P, E>>();
+    try {
+      return context.read<BlocxFormBloc<F, P, E>>();
+    } on ProviderNotFoundException catch (e) {
+      throw FlutterError(
+        'Error: Could not find BlocxFormBloc<$F, $P, $E> in BuildContext.\n\n'
+        'When relying on Inherited Provider lookup, ensure the bloc is provided above '
+        'this widget typed as the base class:\n'
+        '  BlocProvider<BlocxFormBloc<$F, $P, $E>>.value(\n'
+        '    value: myBloc,\n'
+        '    child: MyFormWidget(),\n'
+        '  )\n\n'
+        'Alternatively, pass the bloc explicitly to the widget constructor:\n'
+        '  MyFormWidget(bloc: myBloc)\n\n'
+        'Or override generateBloc in your State subclass:\n'
+        '  @override\n'
+        '  BlocxFormBloc<$F, $P, $E> get generateBloc => myBloc;\n\n'
+        'Original error: $e',
+      );
+    }
   }
 
   @override
