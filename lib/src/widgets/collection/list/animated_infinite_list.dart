@@ -262,10 +262,11 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
     VisibilityInfo visibility,
     BlocxInfiniteListState state,
   ) {
+    final currentState = bloc.state;
     if (visibility.visibleFraction < 0.5 ||
-        state.isLoadingMore ||
+        currentState.isLoadingMore ||
         widget.loadBottomData == null ||
-        state.isScrollingUp) {
+        currentState.isScrollingUp) {
       return;
     }
 
@@ -399,6 +400,10 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
 
     Widget itemWidget = widget.itemBuilder(context, data);
 
+    if (scrollController is AutoScrollController) {
+      itemWidget = wrapInAutoScrollTag(itemWidget, data, index);
+    }
+
     if (isBottomLoadingTrigger) {
       return VisibilityDetector(
         key: Key('$uuid-LoadMore'),
@@ -407,10 +412,6 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
         },
         child: itemWidget,
       );
-    }
-
-    if (scrollController is AutoScrollController) {
-      itemWidget = wrapInAutoScrollTag(itemWidget, data, index);
     }
 
     return itemWidget;
