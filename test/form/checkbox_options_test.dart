@@ -31,19 +31,14 @@ class FakeCheckboxFormBloc
 }
 
 class TestCheckboxWidget extends BlocxFormWidget<void> {
-  final FakeCheckboxFormBloc bloc;
-  const TestCheckboxWidget({super.key, required this.bloc});
+  const TestCheckboxWidget({super.key, super.bloc});
 
   @override
   State<TestCheckboxWidget> createState() => _TestCheckboxWidgetState();
 }
 
-class _TestCheckboxWidgetState extends BlocxFormWidgetState<
-    TestCheckboxWidget, TestCheckboxFormEntity, void, TestCheckboxField> {
-  @override
-  BlocxFormBloc<TestCheckboxFormEntity, void, TestCheckboxField>
-      get generateBloc => widget.bloc;
-
+class _TestCheckboxWidgetState extends BlocxFormWidgetState<TestCheckboxWidget,
+    TestCheckboxFormEntity, void, TestCheckboxField> {
   @override
   List<TestCheckboxField> get keys => [TestCheckboxField.agree];
 
@@ -94,7 +89,9 @@ void main() {
       ),
     );
 
-    expect(find.byType(BlocxFormCheckbox<TestCheckboxFormEntity, void, TestCheckboxField>),
+    expect(
+        find.byType(
+            BlocxFormCheckbox<TestCheckboxFormEntity, void, TestCheckboxField>),
         findsNWidgets(3));
     expect(find.text('Option Only'), findsOneWidget);
     expect(find.text('Overridden Option'), findsOneWidget);

@@ -35,7 +35,8 @@ abstract class BlocxCollectionWidgetState<
   @override
   void initState() {
     searchController = TextEditingController();
-    _bloc = generateBloc;
+    _bloc =
+        (widget.bloc as BlocxCollectionBloc<Entity, Payload>?) ?? generateBloc;
     setScrollController();
 
     if (loadOnInit) {
@@ -66,15 +67,29 @@ abstract class BlocxCollectionWidgetState<
 
   @override
   Widget mainWidget(BuildContext context, ScreenManagerCubitState state) {
-    return BlocProvider<BlocxCollectionBloc<Entity, Payload>>.value(
-      value: _bloc,
-      child: BlocConsumer<BlocxCollectionBloc<Entity, Payload>,
-          BlocxCollectionState<Entity>>(
-        buildWhen: (_, current) => current.shouldRebuild,
-        listenWhen: (_, current) => current.shouldListen,
-        listener: _listListener,
-        builder: collectionWrapperBuilder,
-      ),
+    return BlocxCollectionView<Entity, Payload>(
+      bloc: _bloc,
+      settings: settings,
+      scrollController: scrollController,
+      topBottomAndListSpacing: topBottomAndListSpacing,
+      topWidget: topWidget,
+      bottomWidget: bottomWidget,
+      sliverTopWidget: sliverTopWidget,
+      sliverBottomWidget: sliverBottomWidget,
+      itemBuilder: itemBuilder,
+      separatorBuilder: separatorBuilder,
+      loadingWidget: loadingWidget,
+      emptyWidget: emptyWidget,
+      errorWidget: collectionErrorWidget,
+      refreshWidgetBuilder: refreshWidgetBuilder,
+      loadMoreWidgetBuilder: loadMoreWidgetBuilder,
+      deleteAnimation: deleteAnimation,
+      insertAnimation: insertAnimation,
+      onSelectionChanged: onSelectionChanged,
+      listener: blocListener,
+      collectionWidgetBuilder: collectionWidget,
+      wrapperBuilder: collectionWrapperBuilder,
+      onRetry: retryInitialPage,
     );
   }
 
@@ -142,21 +157,6 @@ abstract class BlocxCollectionWidgetState<
 
   /// Builds one visual item for [item].
   Widget itemBuilder(BuildContext context, Entity item);
-
-  void _listListener(BuildContext context, BlocxCollectionState<Entity> state) {
-    if (state is BlocxCollectionStateScrollToItem<Entity>) {
-      final controller = scrollController;
-
-      if (controller is AutoScrollController) {
-        controller.scrollToIndex(
-          state.index,
-          preferPosition: AutoScrollPosition.middle,
-        );
-      }
-    }
-
-    blocListener(context, state);
-  }
 
   /// Reacts to listen-only collection states.
   void blocListener(BuildContext context, BlocxCollectionState<Entity> state) {
@@ -369,14 +369,26 @@ abstract class BlocxCollectionWidgetState<
         options: AnimatedInfiniteListOptions(),
       );
 
+  bool _isBlocFromContext = false;
+
   /// Whether [_bloc] is closed when this state is disposed.
-  bool get autoDisposeBloc => true;
+  ///
+  /// Defaults to `false` when [widget.bloc] was provided externally or resolved
+  /// from ancestor context, and `true` when instantiated internally.
+  bool get autoDisposeBloc => widget.bloc == null && !_isBlocFromContext;
 
   /// Whether initial data should be loaded during [initState].
   bool get loadOnInit => true;
 
-  /// Creates the collection bloc for this state.
-  BlocxCollectionBloc<Entity, Payload> get generateBloc;
+  /// Creates or resolves the collection bloc for this state.
+  ///
+  /// Defaults to resolving [BlocxCollectionBloc] from the nearest ancestor
+  /// [BuildContext] via [context.read]. Override this getter to instantiate a
+  /// specific bloc subtype manually.
+  BlocxCollectionBloc<Entity, Payload> get generateBloc {
+    _isBlocFromContext = true;
+    return context.read<BlocxCollectionBloc<Entity, Payload>>();
+  }
 
   /// The collection bloc that drives this screen.
   BlocxCollectionBloc<Entity, Payload> get bloc => _bloc;

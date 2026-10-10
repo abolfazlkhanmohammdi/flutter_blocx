@@ -1,5 +1,4 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_core/collection_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blocx/flutter_blocx.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,13 +16,12 @@ class TestRowItem extends BlocxCollectionItem<TestItemEntity, void> {
 }
 
 class TestItemCollectionWidget extends BlocxCollectionWidget<void> {
-  final FakeCollectionBloc bloc;
   final Widget Function(BuildContext context, TestItemEntity item)?
       customItemBuilder;
 
   const TestItemCollectionWidget({
     super.key,
-    required this.bloc,
+    super.bloc,
     this.customItemBuilder,
   });
 
@@ -34,9 +32,6 @@ class TestItemCollectionWidget extends BlocxCollectionWidget<void> {
 
 class _TestItemCollectionWidgetState extends BlocxCollectionWidgetState<
     TestItemCollectionWidget, TestItemEntity, void> {
-  @override
-  BlocxCollectionBloc<TestItemEntity, void> get generateBloc => widget.bloc;
-
   @override
   CollectionSettings get settings => CollectionSettings(
         type: CollectionWidgetStateType.list,

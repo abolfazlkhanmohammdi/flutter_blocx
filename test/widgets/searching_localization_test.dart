@@ -1,5 +1,4 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_core/collection_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blocx/flutter_blocx.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -135,8 +134,7 @@ class _CustomTestLoc extends BlocXLocalizations {
 }
 
 class TestLocalizedCollectionWidget extends BlocxCollectionWidget<void> {
-  final FakeCollectionBloc bloc;
-  const TestLocalizedCollectionWidget({super.key, required this.bloc});
+  const TestLocalizedCollectionWidget({super.key, super.bloc});
 
   @override
   State<TestLocalizedCollectionWidget> createState() =>
@@ -145,9 +143,6 @@ class TestLocalizedCollectionWidget extends BlocxCollectionWidget<void> {
 
 class _TestLocalizedCollectionWidgetState extends BlocxCollectionWidgetState<
     TestLocalizedCollectionWidget, TestItemEntity, void> {
-  @override
-  BlocxCollectionBloc<TestItemEntity, void> get generateBloc => widget.bloc;
-
   @override
   CollectionSettings get settings => CollectionSettings(
         type: CollectionWidgetStateType.list,

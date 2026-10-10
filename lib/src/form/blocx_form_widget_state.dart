@@ -31,7 +31,7 @@ abstract class BlocxFormWidgetState<
 
   @override
   void initState() {
-    bloc = generateBloc;
+    bloc = (widget.bloc as BlocxFormBloc<F, P, E>?) ?? generateBloc;
     bloc.add(BlocxFormEventInit(payload: widget.payload));
     super.initState();
   }
@@ -47,21 +47,24 @@ abstract class BlocxFormWidgetState<
     bloc.add(BlocxFormEventInit(payload: widget.payload));
   }
 
-  /// Instantiates the [BlocxFormBloc] for this screen.
+  bool _isBlocFromContext = false;
+
+  /// Instantiates or resolves the [BlocxFormBloc] for this screen.
   ///
-  /// Called once in [initState]. Inject dependencies here.
-  BlocxFormBloc<F, P, E> get generateBloc;
+  /// Defaults to resolving [BlocxFormBloc] from the nearest ancestor
+  /// [BuildContext] via [context.read]. Override this getter to instantiate a
+  /// specific bloc subtype manually.
+  BlocxFormBloc<F, P, E> get generateBloc {
+    _isBlocFromContext = true;
+    return context.read<BlocxFormBloc<F, P, E>>();
+  }
 
   @override
   Widget mainWidget(BuildContext context, ScreenManagerCubitState state) {
-    return BlocProvider<BlocxFormBloc<F, P, E>>.value(
-      value: bloc,
-      child: BlocConsumer<BlocxFormBloc<F, P, E>, BlocxFormState<F, E>>(
-        builder: _blocBuilder,
-        buildWhen: (_, current) => current.shouldRebuild,
-        listener: blocListener,
-        listenWhen: (_, current) => current.shouldListen,
-      ),
+    return BlocxFormView<F, P, E>(
+      bloc: bloc,
+      builder: _blocBuilder,
+      listener: blocListener,
     );
   }
 
@@ -352,7 +355,10 @@ abstract class BlocxFormWidgetState<
   }
 
   /// Whether [bloc] is closed when this state is disposed.
-  bool get autoCloseBloc => true;
+  ///
+  /// Defaults to `false` when [widget.bloc] was provided externally or resolved
+  /// from ancestor context, and `true` when created internally.
+  bool get autoCloseBloc => widget.bloc == null && !_isBlocFromContext;
 
   /// Called when [BlocxFormStateFormUpdated] is emitted.
   void onFormUpdated(F formData, E updatedKey, oldValue, newValue) {}

@@ -49,9 +49,7 @@ class FakeFormBloc extends BlocxFormBloc<TestFormEntity, void, TestFormField> {
 }
 
 class TestFormWidget extends BlocxFormWidget<void> {
-  final FakeFormBloc bloc;
-
-  const TestFormWidget({super.key, required this.bloc});
+  const TestFormWidget({super.key, super.bloc});
 
   @override
   State<TestFormWidget> createState() => _TestFormWidgetState();
@@ -59,10 +57,6 @@ class TestFormWidget extends BlocxFormWidget<void> {
 
 class _TestFormWidgetState extends BlocxFormWidgetState<TestFormWidget,
     TestFormEntity, void, TestFormField> {
-  @override
-  BlocxFormBloc<TestFormEntity, void, TestFormField> get generateBloc =>
-      widget.bloc;
-
   @override
   List<TestFormField> get keys => [TestFormField.name, TestFormField.bio];
 

@@ -1,5 +1,4 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_core/collection_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blocx/flutter_blocx.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,13 +6,12 @@ import 'package:flutter_test/flutter_test.dart';
 import '../helpers/fake_collection_bloc.dart';
 
 class TestScrollCollectionWidget extends BlocxCollectionWidget<void> {
-  final FakeCollectionBloc bloc;
   final CollectionWidgetStateType type;
   final VoidCallback? onLoadMoreTriggered;
 
   const TestScrollCollectionWidget({
     super.key,
-    required this.bloc,
+    super.bloc,
     this.type = CollectionWidgetStateType.list,
     this.onLoadMoreTriggered,
   });
@@ -26,8 +24,6 @@ class TestScrollCollectionWidget extends BlocxCollectionWidget<void> {
 class _TestScrollCollectionWidgetState extends BlocxCollectionWidgetState<
     TestScrollCollectionWidget, TestItemEntity, void> {
   @override
-  BlocxCollectionBloc<TestItemEntity, void> get generateBloc => widget.bloc;
-
   @override
   CollectionSettings get settings => CollectionSettings(
         type: widget.type,

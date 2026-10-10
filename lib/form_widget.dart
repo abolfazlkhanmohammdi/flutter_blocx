@@ -3,6 +3,7 @@ import 'package:blocx_core/form_bloc.dart';
 import 'src/form/widgets/blocx_dropdown_menu.dart';
 import 'src/form/widgets/blocx_form_text_field.dart';
 
+export 'src/form/blocx_form_view.dart';
 export 'src/form/blocx_form_widget_state.dart';
 export 'src/form/form_widget.dart';
 export 'src/form/widgets/blocx_dropdown_menu.dart';

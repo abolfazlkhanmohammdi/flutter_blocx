@@ -1,5 +1,4 @@
 import 'package:blocx_core/blocx_core.dart';
-import 'package:blocx_core/collection_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blocx/flutter_blocx.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,9 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../helpers/fake_collection_bloc.dart';
 
 class TestCollectionWidget extends BlocxCollectionWidget<void> {
-  final FakeCollectionBloc bloc;
-
-  const TestCollectionWidget({super.key, required this.bloc});
+  const TestCollectionWidget({super.key, super.bloc});
 
   @override
   State<TestCollectionWidget> createState() => _TestCollectionWidgetState();
@@ -17,9 +14,6 @@ class TestCollectionWidget extends BlocxCollectionWidget<void> {
 
 class _TestCollectionWidgetState extends BlocxCollectionWidgetState<
     TestCollectionWidget, TestItemEntity, void> {
-  @override
-  BlocxCollectionBloc<TestItemEntity, void> get generateBloc => widget.bloc;
-
   @override
   CollectionSettings get settings => CollectionSettings(
         type: CollectionWidgetStateType.list,

@@ -3,6 +3,8 @@
 ## [1.1.0] - Unreleased
 
 ### Added
+* Added composable `BlocxCollectionView` and `BlocxFormView` standalone view widgets with builder fallbacks (`emptyBuilder`, `errorBuilder`, `loadingBuilder`), allowing collection lists and forms to be embedded directly into custom widget trees without subclassing full screen state classes.
+* Added DI-friendly construction to `BlocxCollectionWidget` and `BlocxFormWidget`: added optional `bloc` constructor argument, automatic fallback to `context.read<B>()` in `generateBloc()`, and non-destructive lifecycle management (`autoDisposeBloc` / `autoCloseBloc` default to `false` when externally provided).
 * Added retry support to default `errorWidget` and `errorWidgetByErrorCode` in `BlocxScreenManagerState`, invoking `managerCubit.clearError()` to dismiss full-page errors followed by the `onRetry(BuildContext)` hook (overridden in `BlocxCollectionWidgetState` and `BlocxFormWidgetState` to automatically reload data).
 * Added `onPop(BuildContext)` hook in `BlocxScreenManagerState` (defaulting to `Navigator.of(context).maybePop()`) to enable custom navigation handling for declarative routing solutions (`go_router`, `auto_route`).
 * Updated `BlocxCollectionWidgetState.searchingText` and `BlocxSearchField` default hint to use `loc.searchingText` and `loc.searchHint` from `BlocXLocalizations`.
