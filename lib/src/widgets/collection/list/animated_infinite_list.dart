@@ -265,6 +265,7 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
     final currentState = bloc.state;
     if (visibility.visibleFraction < 0.5 ||
         currentState.isLoadingMore ||
+        currentState.hasReachedEnd ||
         widget.loadBottomData == null ||
         currentState.isScrollingUp) {
       return;
