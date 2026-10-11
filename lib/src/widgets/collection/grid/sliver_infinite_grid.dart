@@ -117,7 +117,12 @@ class SliverInfiniteGridState<Entity extends BlocxBaseEntity>
                       BlocxInfiniteListEventVerticalDragUpdated(globalY: null),
                     )
                   : null,
-              child: _sliverGrid(context, state),
+              child: CustomScrollView(
+                controller: effectiveController,
+                reverse: options.reverse,
+                physics: options.scrollPhysics,
+                slivers: [_sliverGrid(context, state)],
+              ),
             ),
           );
         },
@@ -175,10 +180,12 @@ class SliverInfiniteGridState<Entity extends BlocxBaseEntity>
   }
 
   void onVisibilityChanged(VisibilityInfo c, BlocxInfiniteListState state) {
+    final currentState = bloc.state;
     if (c.visibleFraction < 0.5 ||
-        state.isLoadingMore ||
+        currentState.isLoadingMore ||
+        currentState.hasReachedEnd ||
         widget.loadBottomData == null ||
-        state.isScrollingUp) {
+        currentState.isScrollingUp) {
       return;
     }
     bloc.setLoadingBottomStatus(true);

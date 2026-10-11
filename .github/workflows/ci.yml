@@ -1,10 +1,19 @@
 name: CI
 
+# CI validates only. It never uploads anything to pub.dev.
+# Publishing lives in release.yml (tag on merge to main) and publish.yml (tag push).
+# blocx_core is resolved from pub.dev (>= 1.1.0 is published). If a UI change ever needs
+# UNRELEASED core code, temporarily add a checkout of blocx_core + pubspec_overrides.yaml
+# (path override) and remove it again before the release.
 on:
   push:
-    branches: [ develop, main ]
+    branches: [develop]
   pull_request:
-    branches: [ develop, main ]
+    branches: [develop, main]
+  workflow_call: # lets release.yml re-run the full gate on main before tagging
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -15,32 +24,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Checkout blocx_core for local resolution
-        uses: actions/checkout@v4
-        with:
-          repository: abolfazlkhanmohammdi/blocx_core
-          ref: develop
-          path: _blocx_core
-
-      - name: Setup local pubspec overrides for CI
-        run: |
-          echo "dependency_overrides:" > pubspec_overrides.yaml
-          echo "  blocx_core:" >> pubspec_overrides.yaml
-          echo "    path: ./_blocx_core" >> pubspec_overrides.yaml
-          echo "dependency_overrides:" > example/pubspec_overrides.yaml
-          echo "  blocx_core:" >> example/pubspec_overrides.yaml
-          echo "    path: ../_blocx_core" >> example/pubspec_overrides.yaml
-
       - uses: subosito/flutter-action@v2
         with:
           channel: ${{ matrix.channel }}
           cache: true
 
+      - run: flutter --version
+
       - name: Install dependencies
         run: flutter pub get
 
       - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed lib test example/lib
+        run: dart format --output=show --set-exit-if-changed lib test example/lib
 
       - name: Analyze project source
         run: flutter analyze --fatal-infos
@@ -48,29 +43,11 @@ jobs:
       - name: Run tests with coverage
         run: flutter test --coverage
 
+      - name: Validate package (dry run, uploads nothing)
+        run: flutter pub publish --dry-run
+
       - name: Build example for web
         run: |
           cd example
           flutter pub get
           flutter build web
-
-  publish:
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Publish to pub.dev
-        run: flutter pub publish --force
-

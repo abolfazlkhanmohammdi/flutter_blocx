@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.0] - 2026-10-10
+
+### Fixed
+* Fixed late field hydration in `BlocxFormWidgetState` (F8 / U1): `getTextEditingController(key)` now pre-hydrates newly created controllers with existing values from `bloc.formData` if already present, ensuring conditionally mounted or multi-step form fields display their data immediately.
+* Fixed `BlocXFormDropdown` bloc binding (U-B): bound `value` in `BlocXFormDropdown` directly to `bloc.formData[key]` instead of leaving it unbound, enabling declarative form data sync and hydration for dropdown fields.
+* Fixed `AutoScrollTag` wrapping order on bottom loading trigger items in infinite collection widgets (F9 / U2): in `InfiniteList`, `SliverInfiniteList`, `InfiniteGrid`, `SliverInfiniteGrid`, `AnimatedInfiniteList`, and `AnimatedSliverInfiniteList`, items are wrapped in `AutoScrollTag` before `VisibilityDetector`, ensuring index targeting and auto-scrolling work correctly on the trigger item.
+* Prevented stale state checks in visibility callbacks (F10 / U3): `onVisibilityChanged` in all infinite list and grid widgets now reads current `bloc.state` rather than closing over a potentially stale build-time snapshot.
+
+### Infrastructure & Testing
+* Tested against published `blocx_core` 1.1.0 and made package dry-run checks blocking in CI (U-A).
+* Added comprehensive widget tests for form hydration, `AutoScrollTag` hierarchy, visibility freshness, and concurrent pull-to-refresh during load-more requests (U-C, F11 / U4).
+* Configured GitHub Actions CI/CD workflows (`ci.yml`, `release.yml`, `publish.yml`) supporting OIDC automated pub.dev publishing on release tag push.
+
 ## [1.1.0] - 2026-10-10
 
 ### Added

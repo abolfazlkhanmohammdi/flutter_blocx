@@ -283,11 +283,22 @@ abstract class BlocxFormWidgetState<
     return BlocxFormCheckbox<F, P, E>(formKey: key, options: effectiveOptions);
   }
 
+  String _initialTextFor(E key) {
+    final value =
+        bloc.formData.getFormattedValueByKey(key) ??
+        bloc.formData.getValueByKey(key);
+    return value?.toString() ?? '';
+  }
+
   /// Returns the managed [TextEditingController] for [key].
   ///
-  /// Creates the controller if it does not already exist.
+  /// Creates the controller if it does not already exist, pre-hydrating it
+  /// with any existing value from the bloc's current form data.
   TextEditingController getTextEditingController(E key) {
-    return _controllersMap.putIfAbsent(key, TextEditingController.new);
+    return _controllersMap.putIfAbsent(
+      key,
+      () => TextEditingController(text: _initialTextFor(key)),
+    );
   }
 
   TextEditingController? _getTextEditingControllerIfExists(E key) {

@@ -278,11 +278,13 @@ class AnimatedSliverBlocxInfiniteListState<Entity extends BlocxBaseEntity>
     return SliverPadding(padding: padding, sliver: sliver);
   }
 
-  void _onVisibilityChanged(VisibilityInfo c, BlocxInfiniteListState state) {
+  void onVisibilityChanged(VisibilityInfo c, BlocxInfiniteListState state) {
+    final currentState = bloc.state;
     if (c.visibleFraction < 0.5 ||
-        state.isLoadingMore ||
+        currentState.isLoadingMore ||
+        currentState.hasReachedEnd ||
         widget.loadBottomData == null ||
-        state.isScrollingUp) {
+        currentState.isScrollingUp) {
       return;
     }
     bloc.setLoadingBottomStatus(true);
@@ -320,15 +322,17 @@ class AnimatedSliverBlocxInfiniteListState<Entity extends BlocxBaseEntity>
       );
     }
 
+    child = _wrapInAutoScrollTag(child, data, index);
+
     if (isBottomLoadingTrigger && !state.hasReachedEnd) {
       child = VisibilityDetector(
         key: Key("${uuid}_LoadMore_$index"),
-        onVisibilityChanged: (c) => _onVisibilityChanged(c, state),
+        onVisibilityChanged: (c) => onVisibilityChanged(c, state),
         child: child,
       );
     }
 
-    return _wrapInAutoScrollTag(child, data, index);
+    return child;
   }
 
   Widget _buildAnimatedList(

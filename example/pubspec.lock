@@ -52,9 +52,10 @@ packages:
   blocx_core:
     dependency: "direct main"
     description:
-      path: "../../blocx_core"
-      relative: true
-    source: path
+      name: blocx_core
+      sha256: "66d613a5c91616a7d21c22f0f8d5426723516a46d5f82c8a037b85901c35f88e"
+      url: "https://pub.dev"
+    source: hosted
     version: "1.1.0"
   boolean_selector:
     dependency: transitive
@@ -251,7 +252,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.1.0"
+    version: "1.2.0"
   flutter_lints:
     dependency: "direct dev"
     description:

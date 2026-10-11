@@ -204,10 +204,12 @@ class InfiniteListWidgetState<Entity extends BlocxBaseEntity>
       widget.refreshOnSwipe != null;
 
   void onVisibilityChanged(VisibilityInfo c, BlocxInfiniteListState state) {
+    final currentState = bloc.state;
     if (c.visibleFraction < 0.5 ||
-        state.isLoadingMore ||
+        currentState.isLoadingMore ||
+        currentState.hasReachedEnd ||
         widget.loadBottomData == null ||
-        state.isScrollingUp) {
+        currentState.isScrollingUp) {
       return;
     }
     bloc.setLoadingBottomStatus(true);
@@ -314,6 +316,9 @@ class InfiniteListWidgetState<Entity extends BlocxBaseEntity>
         !state.hasReachedEnd;
 
     Widget itemWidget = widget.itemBuilder(context, data);
+    if (widget.scrollController is AutoScrollController) {
+      itemWidget = wrapInAutoScrollTag(itemWidget, data, index);
+    }
 
     if (isBottomLoadingTrigger && !state.hasReachedEnd) {
       return VisibilityDetector(
@@ -321,10 +326,6 @@ class InfiniteListWidgetState<Entity extends BlocxBaseEntity>
         onVisibilityChanged: (c) => onVisibilityChanged(c, state),
         child: itemWidget,
       );
-    }
-
-    if (widget.scrollController is AutoScrollController) {
-      itemWidget = wrapInAutoScrollTag(itemWidget, data, index);
     }
 
     return itemWidget;
