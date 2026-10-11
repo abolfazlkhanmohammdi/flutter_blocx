@@ -4,7 +4,6 @@ import 'package:blocx_core/form_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blocx/list_widget.dart';
 import 'package:flutter_blocx/src/form/blocx_form_view.dart';
-import 'package:flutter_blocx/src/list/blocx_collection_view.dart';
 import 'package:flutter_blocx/src/screen_manager/blocx_error_widget.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -156,17 +155,14 @@ void main() {
               options: const InfiniteListOptions(),
             ),
             itemBuilder: (context, item) => Text(item.title),
-            emptyWidget:
-                (context, state) =>
-                    const Center(child: Text('No products available')),
-            errorWidget:
-                (context, state) => BlocxErrorWidget(
-                  error: ReadableError(message: state.message),
-                  onRetry:
-                      () => productsBloc.add(
-                        BlocxCollectionEventLoadInitialPage(payload: null),
-                      ),
-                ),
+            emptyWidget: (context, state) =>
+                const Center(child: Text('No products available')),
+            errorWidget: (context, state) => BlocxErrorWidget(
+              error: ReadableError(message: state.message),
+              onRetry: () => productsBloc.add(
+                BlocxCollectionEventLoadInitialPage(payload: null),
+              ),
+            ),
           ),
         ),
       ),
@@ -181,21 +177,15 @@ void main() {
   testWidgets('README BlocxFormView snippet builds and renders', (
     tester,
   ) async {
-    final profileBloc = DemoFormBloc(
-      const DemoFormEntity(title: 'Alice'),
-    );
+    final profileBloc = DemoFormBloc(const DemoFormEntity(title: 'Alice'));
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: BlocxFormView<DemoFormEntity, void, DemoField>(
             bloc: profileBloc,
-            builder:
-                (context, state) => Column(
-                  children: [
-                    Text('Form Name: ${state.formData.title}'),
-                  ],
-                ),
+            builder: (context, state) =>
+                Column(children: [Text('Form Name: ${state.formData.title}')]),
           ),
         ),
       ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:blocx_core/blocx_core.dart';
 import 'package:blocx_core/form_bloc.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +47,29 @@ class FakeRoleFormBloc
         useCase: _DummySubmitUseCase(),
         inputBuilder: () => null,
       );
+}
+
+class DelayedRoleFormBloc
+    extends BlocxFormBloc<RoleFormEntity, void, RoleFormField> {
+  final Completer<void> completer;
+
+  DelayedRoleFormBloc({
+    required this.completer,
+    RoleFormEntity initial = const RoleFormEntity(),
+  }) : super(initial);
+
+  @override
+  BlocxUseCaseTask<Object?, Object?> get submitUseCaseTask =>
+      BlocxUseCaseTask<Object?, Object?>(
+        useCase: _DummySubmitUseCase(),
+        inputBuilder: () => null,
+      );
+
+  @override
+  Future<RoleFormEntity> updateFormData(RoleFormField key, dynamic data) async {
+    await completer.future;
+    return super.updateFormData(key, data);
+  }
 }
 
 class RoleFormWidget extends BlocxFormWidget<void> {
@@ -205,6 +230,67 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Beta'), findsNothing);
+    });
+
+    testWidgets('6. Pending selection survives a rebuild during async validation', (
+      tester,
+    ) async {
+      final completer = Completer<void>();
+      final bloc = DelayedRoleFormBloc(completer: completer);
+      var rebuildCount = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                return Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => setState(() => rebuildCount++),
+                      child: Text('Rebuild $rebuildCount'),
+                    ),
+                    Expanded(child: RoleFormWidget(bloc: bloc)),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Open dropdown and select Alpha
+      await tester.tap(find.byType(DropdownButtonFormField<String>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Alpha').last);
+      // Let the dropdown button close its menu popup (Navigator pop animation)
+      // Since completer is not completed, bloc.updateData is suspended.
+      // But Flutter's PopupMenu route animation can finish with pumpAndSettle() ONLY IF no infinite animation is active.
+      // However, if pumpAndSettle waits for future, it won't wait for completer if completer isn't a timer!
+      // Wait, let's see why pumpAndSettle didn't run: we only called pump() then pump(300ms)!
+      // Let's pump 500ms to allow route pop animation to finish completely:
+      await tester.pump(const Duration(seconds: 1));
+
+      // Form data in bloc still holds old value ''
+      expect(bloc.formData.role, equals(''));
+
+      // Trigger unrelated rebuild while validation is still pending
+      await tester.tap(find.text('Rebuild 0'));
+      await tester.pump();
+
+      // Dropdown still displays Alpha
+      final fieldState = tester.state<FormFieldState<String>>(
+        find.byType(DropdownButtonFormField<String>),
+      );
+      expect(fieldState.value, equals('alpha'));
+
+      // Complete async validation
+      completer.complete();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Alpha'), findsOneWidget);
+      expect(bloc.formData.role, equals('alpha'));
     });
   });
 }
