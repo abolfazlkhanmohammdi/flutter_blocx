@@ -592,6 +592,7 @@ This repository includes an AI agent skill at [`skills/flutter-blocx/SKILL.md`](
 2. **Inherited Provider Typing**: When resolving BLoCs from `BuildContext` (`context.read`), the provider must be typed as the base class (`BlocProvider<BlocxCollectionBloc<Entity, Payload>>` or `BlocProvider<BlocxFormBloc<F, P, E>>`). If provided under a concrete subtype, pass it directly via constructor `MyWidget(bloc: myBloc)` or override `get generateBloc => myBloc`.
 3. **Sliver Context Requirement**: Sliver collection display types (`CollectionWidgetStateType.sliverList`, `CollectionWidgetStateType.sliverGrid`, `CollectionWidgetStateType.animatedSliverList`) must be placed inside a `CustomScrollView` or sliver viewport.
 4. **Form Key Ordering**: `requestFocusOnError` resolves error focus using the declaration order of `keys`. Ensure your `keys` getter defines fields in the visual top-to-bottom layout order of your form.
+5. **Platform Support (Web)**: pub.dev does not list Web for this package because a transitive dependency (`implicitly_animated_list` -> `list_diff`) imports `dart:isolate`; the package builds and runs on web (the example is built for web in CI).
 
 ---
 
