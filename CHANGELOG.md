@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.2.1] - 2026-10-11
+
+### Fixed
+* Fixed pending dropdown selection reset on unrelated rebuilds: `_BlocXFormDropdownState` now tracks `_lastBlocValue` and dispatches `field.didChange` only when the underlying BLoC state value has actually changed, preventing pending selections from reverting during async validation or unrelated rebuilds.
+
+### Maintenance & Hygiene
+* Marked `onVisibilityChanged` as `@visibleForTesting` across all six collection widgets (`InfiniteList`, `AnimatedInfiniteList`, `SliverInfiniteList`, `AnimatedSliverInfiniteList`, `InfiniteGrid`, `SliverInfiniteGrid`).
+
+### Documentation
+* Corrected standalone view code examples (`BlocxCollectionView` and `BlocxFormView`) and constructor parameter signatures in `README.md`.
+* Added automated compile and render tests for `README.md` view snippets (`test/readme_view_examples_test.dart`).
+* Added automated identifier check (`tool/check_readme.dart`) verifying exported symbols.
+* Added documentation note in `README.md` Limitations regarding Web platform compatibility and transitive `dart:isolate` usage in `list_diff`.
+
+### Infrastructure
+* Transitioned GitHub Actions release automation to a token-free model using `workflow_dispatch` on tags without requiring personal access tokens.
+
 ## [1.2.0] - 2026-10-10
 
 ### Fixed
