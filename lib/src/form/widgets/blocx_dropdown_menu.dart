@@ -74,23 +74,34 @@ class _BlocXFormDropdownState<
   T
 >
     extends BlocXWidgetState<BlocXFormDropdown<F, P, E, T>> {
-  T? _selectedValue;
+  final GlobalKey<FormFieldState<T>> _fieldKey = GlobalKey<FormFieldState<T>>();
 
-  @override
-  void initState() {
-    super.initState();
-    _selectedValue = widget.value;
+  T? _currentValue() {
+    final raw = widget.value ?? bloc.formData.getValueByKey(widget.formKey);
+    final candidate = raw is T ? raw : null;
+    if (candidate == null) return null;
+    // DropdownButtonFormField asserts if the value is not among the items.
+    return widget.items.any((i) => i.value == candidate) ? candidate : null;
   }
 
   @override
   Widget build(BuildContext context) {
     final o = widget.options;
     final errorText = getErrorText();
+    final current = _currentValue();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final field = _fieldKey.currentState;
+      if (field != null && field.mounted && field.value != current) {
+        field.didChange(current); // does not call onChanged, so no echo
+      }
+    });
 
     return DropdownButtonFormField<T>(
+      key: _fieldKey,
       focusNode: widget.focusNode,
       style: o.textStyle,
-      initialValue: _selectedValue,
+      initialValue: current,
       selectedItemBuilder: o.selectedItemBuilder,
       decoration: InputDecoration(
         filled: o.filled,
