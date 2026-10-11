@@ -34,6 +34,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: README identifiers exist in lib/
+        run: dart run tool/check_readme.dart
+
       - name: Verify formatting
         run: dart format --output=show --set-exit-if-changed lib test example/lib
 

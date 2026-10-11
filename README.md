@@ -118,8 +118,8 @@ Add both **`blocx_core`** and **`flutter_blocx`** to your `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  blocx_core: ^1.1.0
-  flutter_blocx: ^1.1.0
+  blocx_core: ^1.2.0
+  flutter_blocx: ^1.2.1
 ```
 
 Or run:
@@ -263,19 +263,24 @@ Need to embed a collection list or a form inside a custom layout, tab view, dial
 // Standalone collection list view
 BlocxCollectionView<ProductEntity, void>(
   bloc: productsBloc,
+  settings: CollectionSettings(
+    type: CollectionWidgetStateType.list,
+    options: const InfiniteListOptions(),
+  ),
   itemBuilder: (context, item) => ProductCard(item: item),
-  emptyBuilder: (context) => const Center(child: Text('No products available')),
-  errorBuilder: (context, error) => BlocxErrorWidget(
-    error: error,
-    onRetry: () => productsBloc.loadInitialPage(),
+  emptyWidget: (context, state) => const Center(child: Text('No products available')),
+  errorWidget: (context, state) => BlocxErrorWidget(
+    error: ReadableError(message: state.message),
+    onRetry: () => productsBloc.add(
+      BlocxCollectionEventLoadInitialPage(payload: null),
+    ),
   ),
 );
 
 // Standalone form view
 BlocxFormView<ProfileFormEntity, UserProfileEntity, ProfileFormField>(
   bloc: profileBloc,
-  formBuilder: (context, state) => Column(children: [...]),
-  loadingBuilder: (context) => const Center(child: CircularProgressIndicator()),
+  builder: (context, state) => Column(children: [...]),
 );
 ```
 
@@ -467,10 +472,10 @@ class _ProfileFormScreenState extends BlocxFormWidgetState<
 
 | Host Helper / Widget | Key Features |
 | :--- | :--- |
-| `textField(...)` / `BlocxFormTextField` | `TextFieldType.filled` / `outlined` / `underlined`, `converter` for numeric/custom types, automatic RTL/LTR text direction, clear button, and automatic suffix spinner during async `BlocxUniqueFieldValidatorMixin` checks |
-| `dropdown<T>(...)` / `BlocxFormDropdown` | Pre-wired `DropdownButtonFormField<T>` with automatic validation error display |
+| `textField(...)` / `BlocXFormTextField` | `TextFieldType.filled` / `outlined` / `underlined`, `converter` for numeric/custom types, automatic RTL/LTR text direction, clear button, and automatic suffix spinner during async `BlocxUniqueFieldValidatorMixin` checks |
+| `dropdown<T>(...)` / `BlocXFormDropdown` | Pre-wired `DropdownButtonFormField<T>` with automatic validation error display; follows the bloc's value (hydration, reset and live sync are displayed) |
 | `checkbox(...)` / `BlocxFormCheckbox` | Renders a `CheckboxListTile` when `label`/`subtitle` is provided, or a compact `Checkbox` otherwise |
-| `submitButton(...)` / `BlocxFormRegisterButton` | Reacts to `isSubmitting`, `isCheckingUniqueField`, and `isLoadingRequiredFields` with an inline progress indicator |
+| `submitButton(...)` / `BlocxFormRegisterButton` | Reacts to `isSubmittingForm`, `isCheckingUniqueFields`, and `isFetchingFieldInfo` with an inline progress indicator |
 | `formButtonRow(...)` / `BlocxFormButtonRow` | Primary `BlocxFormRegisterButton` paired with a secondary cancel/back button (`Navigator.maybePop()`) |
 
 #### Form Validation Precedence
@@ -585,7 +590,7 @@ This repository includes an AI agent skill at [`skills/flutter-blocx/SKILL.md`](
 
 1. **BLoC Instance Immutability**: Dynamically mutating or replacing `widget.bloc` on an existing widget state is not supported. `didUpdateWidget` asserts `widget.bloc == oldWidget.bloc`. To switch BLoCs, re-create the widget subtree or provide the bloc via an ancestor `BlocProvider`.
 2. **Inherited Provider Typing**: When resolving BLoCs from `BuildContext` (`context.read`), the provider must be typed as the base class (`BlocProvider<BlocxCollectionBloc<Entity, Payload>>` or `BlocProvider<BlocxFormBloc<F, P, E>>`). If provided under a concrete subtype, pass it directly via constructor `MyWidget(bloc: myBloc)` or override `get generateBloc => myBloc`.
-3. **Sliver Context Requirement**: Sliver collection display types (`CollectionWidgetStateType.sliverList`, `sliverGrid`, `animatedSliverList`, `animatedSliverGrid`) must be placed inside a `CustomScrollView` or sliver viewport.
+3. **Sliver Context Requirement**: Sliver collection display types (`CollectionWidgetStateType.sliverList`, `CollectionWidgetStateType.sliverGrid`, `CollectionWidgetStateType.animatedSliverList`) must be placed inside a `CustomScrollView` or sliver viewport.
 4. **Form Key Ordering**: `requestFocusOnError` resolves error focus using the declaration order of `keys`. Ensure your `keys` getter defines fields in the visual top-to-bottom layout order of your form.
 
 ---
