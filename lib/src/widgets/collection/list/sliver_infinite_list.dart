@@ -296,6 +296,7 @@ class SliverBlocxInfiniteListState<Entity extends BlocxBaseEntity>
     return SliverPadding(padding: padding, sliver: sliver);
   }
 
+  @visibleForTesting
   void onVisibilityChanged(VisibilityInfo c, BlocxInfiniteListState state) {
     final currentState = bloc.state;
     if (c.visibleFraction < 0.5 ||

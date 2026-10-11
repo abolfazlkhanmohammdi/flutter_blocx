@@ -75,6 +75,8 @@ class _BlocXFormDropdownState<
 >
     extends BlocXWidgetState<BlocXFormDropdown<F, P, E, T>> {
   final GlobalKey<FormFieldState<T>> _fieldKey = GlobalKey<FormFieldState<T>>();
+  T? _lastBlocValue;
+  bool _hasReadValue = false;
 
   T? _currentValue() {
     final raw = widget.value ?? bloc.formData.getValueByKey(widget.formKey);
@@ -89,13 +91,18 @@ class _BlocXFormDropdownState<
     final o = widget.options;
     final errorText = getErrorText();
     final current = _currentValue();
+    final blocValueChanged = !_hasReadValue || current != _lastBlocValue;
+    _lastBlocValue = current;
+    _hasReadValue = true;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final field = _fieldKey.currentState;
-      if (field != null && field.mounted && field.value != current) {
-        field.didChange(current); // does not call onChanged, so no echo
-      }
-    });
+    if (blocValueChanged) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final field = _fieldKey.currentState;
+        if (field != null && field.mounted && field.value != current) {
+          field.didChange(current); // does not call onChanged, so no echo
+        }
+      });
+    }
 
     return DropdownButtonFormField<T>(
       key: _fieldKey,

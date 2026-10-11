@@ -258,6 +258,7 @@ class AnimatedBlocxInfiniteListState<Entity extends BlocxBaseEntity>
     return options.reverse ? bloc.state.isAtBottom : bloc.state.isAtTop;
   }
 
+  @visibleForTesting
   void onVisibilityChanged(
     VisibilityInfo visibility,
     BlocxInfiniteListState state,
