@@ -278,10 +278,11 @@ class AnimatedSliverBlocxInfiniteListState<Entity extends BlocxBaseEntity>
     return SliverPadding(padding: padding, sliver: sliver);
   }
 
-  void _onVisibilityChanged(VisibilityInfo c, BlocxInfiniteListState state) {
+  void onVisibilityChanged(VisibilityInfo c, BlocxInfiniteListState state) {
     final currentState = bloc.state;
     if (c.visibleFraction < 0.5 ||
         currentState.isLoadingMore ||
+        currentState.hasReachedEnd ||
         widget.loadBottomData == null ||
         currentState.isScrollingUp) {
       return;
@@ -326,7 +327,7 @@ class AnimatedSliverBlocxInfiniteListState<Entity extends BlocxBaseEntity>
     if (isBottomLoadingTrigger && !state.hasReachedEnd) {
       child = VisibilityDetector(
         key: Key("${uuid}_LoadMore_$index"),
-        onVisibilityChanged: (c) => _onVisibilityChanged(c, state),
+        onVisibilityChanged: (c) => onVisibilityChanged(c, state),
         child: child,
       );
     }

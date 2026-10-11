@@ -207,6 +207,7 @@ class InfiniteListWidgetState<Entity extends BlocxBaseEntity>
     final currentState = bloc.state;
     if (c.visibleFraction < 0.5 ||
         currentState.isLoadingMore ||
+        currentState.hasReachedEnd ||
         widget.loadBottomData == null ||
         currentState.isScrollingUp) {
       return;
