@@ -296,6 +296,7 @@ class InfiniteGridState<Entity extends BlocxBaseEntity>
     return child;
   }
 
+  @visibleForTesting
   void onVisibilityChanged(VisibilityInfo c, BlocxInfiniteListState state) {
     final currentState = bloc.state;
     if (c.visibleFraction < 0.5 ||
