@@ -1,6 +1,6 @@
-# Screen Manager, Error Widget, SnackBar, Confirm Sheet & Base Widgets
+# Screen Manager, Error Widget, SnackBar, Local Primitives, Confirm Sheet & Testing
 
-This reference documents `BlocxScreenManagerState`, `BlocxStatelessWidget`, `BlocXWidgetState` (`BlocxWidgetState`), `BlocxErrorWidget`, `BlocxSnackBar`, `ConfirmActionWidget`, and `BlocXLocalizations` (`loc`).
+This reference documents `BlocxScreenManagerState`, `BlocxStatelessWidget`, `BlocXWidgetState` (`BlocxWidgetState`), `BlocxLocal`, `BlocxUiToggle`, `BlocxErrorWidget`, `BlocxSnackBar`, `ConfirmActionWidget`, `BlocXLocalizations` (`loc`), and `package:flutter_blocx/testing.dart`.
 
 ---
 
@@ -212,3 +212,99 @@ if (confirmed == true) {
   - `ConfirmActionWidget`: `loc.areYouSure`, `loc.areYouSureYouWantToDeleteThisItem`, `loc.cancel`, `loc.delete`
   - `BlocxFormWidgetState.formButtonRow`: `loc.cancel`
   - `BlocxScreenManagerState`: `loc.errorCodeMessage(state.errorCode)`
+
+---
+
+## 7. Ephemeral UI State: `BlocxLocal<T>` & `BlocxUiToggle`
+
+Use `BlocxLocal<T>` or `BlocxUiToggle` for self-contained visual micro-interactions (disclosure accordions, preview panels, local tab indices, inline filters) so you do not need to write throwaway `StatefulWidget` classes or pollute a `BlocxFormBloc` entity with non-persisted UI state:
+
+```dart
+// 1. Generic self-disposing local value holder (ValueNotifier<T> + ValueListenableBuilder<T>)
+BlocxLocal<int>(
+  initialValue: 0,
+  onChanged: (tab) => debugPrint('Active tab: $tab'),
+  builder: (context, tab, setTab, updateTab) {
+    return SegmentedButton<int>(
+      segments: const [
+        ButtonSegment(value: 0, label: Text('Details')),
+        ButtonSegment(value: 1, label: Text('Activity')),
+      ],
+      selected: {tab},
+      onSelectionChanged: (s) => setTab(s.first),
+    );
+  },
+)
+
+// 2. Boolean toggle primitive built on BlocxLocal<bool>
+BlocxUiToggle(
+  initialValue: false,
+  onChanged: (expanded) => debugPrint('Expanded: $expanded'),
+  builder: (context, isExpanded, toggle, setExpanded) {
+    return Column(
+      children: [
+        ListTile(
+          title: const Text('Advanced Options'),
+          trailing: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
+          onTap: toggle,
+        ),
+        if (isExpanded) const AdvancedOptionsPanel(),
+      ],
+    );
+  },
+)
+```
+
+### API Summary
+- **`BlocxLocal<T>`**:
+  - `required T initialValue`
+  - `required BlocxLocalWidgetBuilder<T> builder` — `(BuildContext context, T value, ValueChanged<T> setValue, void Function(T Function(T current) updater) update)`
+  - `ValueChanged<T>? onChanged` — fires only when the new value differs (`_notifier.value != next`); guards against calls after unmount and disposes the internal `ValueNotifier<T>` automatically in `dispose()`.
+- **`BlocxUiToggle`**:
+  - `bool initialValue = false`
+  - `required BlocxUiToggleBuilder builder` — `(BuildContext context, bool isActive, VoidCallback toggle, ValueChanged<bool> setValue)`
+  - `ValueChanged<bool>? onChanged`
+
+---
+
+## 8. Testing Helpers & Semantic Finders (`package:flutter_blocx/testing.dart`)
+
+Import `package:flutter_blocx/testing.dart` inside tests to access both all pure-Dart fixtures/fakes from `package:blocx_core/testing.dart` (`BlocxTestEntity`, `createTestEntities`, `BlocxTestEventHub`, `FakePaginatedSource`, `FakePaginatedUseCase`, `FakeSearchUseCase`, `createFakePaginatedTask`, `BlocxCollectionStateSeeder`, `BlocxFormStateSeeder`) and `BlocxCommonFinders` on `CommonFinders` (`find`):
+
+```dart
+import 'package:flutter_blocx/testing.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+testWidgets('submits credentials using semantic finders', (tester) async {
+  // ... pump form or collection screen
+  await tester.enterText(find.blocxField(LoginField.password), 'secret123');
+  await tester.tap(find.blocxObscureToggle(LoginField.password));
+  await tester.tap(find.blocxSwitch(LoginField.rememberMe));
+  await tester.tap(find.blocxFilter('admin'));
+  await tester.tap(find.blocxSubmitButton());
+  await tester.pumpAndSettle();
+
+  expect(find.blocxItem('item-1'), findsOneWidget);
+  expect(find.blocxBadge('active'), findsOneWidget);
+});
+```
+
+### Deterministic Keys & `BlocxCommonFinders` Reference
+
+| Finder Method | Matched `ValueKey<String>` Pattern | Target Widget |
+| :--- | :--- | :--- |
+| `find.blocxItem(Object id)` | `'blocx_item_$id'`, `'$id'`, or `'$id+...'` (deduplicated per rendered item) | Item rows/tiles across all 6 `Infinite*` / `SliverInfinite*` engines |
+| `find.blocxSearchField()` | `'blocx_search_field'` | `BlocxSearchField` |
+| `find.blocxField(Enum field)` | `'blocx_field_${field.name}'` | `BlocXFormTextField`, `BlocxFormChipField`, `BlocxFormSegmentedField` |
+| `find.blocxDropdown(Enum field)` | `'blocx_dropdown_${field.name}'` | `BlocXFormDropdown` |
+| `find.blocxCheckbox(Enum field)` | `'blocx_checkbox_${field.name}'` | `BlocxFormCheckbox` |
+| `find.blocxSwitch(Enum field)` | `'blocx_switch_${field.name}'` | `BlocxFormSwitchField` |
+| `find.blocxObscureToggle(Enum field)` | `'blocx_obscure_toggle_${field.name}'` | Suffix eye button inside password `BlocXFormTextField` |
+| `find.blocxFilter(Object filterValue)` | `'blocx_filter_$filterValue'` | `ChoiceChip` / `FilterChip` inside `BlocxFormChipField` (or custom filter chips) |
+| `find.blocxBadge(Object status)` | `'blocx_badge_$status'` | Status badges tagged with `ValueKey('blocx_badge_$status')` |
+| `find.blocxSubmitButton()` | `'blocx_submit_button'` | `BlocxFormRegisterButton` |
+| `find.blocxCancelButton()` | `'blocx_cancel_button'` | Secondary cancel button in `BlocxFormButtonRow` |
+
+*(Additionally, `BlocxFormSubmitBuilder` wraps its child in `ValueKey('blocx_submit_builder')` and `BlocxFormStepBuilder` wraps its child in `ValueKey('blocx_step_builder')`.)*
+
+> **Widget test tip**: Set `VisibilityDetectorController.instance.updateInterval = Duration.zero;` in `setUpAll` when testing `InfiniteList` / `InfiniteGrid` widgets, and dispose blocs synchronously (`bloc.close();`) inside `testWidgets` rather than `await bloc.close()`.

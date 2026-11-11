@@ -22,14 +22,17 @@ class BlocxFormCheckbox<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
         ? _buildListTile(context)
         : _buildCompact(context);
 
-    return Padding(
-      padding: options.padding ?? EdgeInsets.zero,
-      child: Semantics(
-        container: true,
-        label: options.label,
-        hint: options.subtitle,
-        checked: options.isChecked,
-        child: child,
+    return KeyedSubtree(
+      key: ValueKey<String>('blocx_checkbox_${formKey.name}'),
+      child: Padding(
+        padding: options.padding ?? EdgeInsets.zero,
+        child: Semantics(
+          container: true,
+          label: options.label,
+          hint: options.subtitle,
+          checked: options.isChecked,
+          child: child,
+        ),
       ),
     );
   }

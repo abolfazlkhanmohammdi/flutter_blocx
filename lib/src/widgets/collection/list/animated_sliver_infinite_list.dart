@@ -314,7 +314,10 @@ class AnimatedSliverBlocxInfiniteListState<Entity extends BlocxBaseEntity>
         index == (widget.items.length - options.loadMoreTriggerItemDistance) &&
         !state.hasReachedEnd;
 
-    Widget child = widget.itemBuilder(context, data);
+    Widget child = KeyedSubtree(
+      key: ValueKey<String>('blocx_item_${data.identifier}'),
+      child: widget.itemBuilder(context, data),
+    );
 
     if (widget.separatorBuilder != null && index < widget.items.length - 1) {
       child = Column(

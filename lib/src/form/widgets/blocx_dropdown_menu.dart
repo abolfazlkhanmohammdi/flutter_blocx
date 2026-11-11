@@ -104,27 +104,30 @@ class _BlocXFormDropdownState<
       });
     }
 
-    return DropdownButtonFormField<T>(
-      key: _fieldKey,
-      focusNode: widget.focusNode,
-      style: o.textStyle,
-      initialValue: current,
-      selectedItemBuilder: o.selectedItemBuilder,
-      decoration: InputDecoration(
-        filled: o.filled,
-        fillColor: o.fillColor,
-        errorText: errorText,
-        labelText: o.labelText,
-        hintText: o.hintText,
-        hintStyle: o.hintStyle,
-        contentPadding: o.contentPadding,
+    return KeyedSubtree(
+      key: ValueKey<String>('blocx_dropdown_${widget.formKey.name}'),
+      child: DropdownButtonFormField<T>(
+        key: _fieldKey,
+        focusNode: widget.focusNode,
+        style: o.textStyle,
+        initialValue: current,
+        selectedItemBuilder: o.selectedItemBuilder,
+        decoration: InputDecoration(
+          filled: o.filled,
+          fillColor: o.fillColor,
+          errorText: errorText,
+          labelText: o.labelText,
+          hintText: o.hintText,
+          hintStyle: o.hintStyle,
+          contentPadding: o.contentPadding,
+        ),
+        isExpanded: o.isExpanded,
+        borderRadius: BorderRadius.circular(8),
+        alignment: Alignment.center,
+        items: widget.items,
+        onChanged: (v) =>
+            bloc.add(BlocxFormEventUpdateData(data: v, key: widget.formKey)),
       ),
-      isExpanded: o.isExpanded,
-      borderRadius: BorderRadius.circular(8),
-      alignment: Alignment.center,
-      items: widget.items,
-      onChanged: (v) =>
-          bloc.add(BlocxFormEventUpdateData(data: v, key: widget.formKey)),
     );
   }
 

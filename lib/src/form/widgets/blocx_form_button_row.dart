@@ -312,6 +312,7 @@ class BlocxFormButtonRow<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
     );
 
     return OutlinedButton(
+      key: const ValueKey<String>('blocx_cancel_button'),
       style: resolvedStyle,
       onPressed: disabled
           ? null

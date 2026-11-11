@@ -22,7 +22,9 @@
   <a href="#installation">Installation</a> •
   <a href="#collection-screens-lists-grids--items">Collections & Grids</a> •
   <a href="#form-screens--reactive-controls">Forms</a> •
+  <a href="#ephemeral-ui-state-blocxlocal--blocxuitoggle">Local State</a> •
   <a href="#screen-management--shared-ux">Screen Manager</a> •
+  <a href="#testing-helpers--semantic-finders">Testing</a> •
   <a href="https://pub.dev/packages/blocx_core">← blocx_core</a>
 </p>
 
@@ -94,7 +96,7 @@ class _ProductsScreenState
 | Layer | Package | Responsibilities |
 | :--- | :--- | :--- |
 | **Domain & State (Pure Dart)** | **[`blocx_core`](https://pub.dev/packages/blocx_core)** ([GitHub](https://github.com/abolfazlkhanmohammdi/blocx_core)) | `BlocxBaseEntity`, `BlocxBaseUseCase`, `BlocxEventHub` live CRUD sync, `BlocxCollectionBloc` (10 mixins), `BlocxFormBloc` (5 mixins + 35+ validators), `ScreenManagerCubit` |
-| **Presentation & UI (Flutter)** | **[`flutter_blocx`](https://pub.dev/packages/flutter_blocx)** *(you are here)* | `BlocxCollectionWidgetState`, `BlocxFormWidgetState`, `BlocxCollectionItem`, `InfiniteList` / `InfiniteGrid` / `AnimatedInfiniteList`, `textField` / `dropdown` / `checkbox`, `BlocxScreenManagerState`, `BlocxErrorWidget`, `BlocxSnackBar`, `ConfirmActionWidget` |
+| **Presentation & UI (Flutter)** | **[`flutter_blocx`](https://pub.dev/packages/flutter_blocx)** *(you are here)* | `BlocxCollectionWidgetState`, `BlocxFormWidgetState`, `BlocxCollectionItem`, `InfiniteList` / `InfiniteGrid` / `AnimatedInfiniteList`, `textField` / `passwordField` / `dropdown` / `checkbox` / `switchField` / `chipField` / `segmentedField`, `BlocxFormSubmitBuilder`, `BlocxFormStepBuilder`, `BlocxLocal`, `BlocxUiToggle`, `BlocxScreenManagerState`, `BlocxErrorWidget`, `BlocxSnackBar`, `ConfirmActionWidget` |
 
 > **Always install both packages together** in your Flutter project so your BLoCs, UseCases, and Flutter screens share the same strongly typed contracts.
 
@@ -102,11 +104,13 @@ class _ProductsScreenState
 
 ## Feature Highlights
 
-- **📋 Collection Host & 6 Layout Engines (`list_widget.dart`)**: Switch effortlessly between `InfiniteList`, `AnimatedInfiniteList`, `SliverInfiniteList`, `AnimatedSliverInfiniteList`, `InfiniteGrid`, and `SliverInfiniteGrid` via `CollectionSettings`.
+- **📋 Collection Host & 6 Layout Engines (`list_widget.dart`)**: Switch effortlessly between `InfiniteList`, `AnimatedInfiniteList`, `SliverInfiniteList`, `AnimatedSliverInfiniteList`, `InfiniteGrid`, and `SliverInfiniteGrid` via `CollectionSettings`—with preserved `topWidget`/`bottomWidget` headers and query-preserving `BlocxCollectionEventRetryLastLoad` error retries.
 - **🃏 Smart Collection Items**: `BlocxCollectionItem` (stateless) and `BlocxStatefulCollectionItem` + `BlocxCollectionItemState` (stateful) with built-in helpers for `isSelected`, `isExpanded`, `isHighlighted`, `isBeingRemoved`, and modal delete confirmation.
 - **🔍 Built-in Search & Scroll-Aware FAB**: Drop in `searchField()` for debounced search and mix in `HideOnScrollFabMixin` for a FloatingActionButton that hides on scroll-down and reappears on scroll-up.
-- **📝 Reactive Form Host & Controls (`form_widget.dart`)**: `BlocxFormWidgetState` automatically manages `TextEditingController`s and `FocusNode`s, hydrates edit-mode data, and provides `textField()` (with type `converter`, RTL auto-detection, and async uniqueness spinner), `dropdown<T>()`, `checkbox()`, `BlocxFormRegisterButton`, and `BlocxFormButtonRow`.
+- **📝 Reactive Form Host & Controls (`form_widget.dart`)**: `BlocxFormWidgetState` manages `TextEditingController`s and `FocusNode`s, hydrates edit-mode data, provides `textField()`, `passwordField()` (built-in visibility toggle), `dropdown<T>()`, `checkbox()`, `switchField()`, `chipField()`, `segmentedField()`, `BlocxFormRegisterButton`, and `BlocxFormButtonRow`, plus `BlocxFormScope`, `BlocxFormSubmitBuilder`, and `BlocxFormStepBuilder` for detached app-bar/bottom-bar controls.
+- **🎚️ Ephemeral UI State**: `BlocxLocal<T>` and `BlocxUiToggle` encapsulate self-disposing UI-only micro-state (disclosure panels, preview toggles, local tabs) without `StatefulWidget` boilerplate.
 - **🖥️ Unified Screen Management**: `BlocxScreenManagerState` automatically renders `BlocxSnackBar`s, full-screen `BlocxErrorWidget`s (with stack-trace expansion and retry callbacks), and route pops emitted by any `blocx_core` BLoC.
+- **🧪 Deterministic Test Keys & Finders (`testing.dart`)**: Built-in `ValueKey`s across list items and form controls paired with `BlocxCommonFinders` (`find.blocxItem`, `find.blocxField`, `find.blocxSearchField`, `find.blocxSubmitButton`, and more).
 
 ---
 
@@ -118,8 +122,8 @@ Add both **`blocx_core`** and **`flutter_blocx`** to your `pubspec.yaml`:
 dependencies:
   flutter:
     sdk: flutter
-  blocx_core: ^1.2.0
-  flutter_blocx: ^1.2.1
+  blocx_core: ^1.3.0
+  flutter_blocx: ^1.3.0
 ```
 
 Or run:
@@ -131,13 +135,16 @@ flutter pub add blocx_core flutter_blocx
 ### Barrel Imports
 
 ```dart
-// Full package barrel (Collection widgets, Form widgets, ScreenManager, SnackBar, ErrorWidget, ConfirmAction)
+// Full package barrel (Collection widgets, Form widgets, ScreenManager, BlocxLocal, BlocxUiToggle, SnackBar, ErrorWidget, ConfirmAction)
 import 'package:flutter_blocx/flutter_blocx.dart';
 
 // Or import modular barrels:
 import 'package:flutter_blocx/list_widget.dart';
 import 'package:flutter_blocx/form_widget.dart';
 import 'package:flutter_blocx/blocx_collection_item_state.dart';
+
+// Testing utilities & semantic finders (in test/ or integration_test/):
+import 'package:flutter_blocx/testing.dart';
 ```
 
 ---
@@ -293,7 +300,14 @@ BlocxFormView<ProfileFormEntity, UserProfileEntity, ProfileFormField>(
 
 *When a BLoC is injected via constructor or context, `autoDisposeBloc` / `autoCloseBloc` default to `false` so ancestor providers retain full lifecycle ownership.*
 
-### 4. Automatic Payload Reload (`shouldReloadOnPayloadChange`)
+### 4. Header/Footer Preservation & Inline Error Retries
+
+By default, both `BlocxCollectionWidgetState` and `BlocxCollectionView` keep `topWidget` (such as `searchField()` or filter bars) and `bottomWidget` mounted even when search/filter results are empty or fail with an initial error:
+- **`BlocxCollectionWidgetState` getters** (all default to `true`): `preserveTopWidgetOnEmpty`, `preserveTopWidgetOnError`, `preserveBottomWidgetOnEmpty`, `preserveBottomWidgetOnError`.
+- **`BlocxCollectionView` flags** (all default to `true`): `preserveTopOnEmpty`, `preserveTopOnError`, `preserveBottomOnEmpty`, `preserveBottomOnError`.
+- **Inline error & query-preserving retry**: `inlineErrorWidget` renders inside the collection viewport (delegating `BlocxCollectionStateError` to `collectionErrorWidget`), and `retryInitialPage()` / default `BlocxCollectionView` retry dispatches `BlocxCollectionEventRetryLastLoad` so active search queries and filters remain intact.
+
+### 5. Automatic Payload Reload (`shouldReloadOnPayloadChange`)
 
 Both `BlocxCollectionWidgetState` and `BlocxFormWidgetState` listen for incoming widget updates via `didUpdateWidget`. When `widget.payload` changes, `reload()` is automatically called to refresh the collection or re-initialize the form. To disable automatic reloads upon payload changes, override:
 
@@ -302,7 +316,7 @@ Both `BlocxCollectionWidgetState` and `BlocxFormWidgetState` listen for incoming
 bool get shouldReloadOnPayloadChange => false;
 ```
 
-### 5. Collection Item Widgets (`BlocxCollectionItem` & `BlocxStatefulCollectionItem`)
+### 6. Collection Item Widgets (`BlocxCollectionItem` & `BlocxStatefulCollectionItem`)
 
 #### Stateless Item (`BlocxCollectionItem<Entity, Payload>`)
 
@@ -472,11 +486,48 @@ class _ProfileFormScreenState extends BlocxFormWidgetState<
 
 | Host Helper / Widget | Key Features |
 | :--- | :--- |
-| `textField(...)` / `BlocXFormTextField` | `TextFieldType.filled` / `outlined` / `underlined`, `converter` for numeric/custom types, automatic RTL/LTR text direction, clear button, and automatic suffix spinner during async `BlocxUniqueFieldValidatorMixin` checks |
+| `textField(...)` / `BlocXFormTextField` | `TextFieldType.filled` / `outlined` / `underlined`, `converter` for numeric/custom types, automatic RTL/LTR text direction, `enableObscureToggle`, clear button, and automatic suffix spinner during async `BlocxUniqueFieldValidatorMixin` checks |
+| `passwordField(...)` / `BlocXFormTextField` | Pre-configured `obscureText: true` with built-in visibility toggle icon button (`enableObscureToggle: true` by default; clear button disabled when obscured) |
 | `dropdown<T>(...)` / `BlocXFormDropdown` | Pre-wired `DropdownButtonFormField<T>` with automatic validation error display; follows the bloc's value (hydration, reset and live sync are displayed) |
 | `checkbox(...)` / `BlocxFormCheckbox` | Renders a `CheckboxListTile` when `label`/`subtitle` is provided, or a compact `Checkbox` otherwise |
+| `switchField(...)` / `BlocxFormSwitchField` | Reactive adaptive `Switch` / `SwitchListTile` bound to boolean fields via `BlocxSwitchOptions` with automatic error display |
+| `chipField<T>(...)` / `BlocxFormChipField` | Single-select (`ChoiceChip`) or multi-select (`FilterChip`) chip group configured via `BlocxChipOption` and `BlocxChipFieldOptions` |
+| `segmentedField<T>(...)` / `BlocxFormSegmentedField` | Material 3 `SegmentedButton` field configured via `BlocxSegmentOption` and `BlocxSegmentedFieldOptions` for single or multi-select fields |
 | `submitButton(...)` / `BlocxFormRegisterButton` | Reacts to `isSubmittingForm`, `isCheckingUniqueFields`, and `isFetchingFieldInfo` with an inline progress indicator |
 | `formButtonRow(...)` / `BlocxFormButtonRow` | Primary `BlocxFormRegisterButton` paired with a secondary cancel/back button (`Navigator.maybePop()`) |
+| `submitBuilder(...)` / `BlocxFormSubmitBuilder` | Detached submit/cancel action builder usable anywhere inside `BlocxFormScope` (`appBar`, `bottomNavigationBar`, dialogs) |
+| `stepBuilder(...)` / `BlocxFormStepBuilder` | Decoupled multi-step navigation builder providing `BlocxFormStepControls` (`nextStep`, `previousStep`, `goToStep`, `submitForm`) |
+
+#### Decoupled Submit & Multi-Step Navigation (`BlocxFormScope`, `BlocxFormSubmitBuilder`, `BlocxFormStepBuilder`)
+
+Both `BlocxFormWidgetState` and `BlocxFormView` install a `BlocxFormScope` automatically, so action buttons and steppers placed in `AppBar.actions` or `Scaffold.bottomNavigationBar` stay in sync with the form BLoC without manually threading a `GlobalKey<FormState>`:
+
+```dart
+BlocxFormSubmitBuilder<ProfileFormEntity, UserProfileEntity, ProfileFormField>(
+  disableWhenInvalid: true,
+  resetOnCancel: true,
+  builder: (context, state, submitForm, cancelForm) => Row(
+    children: [
+      OutlinedButton(onPressed: cancelForm, child: const Text('Reset')),
+      FilledButton(onPressed: submitForm, child: const Text('Save')),
+    ],
+  ),
+);
+
+BlocxFormStepBuilder<ProfileFormEntity, UserProfileEntity, ProfileFormField>(
+  maxStep: 2,
+  builder: (context, state, controls) => Row(
+    children: [
+      if (!controls.isFirstStep)
+        TextButton(onPressed: controls.previousStep, child: const Text('Back')),
+      FilledButton(
+        onPressed: controls.isLastStep ? controls.submitForm : controls.nextStep,
+        child: Text(controls.isLastStep ? 'Finish' : 'Next'),
+      ),
+    ],
+  ),
+);
+```
 
 #### Form Validation Precedence
 
@@ -493,8 +544,41 @@ class _ProfileFormScreenState extends BlocxFormWidgetState<
 #### Automatic Focus Management & `requestFocusOnError`
 
 `BlocxFormWidgetState` manages `FocusNode` instances for all fields declared in `keys`:
-- Calling `textField(key)` or `dropdown(key)` automatically attaches the managed focus node from `getFocusNode(key)`. You can also supply a custom `focusNode:` if needed.
+- Calling `textField(key)`, `passwordField(key)`, `dropdown(key)`, or `switchField(key)` automatically attaches the managed focus node from `getFocusNode(key)`. You can also supply a custom `focusNode:` if needed.
 - Calling `requestFocusOnError(state)` focuses the first field with an active error, traversing fields in the declaration order of `keys` (rather than arbitrary map iteration order).
+
+---
+
+## Ephemeral UI State (`BlocxLocal` & `BlocxUiToggle`)
+
+Use `BlocxLocal<T>` and `BlocxUiToggle` for self-disposing visual micro-interactions (disclosure panels, preview toggles, local tabs) without writing throwaway `StatefulWidget` boilerplate or adding UI-only flags to a form entity:
+
+```dart
+BlocxUiToggle(
+  builder: (context, isExpanded, toggle, _) => Column(
+    children: [
+      ListTile(
+        title: const Text('Advanced Options'),
+        trailing: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
+        onTap: toggle,
+      ),
+      if (isExpanded) const Text('Optional advanced configuration'),
+    ],
+  ),
+);
+
+BlocxLocal<int>(
+  initialValue: 0,
+  builder: (context, tabIndex, setTabIndex, updateTabIndex) => SegmentedButton<int>(
+    segments: const [
+      ButtonSegment(value: 0, label: Text('Details')),
+      ButtonSegment(value: 1, label: Text('Preview')),
+    ],
+    selected: {tabIndex},
+    onSelectionChanged: (next) => setTabIndex(next.first),
+  ),
+);
+```
 
 ---
 
@@ -564,6 +648,41 @@ void main() {
   BlocXLocalizations.localizations = MyAppLocalizations();
   runApp(const MyApp());
 }
+```
+
+---
+
+## Testing Helpers & Semantic Finders
+
+Import `package:flutter_blocx/testing.dart` inside tests to get all pure-Dart fixtures and state seeders from `package:blocx_core/testing.dart` (`BlocxCollectionStateSeeder`, `BlocxFormStateSeeder`) alongside `BlocxCommonFinders` matching built-in `ValueKey` identifiers:
+
+| Widget / Item | Semantic Key | Finder (`find.*`) |
+| :--- | :--- | :--- |
+| Collection items (all 6 engines) | `blocx_item_<id>` | `find.blocxItem(id)` |
+| `BlocxSearchField` | `blocx_search_field` | `find.blocxSearchField()` |
+| `BlocXFormTextField` / `BlocxFormChipField` / `BlocxFormSegmentedField` | `blocx_field_<field.name>` | `find.blocxField(field)` |
+| `BlocXFormDropdown` | `blocx_dropdown_<field.name>` | `find.blocxDropdown(field)` |
+| `BlocxFormCheckbox` | `blocx_checkbox_<field.name>` | `find.blocxCheckbox(field)` |
+| `BlocxFormSwitchField` | `blocx_switch_<field.name>` | `find.blocxSwitch(field)` |
+| Password visibility toggle | `blocx_obscure_toggle_<field.name>` | `find.blocxObscureToggle(field)` |
+| `BlocxFormChipField` option chips | `blocx_filter_<value>` | `find.blocxFilter(value)` |
+| Status badges | `blocx_badge_<status>` | `find.blocxBadge(status)` |
+| `BlocxFormRegisterButton` | `blocx_submit_button` | `find.blocxSubmitButton()` |
+| Cancel button in `BlocxFormButtonRow` | `blocx_cancel_button` | `find.blocxCancelButton()` |
+
+```dart
+import 'package:flutter_blocx/testing.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+testWidgets('logs in and verifies first list item', (tester) async {
+  // ... pump widget tree
+  await tester.enterText(find.blocxField(LoginField.password), 'secret');
+  await tester.tap(find.blocxObscureToggle(LoginField.password));
+  await tester.tap(find.blocxSubmitButton());
+  await tester.pumpAndSettle();
+
+  expect(find.blocxItem('note-1'), findsOneWidget);
+});
 ```
 
 ---

@@ -15,6 +15,8 @@ export 'src/screen_manager/blocx_screen_manager_state.dart';
 export 'src/widgets/blocx_search_field.dart';
 export 'src/widgets/blocx_snack_bar.dart';
 export 'src/widgets/confirm_action_widget.dart';
+export 'src/widgets/local/blocx_local.dart';
+export 'src/widgets/local/blocx_ui_toggle.dart';
 
 /// Typedef aliases for consistent `Blocx...` casing.
 typedef BlocxWidgetState<W extends StatefulWidget> = BlocXWidgetState<W>;

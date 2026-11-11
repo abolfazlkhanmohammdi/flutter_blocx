@@ -110,25 +110,52 @@ abstract class BlocxCollectionWidgetState<
       collectionWidgetBuilder: collectionWidget,
       wrapperBuilder: collectionWrapperBuilder,
       onRetry: retryInitialPage,
+      preserveTopOnEmpty: preserveTopWidgetOnEmpty,
+      preserveTopOnError: preserveTopWidgetOnError,
+      preserveBottomOnEmpty: preserveBottomWidgetOnEmpty,
+      preserveBottomOnError: preserveBottomWidgetOnError,
     );
   }
+
+  /// Keeps [topWidget] rendered above [emptyWidget] when the list is empty.
+  bool get preserveTopWidgetOnEmpty => true;
+
+  /// Keeps [topWidget] rendered above [inlineErrorWidget] when an initial or
+  /// search load error occurs.
+  bool get preserveTopWidgetOnError => true;
+
+  /// Keeps [bottomWidget] rendered below [emptyWidget] when the list is empty.
+  bool get preserveBottomWidgetOnEmpty => true;
+
+  /// Keeps [bottomWidget] rendered below [inlineErrorWidget] when an initial or
+  /// search load error occurs.
+  bool get preserveBottomWidgetOnError => true;
 
   /// Wraps the main collection widget with optional top and bottom widgets.
   Widget collectionWrapperBuilder(
     BuildContext context,
     BlocxCollectionState<Entity> state,
   ) {
-    final top = topWidget(context, state);
-    final bottom = bottomWidget(context, state);
-    final isErrorState = state is BlocxCollectionStateError<Entity>;
+    final isErrorState =
+        state.hasInitialError && state.list.isEmpty && !state.isInitialLoading;
     final isLoadingOrSearching =
-        (state is BlocxCollectionStateLoading<Entity>) || state.isSearching;
+        !isErrorState && (state.isInitialLoading || state.isSearching);
     final isEmpty =
         !isLoadingOrSearching && !isErrorState && state.list.isEmpty;
 
+    final shouldShowTop =
+        (!isEmpty || preserveTopWidgetOnEmpty) &&
+        (!isErrorState || preserveTopWidgetOnError);
+    final shouldShowBottom =
+        (!isEmpty || preserveBottomWidgetOnEmpty) &&
+        (!isErrorState || preserveBottomWidgetOnError);
+
+    final top = shouldShowTop ? topWidget(context, state) : null;
+    final bottom = shouldShowBottom ? bottomWidget(context, state) : null;
+
     final Widget coreBox;
-    if (state is BlocxCollectionStateError<Entity> && state.list.isEmpty) {
-      coreBox = collectionErrorWidget(context, state);
+    if (isErrorState) {
+      coreBox = inlineErrorWidget(context, state);
     } else if (isLoadingOrSearching) {
       coreBox = loadingWidget(context, state);
     } else if (isEmpty) {
@@ -269,8 +296,32 @@ abstract class BlocxCollectionWidgetState<
     );
   }
 
-  /// Whether the collection is currently in an error state.
-  bool get isError => _bloc.state is BlocxCollectionStateError;
+  /// Whether the collection is currently in an initial/search error state.
+  bool get isError => _bloc.state.hasInitialError;
+
+  /// Builds the inline error widget rendered inside the collection viewport
+  /// whenever [BlocxCollectionState.hasInitialError] is `true` and the list is
+  /// empty.
+  ///
+  /// Delegates to [collectionErrorWidget] when [state] is a
+  /// [BlocxCollectionStateError] so subclasses overriding
+  /// [collectionErrorWidget] keep working unchanged.
+  Widget inlineErrorWidget(
+    BuildContext context,
+    BlocxCollectionState<Entity> state,
+  ) {
+    if (state is BlocxCollectionStateError<Entity>) {
+      return collectionErrorWidget(context, state);
+    }
+    return Center(
+      child: BlocxErrorWidget(
+        error:
+            state.initialError ??
+            ReadableError(message: loc.somethingWentWrong),
+        onRetry: retryInitialPage,
+      ),
+    );
+  }
 
   /// Builds the error widget displayed when initial page loading fails.
   ///
@@ -282,19 +333,16 @@ abstract class BlocxCollectionWidgetState<
   ) {
     return Center(
       child: BlocxErrorWidget(
-        error: ReadableError(message: state.message),
+        error: state.initialError ?? ReadableError(message: state.message),
         onRetry: retryInitialPage,
       ),
     );
   }
 
-  /// Retries loading the initial page after an error.
+  /// Retries the most recent failed load operation while preserving active
+  /// search queries and filters.
   void retryInitialPage() {
-    _bloc.add(
-      BlocxCollectionEventLoadInitialPage<Entity, Payload>(
-        payload: widget.payload,
-      ),
-    );
+    _bloc.add(BlocxCollectionEventRetryLastLoad<Entity>());
   }
 
   /// Scrolls to [item].

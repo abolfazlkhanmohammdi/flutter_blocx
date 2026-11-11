@@ -125,6 +125,20 @@ class BlocxCollectionView<Entity extends BlocxBaseEntity, Payload>
   /// Callback invoked when the user taps retry on the default error widget.
   final VoidCallback? onRetry;
 
+  /// Keeps [topWidget] rendered above [emptyWidget] when the list is empty.
+  final bool preserveTopOnEmpty;
+
+  /// Keeps [topWidget] rendered above inline error UI when an initial or
+  /// search load error occurs.
+  final bool preserveTopOnError;
+
+  /// Keeps [bottomWidget] rendered below [emptyWidget] when the list is empty.
+  final bool preserveBottomOnEmpty;
+
+  /// Keeps [bottomWidget] rendered below inline error UI when an initial or
+  /// search load error occurs.
+  final bool preserveBottomOnError;
+
   /// Creates a composable collection view.
   const BlocxCollectionView({
     super.key,
@@ -150,6 +164,10 @@ class BlocxCollectionView<Entity extends BlocxBaseEntity, Payload>
     this.collectionWidgetBuilder,
     this.wrapperBuilder,
     this.onRetry,
+    this.preserveTopOnEmpty = true,
+    this.preserveTopOnError = true,
+    this.preserveBottomOnEmpty = true,
+    this.preserveBottomOnError = true,
   });
 
   @override
@@ -278,9 +296,7 @@ class _BlocxCollectionViewState<Entity extends BlocxBaseEntity, Payload>
     if (widget.onRetry != null) {
       widget.onRetry!();
     } else {
-      widget.bloc.add(
-        BlocxCollectionEventLoadInitialPage<Entity, Payload>(payload: null),
-      );
+      widget.bloc.add(BlocxCollectionEventRetryLastLoad<Entity>());
     }
   }
 
@@ -332,15 +348,20 @@ class _BlocxCollectionViewState<Entity extends BlocxBaseEntity, Payload>
     );
   }
 
-  Widget _defaultErrorWidget(
+  Widget _defaultInlineErrorWidget(
     BuildContext context,
-    BlocxCollectionStateError<Entity> state,
+    BlocxCollectionState<Entity> state,
   ) {
+    final loc = widget.bloc.localizations;
+    final error =
+        state.initialError ??
+        ReadableError(
+          message: state is BlocxCollectionStateError<Entity>
+              ? state.message
+              : loc.somethingWentWrong,
+        );
     return Center(
-      child: BlocxErrorWidget(
-        error: ReadableError(message: state.message),
-        onRetry: _retryInitialPage,
-      ),
+      child: BlocxErrorWidget(error: error, onRetry: _retryInitialPage),
     );
   }
 
@@ -474,19 +495,33 @@ class _BlocxCollectionViewState<Entity extends BlocxBaseEntity, Payload>
     BuildContext context,
     BlocxCollectionState<Entity> state,
   ) {
-    final top = widget.topWidget?.call(context, state);
-    final bottom = widget.bottomWidget?.call(context, state);
-    final isErrorState = state is BlocxCollectionStateError<Entity>;
+    final isErrorState =
+        state.hasInitialError && state.list.isEmpty && !state.isInitialLoading;
     final isLoadingOrSearching =
-        (state is BlocxCollectionStateLoading<Entity>) || state.isSearching;
+        !isErrorState && (state.isInitialLoading || state.isSearching);
     final isEmpty =
         !isLoadingOrSearching && !isErrorState && state.list.isEmpty;
 
+    final shouldShowTop =
+        (!isEmpty || widget.preserveTopOnEmpty) &&
+        (!isErrorState || widget.preserveTopOnError);
+    final shouldShowBottom =
+        (!isEmpty || widget.preserveBottomOnEmpty) &&
+        (!isErrorState || widget.preserveBottomOnError);
+
+    final top = shouldShowTop ? widget.topWidget?.call(context, state) : null;
+    final bottom = shouldShowBottom
+        ? widget.bottomWidget?.call(context, state)
+        : null;
+
     final Widget coreBox;
-    if (isErrorState && state.list.isEmpty) {
-      coreBox =
-          widget.errorWidget?.call(context, state) ??
-          _defaultErrorWidget(context, state);
+    if (isErrorState) {
+      if (state is BlocxCollectionStateError<Entity> &&
+          widget.errorWidget != null) {
+        coreBox = widget.errorWidget!(context, state);
+      } else {
+        coreBox = _defaultInlineErrorWidget(context, state);
+      }
     } else if (isLoadingOrSearching) {
       coreBox =
           widget.loadingWidget?.call(context, state) ??

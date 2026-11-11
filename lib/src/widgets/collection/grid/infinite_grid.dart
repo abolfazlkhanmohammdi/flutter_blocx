@@ -273,7 +273,10 @@ class InfiniteGridState<Entity extends BlocxBaseEntity>
         index == (widget.items.length - options.loadMoreTriggerItemDistance) &&
         !state.hasReachedEnd;
 
-    Widget child = widget.itemBuilder(context, data);
+    Widget child = KeyedSubtree(
+      key: ValueKey<String>('blocx_item_${data.identifier}'),
+      child: widget.itemBuilder(context, data),
+    );
 
     // Optional AutoScrollTag support
     if (widget.scrollController is AutoScrollController) {

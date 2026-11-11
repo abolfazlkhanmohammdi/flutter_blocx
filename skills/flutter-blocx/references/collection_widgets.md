@@ -46,16 +46,20 @@ abstract class BlocxCollectionWidgetState<
 - `ScrollController? scrollController;` — automatically initialized to `AutoScrollController()` if `bloc.isScrollable` is `true`, or `ScrollController()` otherwise.
 - `ScrollController? get scrollControllerProvider => null;` — override to supply an external `ScrollController` (when provided, `BlocxCollectionWidgetState` will not dispose it).
 - `bool get loadOnInit => true;` — when `true` (default), `initState()` automatically dispatches `BlocxCollectionEventLoadInitialPage<Entity, Payload>(payload: widget.payload)`.
-- `bool get autoDisposeBloc => true;` — when `true` (default), `dispose()` closes `bloc`.
+- `bool get autoDisposeBloc => true;` — when `true` (default when not passed via constructor or resolved from context), `dispose()` closes `bloc`.
+- `bool get shouldReloadOnPayloadChange => true;` — reloads automatically in `didUpdateWidget` when `widget.payload` changes.
+- `bool get preserveTopWidgetOnEmpty => true;` / `bool get preserveTopWidgetOnError => true;` — keep `topWidget` (e.g. `searchField()` / filter chips) mounted when the collection is empty or shows `inlineErrorWidget`.
+- `bool get preserveBottomWidgetOnEmpty => true;` / `bool get preserveBottomWidgetOnError => true;` — keep `bottomWidget` mounted on empty or initial error states.
 - `bool get isLoading => bloc.state is BlocxCollectionStateLoading;`
 - `bool get isSearching => bloc.state.isSearching;`
-- `String get searchingText => 'Searching data, please wait';`
+- `bool get isError => _bloc.state.hasInitialError;`
+- `String get searchingText => loc.searchingText;`
 
 #### Layout & UI Customization Overrides
 - `Widget? topWidget(BuildContext context, BlocxCollectionState<Entity> state) => null;`
-  - Displayed above the list/grid inside the outer `Column`. Ideal for `searchField(...)`, filter chips, or summary banners.
+  - Displayed above the list/grid inside the outer `Column`. Ideal for `searchField(...)`, filter chips, or summary banners. Preserved during empty and error states by default (`preserveTopWidgetOnEmpty`, `preserveTopWidgetOnError`).
 - `Widget? bottomWidget(BuildContext context, BlocxCollectionState<Entity> state) => null;`
-  - Displayed below the list/grid inside the outer `Column`. Ideal for bulk selection toolbars or action footers.
+  - Displayed below the list/grid inside the outer `Column`. Ideal for bulk selection toolbars or action footers. Preserved during empty and error states by default (`preserveBottomWidgetOnEmpty`, `preserveBottomWidgetOnError`).
 - `double get topBottomAndListSpacing => 8.0;`
   - Vertical spacing inserted between `topWidget`, the collection widget, and `bottomWidget`.
 - `Widget? sliverTopWidget(BuildContext context, BlocxCollectionState<Entity> state) => null;`
@@ -65,9 +69,11 @@ abstract class BlocxCollectionWidgetState<
 - `Widget loadingWidget(BuildContext context, BlocxCollectionState<Entity> state)`
   - Rendered when `isLoading || isSearching` is true. Defaults to a centered `CircularProgressIndicator` + `state.isSearching ? searchingText : loc.loadingText`.
 - `Widget emptyWidget(BuildContext context, BlocxCollectionState<Entity> state)`
-  - Rendered when `!isLoading && state.list.isEmpty`. Defaults to an icon + `loc.emptyListText`.
+  - Rendered when `!isLoading && !isError && state.list.isEmpty`. Defaults to an icon + `loc.emptyListText`.
+- `Widget inlineErrorWidget(BuildContext context, BlocxCollectionState<Entity> state)`
+  - Rendered inside the collection viewport whenever `state.hasInitialError && state.list.isEmpty && !state.isInitialLoading`. Delegates `BlocxCollectionStateError` states to `collectionErrorWidget` for backward compatibility, otherwise renders `BlocxErrorWidget` with `onRetry: retryInitialPage`.
 - `Widget collectionErrorWidget(BuildContext context, BlocxCollectionStateError<Entity> state)`
-  - Rendered when initial page load fails (`state is BlocxCollectionStateError<Entity>`). Defaults to a centered `BlocxErrorWidget` with a retry callback triggering `refreshData()`. Override to present a custom error and retry screen.
+  - Rendered when initial page load fails (`state is BlocxCollectionStateError<Entity>`). Defaults to a centered `BlocxErrorWidget` with a retry callback triggering `retryInitialPage()` (dispatches `BlocxCollectionEventRetryLastLoad<Entity>()` so search queries and filters are preserved). Override to present custom retry/error UI.
 - `Widget separatorBuilder(BuildContext context, int index) => const SizedBox.shrink();`
   - Separator between items in `list`, `animatedList`, `sliverList`, and `animatedSliverList`.
 - `Widget? loadMoreWidgetBuilder(BuildContext context, bool isLoadingMore) => null;`
@@ -87,6 +93,8 @@ abstract class BlocxCollectionWidgetState<
   - Dispatches `BlocxCollectionEventFilter<Entity, Filter>(filter: filter)`.
 - `void refreshData()`
   - Dispatches `BlocxCollectionEventRefreshData<Entity>()`.
+- `void retryInitialPage()`
+  - Dispatches `BlocxCollectionEventRetryLastLoad<Entity>()` so failed initial loads, searches, or filtered loads retry with active query/filter state preserved.
 - `void loadNextPage()`
   - Dispatches `BlocxCollectionEventLoadNextPage<Entity>()`.
 - `void addToList(Entity item, {int index = 0})`
@@ -168,6 +176,17 @@ BlocxSearchField<ProductEntity, void>(
 ```
 - Typing (`onChanged` / `onSubmitted`) dispatches `BlocxCollectionEventSearch<Entity>(searchText: text)`.
 - Tapping the clear button clears `controller` and dispatches `BlocxCollectionEventClearSearch<Entity>()`.
+- Assigns `const ValueKey<String>('blocx_search_field')` on its underlying `TextField` (targeted by `find.blocxSearchField()` in `package:flutter_blocx/testing.dart`).
+
+---
+
+## 3A. Standalone `BlocxCollectionView<Entity, Payload>` & Semantic Item Keys
+
+Use `BlocxCollectionView<Entity, Payload>` when embedding a collection inside tabs, dialogs, or split panes without subclassing `BlocxCollectionWidgetState`:
+- **Constructor parameters**:
+  - Required: `bloc`, `itemBuilder`
+  - Optional: `settings`, `scrollController`, `topBottomAndListSpacing = 8.0`, `topWidget`, `bottomWidget`, `sliverTopWidget`, `sliverBottomWidget`, `loadingWidget`, `emptyWidget`, `errorWidget`, `separatorBuilder`, `deleteAnimation`, `insertAnimation`, `refreshWidgetBuilder`, `loadMoreWidgetBuilder`, `onSelectionChanged`, `listener`, `collectionWidgetBuilder`, `wrapperBuilder`, `onRetry` (defaults to `BlocxCollectionEventRetryLastLoad<Entity>()`), `preserveTopOnEmpty = true`, `preserveTopOnError = true`, `preserveBottomOnEmpty = true`, `preserveBottomOnError = true`.
+- **Automatic Item Keys**: All 6 collection widgets (`InfiniteList`, `AnimatedInfiniteList`, `SliverInfiniteList`, `AnimatedSliverInfiniteList`, `InfiniteGrid`, `SliverInfiniteGrid`) automatically wrap each rendered item with `KeyedSubtree(key: ValueKey<String>('blocx_item_${item.identifier}'), ...)`, allowing `find.blocxItem(id)` to match items cleanly regardless of user key schemes.
 
 ---
 

@@ -5,14 +5,17 @@ description: >-
   collection item cards, reactive forms, and screen-managed views using the
   flutter_blocx package (paired with blocx_core). Use this skill whenever working
   with package:flutter_blocx, BlocxCollectionWidget, BlocxCollectionWidgetState,
-  BlocxCollectionItem, BlocxStatefulCollectionItem, BlocxCollectionItemState,
-  CollectionSettings, CollectionWidgetStateType, InfiniteList, AnimatedInfiniteList,
-  InfiniteGrid, SliverInfiniteList, AnimatedSliverInfiniteList, SliverInfiniteGrid,
-  BlocxSearchField, HideOnScrollFabMixin, BlocxFormWidget, BlocxFormWidgetState,
-  BlocxFormTextField, BlocXFormTextField, BlocxFormDropdown, BlocXFormDropdown,
-  BlocxFormCheckbox, BlocxFormRegisterButton, BlocxFormButtonRow,
-  BlocxScreenManagerState, BlocxErrorWidget, BlocxSnackBar, ConfirmActionWidget,
-  BlocxStatelessWidget, or BlocxWidgetState.
+  BlocxCollectionView, BlocxCollectionItem, BlocxStatefulCollectionItem,
+  BlocxCollectionItemState, CollectionSettings, CollectionWidgetStateType, InfiniteList,
+  AnimatedInfiniteList, InfiniteGrid, SliverInfiniteList, AnimatedSliverInfiniteList,
+  SliverInfiniteGrid, BlocxSearchField, HideOnScrollFabMixin, BlocxFormWidget,
+  BlocxFormWidgetState, BlocxFormView, BlocxFormScope, BlocxFormSubmitBuilder,
+  BlocxFormStepBuilder, BlocxFormTextField, BlocXFormTextField, BlocxFormDropdown,
+  BlocXFormDropdown, BlocxFormCheckbox, BlocxFormSwitchField, BlocxFormChipField,
+  BlocxFormSegmentedField, BlocxFormRegisterButton, BlocxFormButtonRow, BlocxLocal,
+  BlocxUiToggle, BlocxScreenManagerState, BlocxErrorWidget, BlocxSnackBar,
+  ConfirmActionWidget, BlocxStatelessWidget, BlocxWidgetState, or
+  package:flutter_blocx/testing.dart.
 ---
 
 # `flutter_blocx` Comprehensive UI & Widget Skill
@@ -26,19 +29,22 @@ description: >-
 The package name in `pubspec.yaml` is **`flutter_blocx`**. Import the barrel file matching your screen type:
 
 ```dart
-// 1. Full package barrel (exports everything below + ScreenManager, SnackBar, ErrorWidget, ConfirmAction, Base Widgets)
+// 1. Full package barrel (exports everything below + ScreenManager, BlocxLocal, BlocxUiToggle, SnackBar, ErrorWidget, ConfirmAction, Base Widgets)
 import 'package:flutter_blocx/flutter_blocx.dart';
 
-// 2. Collection screens, list/grid widgets, collection options, BlocxCollectionItem, BlocxSearchField, HideOnScrollFabMixin
+// 2. Collection screens, list/grid widgets, collection options, BlocxCollectionView, BlocxCollectionItem, BlocxSearchField, HideOnScrollFabMixin
 import 'package:flutter_blocx/list_widget.dart';
 
-// 3. Form screens (BlocxFormWidget, BlocxFormWidgetState) and form controls (textField, dropdown, checkbox, submitButton, formButtonRow)
+// 3. Form screens (BlocxFormWidget, BlocxFormWidgetState, BlocxFormView, BlocxFormScope) and form controls
 import 'package:flutter_blocx/form_widget.dart';
 
 // 4. Stateful collection item base classes (BlocxStatefulCollectionItem, BlocxCollectionItemState)
 import 'package:flutter_blocx/blocx_collection_item_state.dart';
 
-// 5. When referencing Emitter, BlocProvider, BlocBuilder, or Cubit in a Flutter project,
+// 5. Testing helpers & semantic CommonFinders extensions (for test/ and integration_test/)
+import 'package:flutter_blocx/testing.dart';
+
+// 6. When referencing Emitter, BlocProvider, BlocBuilder, or Cubit in a Flutter project,
 //    import package:flutter_bloc/flutter_bloc.dart (NOT package:bloc/bloc.dart):
 import 'package:flutter_bloc/flutter_bloc.dart';
 ```
@@ -54,7 +60,7 @@ Both `Blocx...` and `BlocX...` spellings are exported for classes that historica
 
 ---
 
-## 2. Eight Critical Rules & Gotchas
+## 2. Critical Rules & Gotchas
 
 ### Rule 1: Exact Generic Type Signatures
 Never guess or reorder generic type parameters on `flutter_blocx` classes:
@@ -62,17 +68,26 @@ Never guess or reorder generic type parameters on `flutter_blocx` classes:
 | Class | Exact Type Parameters |
 | :--- | :--- |
 | `BlocxScreenManagerState<W>` | `<W extends StatefulWidget>` (**1** type param) |
+| `BlocxLocal<T>` | `<T>` (**1** type param; `BlocxUiToggle` takes **0** type params) |
 | `BlocxCollectionWidget<Payload>` | `<Payload>` (**1** type param — use `void` or `dynamic` if no payload) |
 | `BlocxCollectionWidgetState<W, Entity, Payload>` | `<W extends BlocxCollectionWidget<Payload>, Entity extends BlocxBaseEntity, Payload>` (**3** type params) |
+| `BlocxCollectionView<Entity, Payload>` | `<Entity extends BlocxBaseEntity, Payload>` (**2** type params) |
 | `BlocxCollectionItem<T, P>` | `<T extends BlocxBaseEntity, P>` (**2** type params — `T`: entity, `P`: collection bloc's `Payload` type) |
 | `BlocxStatefulCollectionItem<T>` | `<T extends BlocxBaseEntity>` (**1** type param) |
 | `BlocxCollectionItemState<W, T, P>` | `<W extends BlocxStatefulCollectionItem<T>, T extends BlocxBaseEntity, P>` (**3** type params) |
 | `BlocxSearchField<Entity, Payload>` | `<Entity extends BlocxBaseEntity, Payload>` (**2** type params) |
 | `BlocxFormWidget<P>` | `<P>` (**1** type param — use `void` or `dynamic` if no payload) |
 | `BlocxFormWidgetState<W, F, P, E>` | `<W extends BlocxFormWidget<P>, F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>` (**4** type params) |
+| `BlocxFormView<F, P, E>` | `<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>` (**3** type params) |
+| `BlocxFormScope<F, P, E>` | `<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>` (**3** type params) |
+| `BlocxFormSubmitBuilder<F, P, E>` | `<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>` (**3** type params) |
+| `BlocxFormStepBuilder<F, P, E>` | `<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>` (**3** type params) |
 | `BlocxFormTextField<F, P, E>` | `<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>` (**3** type params) |
 | `BlocxFormDropdown<F, P, E, T>` | `<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum, T>` (**4** type params — `T` is item value type) |
 | `BlocxFormCheckbox<F, P, E>` | `<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>` (**3** type params) |
+| `BlocxFormSwitchField<F, P, E>` | `<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>` (**3** type params) |
+| `BlocxFormChipField<F, P, E, T>` | `<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum, T>` (**4** type params — `T` is option value type) |
+| `BlocxFormSegmentedField<F, P, E, T>` | `<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum, T>` (**4** type params — `T` is segment value type) |
 | `BlocxFormRegisterButton<F, P, E>` | `<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>` (**3** type params) |
 | `BlocxFormButtonRow<F, P, E>` | `<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>` (**3** type params) |
 
@@ -153,40 +168,60 @@ When `BlocxFormEventInit(payload: widget.payload)` runs in `BlocxFormWidgetState
   - `BlocxScreenManagerState`, `BlocxCollectionWidgetState`, `BlocxFormWidgetState`, and `BlocxCollectionItemState` all extend `BlocXWidgetState<W>`, exposing `theme`, `textTheme`, `colorScheme`, `width`, and `height` getters directly without passing `BuildContext`.
 - **Localization (`loc`)**: Ensure `BlocXLocalizations.localizations` is initialized at app startup (or in test `setUpAll`) if you use a custom localization subclass, because widgets read `loc` (`BlocXLocalizations.localizations`) for default labels (`loc.loadingText`, `loc.emptyListText`, `loc.cancel`, `loc.delete`, `loc.tryAgain`, etc.).
 
-### Rule 8: Immutable State Snapshot Reading & Initial Load Error Retries
-- **Collection Error Retries**: `BlocxCollectionWidgetState` automatically renders `collectionErrorWidget` (`BlocxErrorWidget` with a retry callback triggering `refreshData()`) whenever initial load fails (`BlocxCollectionStateError`). Avoid endless loading spinners or blank screens by leaving this intact or overriding `collectionErrorWidget` with custom retry UI.
+### Rule 8: Immutable State Snapshot Reading, Inline Errors & Header Preservation
+- **Preserved Headers & Footers (`topWidget` / `bottomWidget`)**: Both `BlocxCollectionWidgetState` (`preserveTopWidgetOnEmpty`, `preserveTopWidgetOnError`, `preserveBottomWidgetOnEmpty`, `preserveBottomWidgetOnError`) and `BlocxCollectionView` (`preserveTopOnEmpty`, `preserveTopOnError`, `preserveBottomOnEmpty`, `preserveBottomOnError`) default to `true`, keeping `searchField()` and filter chips mounted across empty and error states.
+- **Query-Preserving Error Retries (`inlineErrorWidget` & `retryInitialPage`)**: When `state.hasInitialError && state.list.isEmpty && !state.isInitialLoading`, `inlineErrorWidget` renders inside the collection viewport (delegating `BlocxCollectionStateError` to `collectionErrorWidget`). Its retry callback calls `retryInitialPage()`, dispatching `BlocxCollectionEventRetryLastLoad<Entity>()` so search queries and filters are preserved on retry (instead of resetting via `refreshData()`).
 - **Snapshot Reading in Form Helpers**: Always pass `formState: state` when calling `submitButton(..., formState: state)` or `formButtonRow(..., formState: state)` within `formWidget(context, state)`. This guarantees busy/disabled button states evaluate the immutable snapshot rather than reading live mutable bloc fields.
-- **Identifier-Based Item Indexing**: `BlocxCollectionItem.index(context)` resolves indices via `state.indexOfId(item.identifier)` rather than reference equality, ensuring resilient lookup across state emissions. Lists also pass builder indices directly to avoid $O(n^2)$ lookup passes.
+- **Identifier-Based Item Indexing**: `BlocxCollectionItem.index(context)` resolves indices via `state.indexOfId(item.identifier)` rather than reference equality, ensuring resilient lookup across state emissions.
 
 ### Rule 9: Composable Standalone Views (`BlocxCollectionView` & `BlocxFormView`)
 For embedded widget trees, multi-pane dashboards, or modal sheets where you don't want a full `BlocxScreenManagerState` subclass:
-- Use `BlocxCollectionView<Entity, Payload>` directly with your existing collection BLoC:
+- Use `BlocxCollectionView<Entity, Payload>` directly with your existing collection BLoC (exact parameter names: `itemBuilder`, `loadingWidget`, `emptyWidget`, `errorWidget`, `onRetry`, `preserveTopOnEmpty`, `preserveTopOnError`, `preserveBottomOnEmpty`, `preserveBottomOnError`):
   ```dart
   BlocxCollectionView<ProductEntity, void>(
     bloc: productsBloc,
-    itemBuilder: (context, item) => ProductCard(product: item),
-    emptyBuilder: (context) => const Text('No products available'),
-    errorBuilder: (context, error) => BlocxErrorWidget(
-      error: error,
-      onRetry: () => productsBloc.loadInitialPage(),
+    itemBuilder: (context, item) => ProductCard(item: item),
+    emptyWidget: (context, state) => const Text('No products available'),
+    errorWidget: (context, state) => BlocxErrorWidget(
+      error: state.initialError ?? ReadableError(message: state.message),
+      onRetry: () => productsBloc.add(BlocxCollectionEventRetryLastLoad()),
     ),
   )
   ```
-- Use `BlocxFormView<F, P, E>` directly with your form BLoC:
+- Use `BlocxFormView<F, P, E>` directly with your form BLoC (exact parameter name: `builder`):
   ```dart
   BlocxFormView<ProfileFormEntity, UserProfileEntity, ProfileFormField>(
     bloc: profileBloc,
-    formBuilder: (context, state) => Column(children: [...]),
-    loadingBuilder: (context) => const CircularProgressIndicator(),
+    builder: (context, state) => Column(children: [...]),
   )
   ```
 
 ### Rule 10: DI-Friendly Construction & Lifecycle Management
 `BlocxCollectionWidget` and `BlocxFormWidget` support three ways to acquire their BLoC:
 1. **Direct constructor injection**: Pass `bloc: myBloc` directly to the widget constructor.
-2. **Inherited Provider**: Provide a BLoC above the widget with `BlocProvider<MyBloc>.value(...)`. When `generateBloc` is not overridden, it automatically resolves `context.read<B>()`.
+2. **Inherited Provider**: Provide a BLoC typed as its base class (`BlocProvider<BlocxCollectionBloc<Entity, Payload>>.value(...)` or `BlocProvider<BlocxFormBloc<F, P, E>>.value(...)`). When `generateBloc` is not overridden, it automatically resolves `context.read<B>()`.
 3. **Internal instantiation**: Subclass and override `get generateBloc => MyBloc()`.
 - **Non-destructive lifecycle**: When a BLoC is injected via constructor or resolved from context, `autoDisposeBloc` / `autoCloseBloc` default to `false`, ensuring ancestor providers retain ownership and the bloc is not prematurely closed.
+
+### Rule 11: Decoupled Scaffold Actions, Step Navigation & Modern Form Controls
+- **`BlocxFormScope`, `BlocxFormSubmitBuilder`, `BlocxFormStepBuilder`**: Both `BlocxFormWidgetState` and `BlocxFormView` automatically install `BlocxFormScope<F, P, E>`. Use `submitBuilder(...)` / `BlocxFormSubmitBuilder` (`disableWhenInvalid`, `onCancel`, `resetOnCancel`) and `stepBuilder(...)` / `BlocxFormStepBuilder` (`BlocxFormStepControls`) inside `AppBar.actions` or `bottomNavigationBar` without threading a `GlobalKey<FormState>`.
+- **Passwords (`passwordField`)**: Call `passwordField(key)` (sets `obscureText: true` and `enableObscureToggle: true` by default). Suffix precedence is: async unique spinner $\rightarrow$ explicit `options.suffix` $\rightarrow$ obscure toggle (`blocx_obscure_toggle_${key.name}`) $\rightarrow$ clear button (`!obscureText` only).
+- **Rich Selection & Toggle Controls**: Prefer `switchField(key)`, `chipField<T>(key, options: ...)` (single-select `ChoiceChip` or `multiSelect: true` `FilterChip`), and `segmentedField<T>(key, segments: ...)` (`SegmentedButton<T>`) over hand-rolled `BlocBuilder` wrappers.
+
+### Rule 12: Ephemeral UI State (`BlocxLocal<T>` & `BlocxUiToggle`)
+Use `BlocxLocal<T>` (generic self-disposing `ValueNotifier<T>`) or `BlocxUiToggle` (boolean toggle) for strictly local visual micro-interactions (collapsible sections, preview switches, local tabs) instead of polluting domain form entities or authoring one-off `StatefulWidget` subclasses.
+
+### Rule 13: Deterministic Semantic Keys & `package:flutter_blocx/testing.dart`
+Import `package:flutter_blocx/testing.dart` in tests (re-exports `package:blocx_core/testing.dart` including `BlocxCollectionStateSeeder` and `BlocxFormStateSeeder`) to use `BlocxCommonFinders`:
+- `find.blocxItem(id)` (`blocx_item_<id>`, `<id>`, `<id>+<ver>` across all 6 collection widgets)
+- `find.blocxSearchField()` (`blocx_search_field`)
+- `find.blocxField(field)` (`blocx_field_${field.name}` on text, chip, and segmented fields)
+- `find.blocxDropdown(field)` (`blocx_dropdown_${field.name}`)
+- `find.blocxCheckbox(field)` (`blocx_checkbox_${field.name}`)
+- `find.blocxSwitch(field)` (`blocx_switch_${field.name}`)
+- `find.blocxObscureToggle(field)` (`blocx_obscure_toggle_${field.name}`)
+- `find.blocxFilter(filterValue)` (`blocx_filter_$filterValue`) and `find.blocxBadge(status)` (`blocx_badge_$status`)
+- `find.blocxSubmitButton()` (`blocx_submit_button`) and `find.blocxCancelButton()` (`blocx_cancel_button`)
 
 ---
 
@@ -474,22 +509,19 @@ class _ProfileFormScreenState extends BlocxFormWidgetState<
 Read the relevant reference file in `./references/` when implementing specific widgets or screen features:
 
 1. **[`references/collection_widgets.md`](./references/collection_widgets.md)**
-   - `BlocxCollectionWidget<Payload>` & `BlocxCollectionWidgetState<W, Entity, Payload>` full lifecycle, properties, and hooks
-   - `CollectionSettings`, `CollectionWidgetStateType` (`list`, `animatedList`, `sliverList`, `animatedSliverList`, `grid`, `sliverGrid`), and all 6 `CollectionOptions` classes (`InfiniteListOptions`, `AnimatedInfiniteListOptions`, `SliverInfiniteListOptions`, `AnimatedSliverInfiniteListOptions`, `InfiniteGridOptions`, `SliverInfiniteGridOptions`)
-   - `BlocxSearchField` & `BlocxSearchFieldOptions`
+   - `BlocxCollectionWidget<Payload>`, `BlocxCollectionWidgetState<W, Entity, Payload>`, and standalone `BlocxCollectionView<Entity, Payload>` (including `preserveTopWidgetOnEmpty/Error`, `preserveBottomWidgetOnEmpty/Error`, `inlineErrorWidget`, and query-preserving `retryInitialPage()`)
+   - `CollectionSettings`, `CollectionWidgetStateType` (`list`, `animatedList`, `sliverList`, `animatedSliverList`, `grid`, `sliverGrid`), and all 6 `CollectionOptions` classes
+   - `BlocxSearchField` (`blocx_search_field`) & `BlocxSearchFieldOptions`, plus automatic `blocx_item_<id>` item keys
    - `HideOnScrollFabMixin<T>`
    - Stateless `BlocxCollectionItem<T, P>` vs Stateful `BlocxStatefulCollectionItem<T>` & `BlocxCollectionItemState<W, T, P>`
 2. **[`references/form_widgets.md`](./references/form_widgets.md)**
-   - `BlocxFormWidget<P>` & `BlocxFormWidgetState<W, F, P, E>` full lifecycle, controller/focus management, and hooks
-   - `textField` / `BlocXFormTextField` (`BlocxFormTextField`), `BlocXTextFieldOptions` (`BlocxTextFieldOptions`), `TextFieldType`, `TypeConverter`, RTL auto-detection, unique-field spinner, and clear button behavior
-   - `dropdown` / `BlocXFormDropdown` (`BlocxFormDropdown`) & `BlocXDropdownOptions` (`BlocxDropdownOptions`)
-   - `checkbox` / `BlocxFormCheckbox` & `BlocxCheckboxOptions`
-   - `submitButton` / `BlocxFormRegisterButton` (`BlocxFormRegisterButtonOptions`, `RegisterButtonType`) and `formButtonRow` / `BlocxFormButtonRow` (`BlocxFormButtonRowOptions`)
-   - Handling edit-mode hydration, live stream sync updates, and stepped/prefetched forms in Flutter UI
+   - `BlocxFormWidget<P>`, `BlocxFormWidgetState<W, F, P, E>`, standalone `BlocxFormView<F, P, E>`, and `BlocxFormScope<F, P, E>`
+   - `textField` / `passwordField` (`BlocXFormTextField` / `BlocxFormTextField`), `enableObscureToggle`, `BlocXTextFieldOptions`, suffix precedence, RTL auto-detection, unique-field spinner
+   - `dropdown` / `BlocXFormDropdown`, `checkbox` / `BlocxFormCheckbox`, `switchField` / `BlocxFormSwitchField`, `chipField` / `BlocxFormChipField`, `segmentedField` / `BlocxFormSegmentedField`
+   - `submitButton` / `BlocxFormRegisterButton`, `formButtonRow` / `BlocxFormButtonRow`, `submitBuilder` / `BlocxFormSubmitBuilder`, and `stepBuilder` / `BlocxFormStepBuilder` (`BlocxFormStepControls`)
+   - Edit-mode hydration, live stream sync updates, stepped/prefetched forms, and deterministic `blocx_*` form keys
 3. **[`references/screen_manager_and_common_widgets.md`](./references/screen_manager_and_common_widgets.md)**
    - `BlocxScreenManagerState<T>` (`wrapInScaffold`, `scaffoldWidget`, `decorateScaffold`, `errorWidget`, `errorWidgetByErrorCode`, `displaySnackBar`)
-   - `BlocxStatelessWidget` & `BlocXWidgetState<W>` (`BlocxWidgetState<W>`) theme and media-query helpers
-   - `BlocxErrorWidget` & `BlocxErrorWidget.fromState`
-   - `BlocxSnackBar` & `BlocxSnackBar.show`
-   - `ConfirmActionWidget` & `ConfirmActionOptions` (including `requireTyping` / `deleteWord` confirmation)
-   - `loc` (`BlocXLocalizations`) setup & Flutter widget testing patterns
+   - `BlocxStatelessWidget`, `BlocXWidgetState<W>` (`BlocxWidgetState<W>`), `BlocxLocal<T>`, and `BlocxUiToggle`
+   - `BlocxErrorWidget` & `BlocxErrorWidget.fromState`, `BlocxSnackBar`, and `ConfirmActionWidget`
+   - `loc` (`BlocXLocalizations`) setup and `package:flutter_blocx/testing.dart` (`BlocxCommonFinders`, fixtures, state seeders)
