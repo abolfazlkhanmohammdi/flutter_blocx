@@ -2,6 +2,8 @@ import 'package:blocx_core/form_bloc.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'widgets/blocx_form_scope.dart';
+
 /// A composable widget that binds and listens to a [BlocxFormBloc].
 ///
 /// Unlike [BlocxFormWidgetState], [BlocxFormView] does not require a full screen
@@ -44,25 +46,28 @@ class BlocxFormView<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
   Widget build(BuildContext context) {
     return BlocProvider<BlocxFormBloc<F, P, E>>.value(
       value: bloc,
-      child: BlocConsumer<BlocxFormBloc<F, P, E>, BlocxFormState<F, E>>(
-        buildWhen: (_, current) => current.shouldRebuild,
-        listenWhen: (_, current) => current.shouldListen,
-        listener: (context, state) {
-          if (state is BlocxFormStateApplyInitialDataToForm<F, E>) {
-            onApplyInitialData?.call(state.formData);
-          } else if (state is BlocxFormStateFormSubmitted<F, E>) {
-            onFormSubmitted?.call(state);
-          } else if (state is BlocxFormStateFormUpdated<F, E>) {
-            onFormUpdated?.call(
-              state.formData,
-              state.updatedKey,
-              state.oldValue,
-              state.newValue,
-            );
-          }
-          listener?.call(context, state);
-        },
-        builder: builder,
+      child: BlocxFormScope<F, P, E>(
+        bloc: bloc,
+        child: BlocConsumer<BlocxFormBloc<F, P, E>, BlocxFormState<F, E>>(
+          buildWhen: (_, current) => current.shouldRebuild,
+          listenWhen: (_, current) => current.shouldListen,
+          listener: (context, state) {
+            if (state is BlocxFormStateApplyInitialDataToForm<F, E>) {
+              onApplyInitialData?.call(state.formData);
+            } else if (state is BlocxFormStateFormSubmitted<F, E>) {
+              onFormSubmitted?.call(state);
+            } else if (state is BlocxFormStateFormUpdated<F, E>) {
+              onFormUpdated?.call(
+                state.formData,
+                state.updatedKey,
+                state.oldValue,
+                state.newValue,
+              );
+            }
+            listener?.call(context, state);
+          },
+          builder: builder,
+        ),
       ),
     );
   }

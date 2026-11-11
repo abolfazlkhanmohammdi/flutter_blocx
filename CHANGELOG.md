@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.3.0] - 2026-11-11
+
+### Added
+* **Ephemeral UI State & Password Visibility Toggles**:
+  * Added `BlocxLocal<T>` (`BlocxLocalWidgetBuilder<T>`) for auto-disposing UI-scoped state (`ValueNotifier<T>` + `ValueListenableBuilder<T>`) without boilerplate `StatefulWidget` subclasses.
+  * Added `BlocxUiToggle` (`BlocxUiToggleBuilder`) as a boolean toggle wrapper built on `BlocxLocal<bool>`.
+  * Added built-in password visibility toggling to `BlocXFormTextField` / `BlocxFormTextField` (`enableObscureToggle`, `BlocXTextFieldOptions.enableObscureToggle`) and added `BlocxFormWidgetState.passwordField(...)` with `obscureText: true` and `enableObscureToggle: true` enabled by default.
+* **Decoupled Form Actions & Step Navigation**:
+  * Added `BlocxFormScope<F, P, E>`, installed automatically by both `BlocxFormWidgetState` and `BlocxFormView` so controls placed anywhere in the scaffold (e.g., `appBar`, `bottomNavigationBar`) can resolve the active `BlocxFormBloc`.
+  * Added `BlocxFormSubmitBuilder<F, P, E>` (`BlocxFormSubmitWidgetBuilder<F, E>`) and `BlocxFormWidgetState.submitBuilder(...)` with `disableWhenInvalid`, `onCancel`, and `resetOnCancel` support.
+  * Added `BlocxFormStepBuilder<F, P, E>` (`BlocxFormStepWidgetBuilder<F, E>`, `BlocxFormStepControls`) and `BlocxFormWidgetState.stepBuilder(...)` for decoupled multi-step wizard navigation with `BlocxFormSteppedMixin`.
+* **Additional Reactive Form Controls**:
+  * Added `BlocxFormSwitchField<F, P, E>` (`BlocxSwitchOptions`) and `BlocxFormWidgetState.switchField(...)` for adaptive boolean toggles.
+  * Added `BlocxFormChipField<F, P, E, T>` (`BlocxChipOption<T>`, `BlocxChipFieldOptions`) and `BlocxFormWidgetState.chipField(...)` supporting single-select (`ChoiceChip`) and multi-select (`FilterChip`) modes.
+  * Added `BlocxFormSegmentedField<F, P, E, T>` (`BlocxSegmentOption<T>`, `BlocxSegmentedFieldOptions`) and `BlocxFormWidgetState.segmentedField(...)` wrapping Material 3 `SegmentedButton<T>` for single and multi-select fields.
+* **Collection Inline Error Recovery & Header Preservation**:
+  * Added `preserveTopWidgetOnEmpty`, `preserveTopWidgetOnError`, `preserveBottomWidgetOnEmpty`, and `preserveBottomWidgetOnError` getters on `BlocxCollectionWidgetState`, plus `preserveTopOnEmpty`, `preserveTopOnError`, `preserveBottomOnEmpty`, and `preserveBottomOnError` parameters on `BlocxCollectionView` (all defaulting to `true`).
+  * Added `inlineErrorWidget`, `isError`, and `retryInitialPage()` on `BlocxCollectionWidgetState` (`inlineErrorWidget` delegates `BlocxCollectionStateError` to `collectionErrorWidget` for backward compatibility).
+* **Deterministic Semantic Test Keys & `package:flutter_blocx/testing.dart`**:
+  * Added deterministic `ValueKey<String>` identifiers across all 6 collection engines (`blocx_item_<id>`), `BlocxSearchField` (`blocx_search_field`), form fields (`blocx_field_<name>`, `blocx_dropdown_<name>`, `blocx_checkbox_<name>`, `blocx_switch_<name>`, `blocx_obscure_toggle_<name>`, `blocx_filter_<value>`), and action controls (`blocx_submit_button`, `blocx_cancel_button`, `blocx_submit_builder`, `blocx_step_builder`).
+  * Added `package:flutter_blocx/testing.dart` re-exporting `package:blocx_core/testing.dart` and providing `BlocxCommonFinders` (`blocxItem`, `blocxField`, `blocxDropdown`, `blocxCheckbox`, `blocxSwitch`, `blocxObscureToggle`, `blocxFilter`, `blocxBadge`, `blocxSubmitButton`, `blocxCancelButton`, `blocxSearchField`).
+
+### Changed
+* Bumped `blocx_core` dependency constraint to `^1.3.0` (and updated `example/pubspec.yaml` to `blocx_core: ^1.3.0`).
+* Updated `BlocxCollectionWidgetState.retryInitialPage()` and default `BlocxCollectionView` error retry callbacks to dispatch `BlocxCollectionEventRetryLastLoad<Entity>()`, preserving active search queries and filters across retries.
+* Added `flutter_test` (Flutter SDK) to package `dependencies` so `package:flutter_blocx/testing.dart` exports cleanly for consumers.
+
 ## [1.2.1] - 2026-10-11
 
 ### Fixed

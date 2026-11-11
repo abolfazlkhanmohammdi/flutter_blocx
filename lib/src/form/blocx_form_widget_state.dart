@@ -98,6 +98,14 @@ abstract class BlocxFormWidgetState<
   }
 
   @override
+  Widget build(BuildContext context) {
+    return BlocProvider<BlocxFormBloc<F, P, E>>.value(
+      value: bloc,
+      child: BlocxFormScope<F, P, E>(bloc: bloc, child: super.build(context)),
+    );
+  }
+
+  @override
   Widget mainWidget(BuildContext context, ScreenManagerCubitState state) {
     return BlocxFormView<F, P, E>(
       bloc: bloc,
@@ -159,6 +167,7 @@ abstract class BlocxFormWidgetState<
     TextInputType? keyboardType,
     TextInputAction? textInputAction,
     bool? obscureText,
+    bool? enableObscureToggle,
     bool? enabled,
     bool? autofocus,
     bool? showClearButton,
@@ -177,6 +186,7 @@ abstract class BlocxFormWidgetState<
       keyboardType: keyboardType,
       textInputAction: textInputAction,
       obscureText: obscureText,
+      enableObscureToggle: enableObscureToggle,
       enabled: enabled,
       autofocus: autofocus,
       showClearButton: showClearButton,
@@ -195,6 +205,47 @@ abstract class BlocxFormWidgetState<
       validator: validator,
       textFieldType: type ?? defaultTextFieldType,
       typeConverter: converter,
+      enableObscureToggle: resolvedOptions.enableObscureToggle,
+    );
+  }
+
+  /// Builds a password [BlocXFormTextField] connected to [key] with
+  /// `obscureText: true` and a built-in suffix visibility toggle enabled by
+  /// default.
+  BlocXFormTextField<F, P, E> passwordField(
+    E key, {
+    BlocXTextFieldOptions? options,
+    FormFieldValidator<String>? validator,
+    TextFieldType? type,
+    FocusNode? focusNode,
+    String? labelText,
+    String? hintText,
+    String? helperText,
+    Widget? prefix,
+    Widget? suffix,
+    TextInputAction? textInputAction,
+    bool? enabled,
+    bool? autofocus,
+    int? maxLength,
+    bool enableObscureToggle = true,
+  }) {
+    return textField(
+      key,
+      options: options,
+      validator: validator,
+      type: type,
+      focusNode: focusNode,
+      labelText: labelText,
+      hintText: hintText,
+      helperText: helperText,
+      prefix: prefix,
+      suffix: suffix,
+      textInputAction: textInputAction,
+      obscureText: true,
+      enableObscureToggle: enableObscureToggle,
+      enabled: enabled,
+      autofocus: autofocus,
+      maxLength: maxLength,
     );
   }
 
@@ -281,6 +332,131 @@ abstract class BlocxFormWidgetState<
         : BlocxCheckboxOptions(isChecked: isChecked ?? false);
 
     return BlocxFormCheckbox<F, P, E>(formKey: key, options: effectiveOptions);
+  }
+
+  /// Builds a [BlocxFormSwitchField] connected to [key].
+  BlocxFormSwitchField<F, P, E> switchField(
+    E key, {
+    BlocxSwitchOptions? options,
+    String? label,
+    String? subtitle,
+    bool? value,
+    bool? enabled,
+    FocusNode? focusNode,
+  }) {
+    final resolvedOptions = (options ?? const BlocxSwitchOptions()).copyWith(
+      label: label,
+      subtitle: subtitle,
+      value: value,
+      enabled: enabled,
+      focusNode: focusNode ?? options?.focusNode ?? getFocusNode(key),
+    );
+    return BlocxFormSwitchField<F, P, E>(
+      formKey: key,
+      options: resolvedOptions,
+    );
+  }
+
+  /// Builds a [BlocxFormChipField] connected to [key].
+  BlocxFormChipField<F, P, E, T> chipField<T>(
+    E key, {
+    required List<BlocxChipOption<T>> options,
+    BlocxChipFieldOptions? fieldOptions,
+    String? labelText,
+    String? helperText,
+    bool? multiSelect,
+    T? value,
+    Iterable<T>? selectedValues,
+  }) {
+    final base = fieldOptions ?? const BlocxChipFieldOptions();
+    final resolvedOptions = BlocxChipFieldOptions(
+      labelText: labelText ?? base.labelText,
+      helperText: helperText ?? base.helperText,
+      errorText: base.errorText,
+      multiSelect: multiSelect ?? base.multiSelect,
+      allowDeselect: base.allowDeselect,
+      spacing: base.spacing,
+      runSpacing: base.runSpacing,
+      alignment: base.alignment,
+      padding: base.padding,
+      showCheckmark: base.showCheckmark,
+      enabled: base.enabled,
+      emitSetInMultiSelect: base.emitSetInMultiSelect,
+      labelStyle: base.labelStyle,
+      helperStyle: base.helperStyle,
+      errorStyle: base.errorStyle,
+    );
+    return BlocxFormChipField<F, P, E, T>(
+      formKey: key,
+      options: options,
+      fieldOptions: resolvedOptions,
+      value: value,
+      selectedValues: selectedValues,
+    );
+  }
+
+  /// Builds a [BlocxFormSegmentedField] connected to [key].
+  BlocxFormSegmentedField<F, P, E, T> segmentedField<T>(
+    E key, {
+    required List<BlocxSegmentOption<T>> segments,
+    BlocxSegmentedFieldOptions? fieldOptions,
+    String? labelText,
+    String? helperText,
+    bool? multiSelect,
+    T? value,
+    Iterable<T>? selectedValues,
+  }) {
+    final base = fieldOptions ?? const BlocxSegmentedFieldOptions();
+    final resolvedOptions = BlocxSegmentedFieldOptions(
+      labelText: labelText ?? base.labelText,
+      helperText: helperText ?? base.helperText,
+      errorText: base.errorText,
+      multiSelect: multiSelect ?? base.multiSelect,
+      emptySelectionAllowed: base.emptySelectionAllowed,
+      showSelectedIcon: base.showSelectedIcon,
+      style: base.style,
+      padding: base.padding,
+      enabled: base.enabled,
+      emitSetInMultiSelect: base.emitSetInMultiSelect,
+      labelStyle: base.labelStyle,
+      helperStyle: base.helperStyle,
+      errorStyle: base.errorStyle,
+    );
+    return BlocxFormSegmentedField<F, P, E, T>(
+      formKey: key,
+      segments: segments,
+      fieldOptions: resolvedOptions,
+      value: value,
+      selectedValues: selectedValues,
+    );
+  }
+
+  /// Builds a decoupled [BlocxFormSubmitBuilder] wired to [bloc].
+  BlocxFormSubmitBuilder<F, P, E> submitBuilder({
+    required BlocxFormSubmitWidgetBuilder<F, E> builder,
+    bool disableWhenInvalid = false,
+    VoidCallback? onCancel,
+    bool resetOnCancel = false,
+  }) {
+    return BlocxFormSubmitBuilder<F, P, E>(
+      bloc: bloc,
+      builder: builder,
+      disableWhenInvalid: disableWhenInvalid,
+      onCancel: onCancel,
+      resetOnCancel: resetOnCancel,
+    );
+  }
+
+  /// Builds a decoupled [BlocxFormStepBuilder] wired to [bloc].
+  BlocxFormStepBuilder<F, P, E> stepBuilder({
+    required BlocxFormStepWidgetBuilder<F, E> builder,
+    int? maxStep,
+  }) {
+    return BlocxFormStepBuilder<F, P, E>(
+      bloc: bloc,
+      maxStep: maxStep,
+      builder: builder,
+    );
   }
 
   String _initialTextFor(E key) {

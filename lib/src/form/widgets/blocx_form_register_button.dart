@@ -124,7 +124,13 @@ class BlocxFormRegisterButton<
       ),
     };
 
-    return Tooltip(message: state.errors.values.join(".\n"), child: widget);
+    return Tooltip(
+      message: state.errors.values.join(".\n"),
+      child: KeyedSubtree(
+        key: const ValueKey<String>('blocx_submit_button'),
+        child: widget,
+      ),
+    );
   }
 
   /// Builds an [ElevatedButton] variant.

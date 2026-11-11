@@ -9,7 +9,13 @@ export 'src/form/form_widget.dart';
 export 'src/form/widgets/blocx_dropdown_menu.dart';
 export 'src/form/widgets/blocx_form_button_row.dart';
 export 'src/form/widgets/blocx_form_checkbox.dart';
+export 'src/form/widgets/blocx_form_chip_field.dart';
 export 'src/form/widgets/blocx_form_register_button.dart';
+export 'src/form/widgets/blocx_form_scope.dart';
+export 'src/form/widgets/blocx_form_segmented_field.dart';
+export 'src/form/widgets/blocx_form_step_builder.dart';
+export 'src/form/widgets/blocx_form_submit_builder.dart';
+export 'src/form/widgets/blocx_form_switch_field.dart';
 export 'src/form/widgets/blocx_form_text_field.dart';
 
 /// Typedef aliases for consistent `Blocx...` casing.

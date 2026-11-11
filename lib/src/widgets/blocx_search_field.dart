@@ -50,6 +50,7 @@ class BlocxSearchField<Entity extends BlocxBaseEntity, Payload>
     );
 
     return TextField(
+      key: const ValueKey<String>('blocx_search_field'),
       controller: controller,
       decoration: options.decoration ?? defaultDecoration,
       style: options.style,

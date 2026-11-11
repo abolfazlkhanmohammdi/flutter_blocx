@@ -53,6 +53,10 @@ class BlocXFormTextField<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
   /// Visual and behavioural options for the text field.
   final BlocXTextFieldOptions textFieldOptions;
 
+  /// Whether to render a built-in suffix visibility toggle when
+  /// [BlocXTextFieldOptions.obscureText] is `true` and no explicit suffix is set.
+  final bool enableObscureToggle;
+
   /// Creates a bloc-connected text form field.
   const BlocXFormTextField({
     super.key,
@@ -63,6 +67,7 @@ class BlocXFormTextField<F extends BlocxBaseFormEntity<F, E>, P, E extends Enum>
     this.focusNode,
     this.validator,
     this.typeConverter,
+    this.enableObscureToggle = false,
   });
 
   @override
@@ -78,6 +83,7 @@ class BlocXFormTextFieldState<
 >
     extends BlocXWidgetState<BlocXFormTextField<F, P, E>> {
   TextEditingController? _internalController;
+  late bool _isObscured = widget.textFieldOptions.obscureText;
 
   /// Whether this state owns and should dispose the active controller.
   bool get _ownsController => widget.controller == null;
@@ -86,15 +92,29 @@ class BlocXFormTextFieldState<
   TextEditingController get _controller =>
       widget.controller ?? _internalController!;
 
+  bool get _effectiveEnableObscureToggle =>
+      widget.enableObscureToggle || widget.textFieldOptions.enableObscureToggle;
+
+  bool get _effectiveObscureText {
+    if (!widget.textFieldOptions.obscureText) return false;
+    return _effectiveEnableObscureToggle ? _isObscured : true;
+  }
+
   @override
   void initState() {
     super.initState();
     _internalController = widget.controller ?? TextEditingController();
+    _isObscured = widget.textFieldOptions.obscureText;
   }
 
   @override
   void didUpdateWidget(covariant BlocXFormTextField<F, P, E> oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.textFieldOptions.obscureText !=
+        widget.textFieldOptions.obscureText) {
+      _isObscured = widget.textFieldOptions.obscureText;
+    }
 
     if (oldWidget.controller == widget.controller) return;
 
@@ -116,6 +136,7 @@ class BlocXFormTextFieldState<
     final options = widget.textFieldOptions;
 
     return TextFormField(
+      key: ValueKey<String>('blocx_field_${widget.formKey.name}'),
       validator: widget.validator,
       controller: _controller,
       focusNode: widget.focusNode,
@@ -131,7 +152,7 @@ class BlocXFormTextFieldState<
       textAlign: options.textAlign,
       maxLines: options.maxLines,
       minLines: options.minLines,
-      obscureText: options.obscureText,
+      obscureText: _effectiveObscureText,
       decoration: _buildDecoration(context),
       onChanged: (String text) {
         bloc.add(
@@ -258,7 +279,9 @@ class BlocXFormTextFieldState<
   ///
   /// 1. Progress indicator while [isCheckingUniqueField] is true.
   /// 2. Explicit [BlocXTextFieldOptions.suffix] if set.
-  /// 3. Clear button when [BlocXTextFieldOptions.showClearButton] is true.
+  /// 3. Visibility toggle button when [BlocXTextFieldOptions.obscureText] and
+  ///    [BlocXFormTextField.enableObscureToggle] are both `true`.
+  /// 4. Clear button when [BlocXTextFieldOptions.showClearButton] is true.
   Widget? getSuffix(BlocXTextFieldOptions options) {
     if (isCheckingUniqueField) {
       return SizedBox.square(
@@ -271,6 +294,24 @@ class BlocXFormTextFieldState<
     }
 
     if (options.suffix != null) return options.suffix;
+
+    if (options.obscureText && _effectiveEnableObscureToggle) {
+      return IconButton(
+        key: ValueKey<String>('blocx_obscure_toggle_${widget.formKey.name}'),
+        visualDensity: VisualDensity.compact,
+        tooltip: _isObscured ? 'Show password' : 'Hide password',
+        icon: Icon(
+          _isObscured
+              ? Icons.visibility_outlined
+              : Icons.visibility_off_outlined,
+        ),
+        onPressed: () {
+          setState(() {
+            _isObscured = !_isObscured;
+          });
+        },
+      );
+    }
 
     final canShowClear =
         options.showClearButton &&
@@ -376,6 +417,10 @@ class BlocXTextFieldOptions {
 
   /// Whether to obscure input.
   final bool obscureText;
+
+  /// Whether to render a built-in suffix visibility toggle when
+  /// [obscureText] is `true` and [suffix] is `null`.
+  final bool enableObscureToggle;
 
   /// Input formatters applied before the value reaches the bloc.
   final List<TextInputFormatter> inputFormatters;
@@ -486,6 +531,7 @@ class BlocXTextFieldOptions {
     this.minLength,
     this.autofocus = false,
     this.obscureText = false,
+    this.enableObscureToggle = false,
     this.labelText,
     this.labelStyle,
     this.hintText,
@@ -529,6 +575,7 @@ extension BlocXTextFieldOptionsCopyWith on BlocXTextFieldOptions {
     bool? autofocus,
     bool? enabled,
     bool? obscureText,
+    bool? enableObscureToggle,
     List<TextInputFormatter>? inputFormatters,
     String? labelText,
     TextStyle? labelStyle,
@@ -569,6 +616,7 @@ extension BlocXTextFieldOptionsCopyWith on BlocXTextFieldOptions {
       autofocus: autofocus ?? this.autofocus,
       enabled: enabled ?? this.enabled,
       obscureText: obscureText ?? this.obscureText,
+      enableObscureToggle: enableObscureToggle ?? this.enableObscureToggle,
       inputFormatters: inputFormatters ?? this.inputFormatters,
       labelText: labelText ?? this.labelText,
       labelStyle: labelStyle ?? this.labelStyle,
